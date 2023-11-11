@@ -1,0 +1,45 @@
+---
+title: "Proposal"
+date: "2023-11-11"
+output: github_document
+---
+
+### The group members (names and UNIs):
+Li Tian  lt2949\
+Qianyuan Huang  qh2283\
+Ziqi Wang  zw2977\
+Tongxi Yu  ty2520\
+You Wu
+
+### The tentative project title:
+Visualizing the Pulse of Global Entertainment: A Data-Driven Exploration of YouTube Statistics
+
+### The motivation for this project:
+In this rapidly advancing AI era, social media has become multifaceted, exemplified by YouTube's emergence as a platform for showcasing educational projects.  Our project is focused on analyzing user-shared content and subscription patterns on YouTube to reveal global viewing habits and the keys to content creators' success.  This endeavor aims to simplify the complexity of digital interactions for content creators, advertisers, and educators, offering them clear insights into how to engage audiences effectively on YouTube across various regions.
+
+### The intended final products:
+The project will deliver a Comprehensive Analysis Report detailing YouTube trends and engagement, an Interactive Dashboard for tracking real-time KPIs, Predictive Models to forecast engagement, and a Data Visualization Suite for easy interpretation of data through various graphical representations.
+
+### The anticipated data sources: 
+https://www.kaggle.com/datasets/nelgiriyewithana/global-youtube-statistics-2023/
+The source data is derived from the Kaggle dataset 'EDA Global YouTube Statistics 2023,' offering comprehensive details on top creators' subscriber counts, rank, video views, category, upload frequency, country of origin, earnings, and more."
+
+### The planned analyses / visualizations / coding challenges：
+* Trend Analysis: Tracking the rise and fall of content categories over time and across geographies.
+* Predictive Analytics: Using historical data to predict future trends in viewer engagement.
+* Cluster Analysis: Segmenting videos or channels to identify niche markets or content gaps.
+* Challenges: Creating a responsive and intuitive dashboard.Integrating diverse data sources to provide a holistic view of YouTube's global impact.
+
+### The planned timeline:
+```{r, echo = FALSE}
+library(dplyr)
+library(knitr)
+# Create a data frame
+project_timeline <- data.frame(
+  Milestones = c("Assign task", "Project Proposal Draft", "Project Proposal Final", "Project Review Meeting", "Coding draft", "Website Construction", "Report Draft","Final Report","In-class Discussion of Projects"),
+  Start_Date = as.Date(c("2023-11-7","2023-11-7", "2023-11-11", "2023-11-16", "2023-11-20", "2023-11-30", "2023-12-4","2023-12-7","2023-12-14")),
+  End_Date = as.Date(c("2023-11-7","2023-11-11", "2023-11-11", "2023-11-16", "2023-11-30", "2023-12-4","2023-12-7","2023-12-9","2023-12-14")),
+  due = (c("NA","NA", "2023-11-11", "2023-11-16", "NA", "NA","NA","2023-12-9","2023-12-14"))
+)
+kable(project_timeline)
+```
