@@ -31,15 +31,8 @@ The source data is derived from the Kaggle dataset 'EDA Global YouTube Statistic
 * Challenges: Creating a responsive and intuitive dashboard.Integrating diverse data sources to provide a holistic view of YouTube's global impact.
 
 ### The planned timeline:
-```{r, echo = FALSE}
-library(dplyr)
-library(knitr)
-# Create a data frame
-project_timeline <- data.frame(
-  Milestones = c("Assign task", "Project Proposal Draft", "Project Proposal Final", "Project Review Meeting", "Coding draft", "Website Construction", "Report Draft","Final Report","In-class Discussion of Projects"),
-  Start_Date = as.Date(c("2023-11-7","2023-11-7", "2023-11-11", "2023-11-16", "2023-11-20", "2023-11-30", "2023-12-4","2023-12-7","2023-12-14")),
-  End_Date = as.Date(c("2023-11-7","2023-11-11", "2023-11-11", "2023-11-16", "2023-11-30", "2023-12-4","2023-12-7","2023-12-9","2023-12-14")),
-  due = (c("NA","NA", "2023-11-11", "2023-11-16", "NA", "NA","NA","2023-12-9","2023-12-14"))
-)
-kable(project_timeline)
-```
+The planned timeline:
+November 13 - November 19: Data cleaning and discuss questions and concerns with teaching team leader during project review meeting
+November 20 - November 26: Data visualization and exploratory data analysis. Decide whether further analysis would be needed for certain interesting findings.
+November 27 - December 3: Finish any additional analysis and possibly some model fitting. Building webpage.
+December 4 - December 9: Final write up + screencasts recording
