@@ -18,6 +18,7 @@ youtube_df <- read_csv("Data/Global YouTube Statistics.csv")|>
 ```
 checking NA values
 ```{r}
-sum(is.na(youtube_df))
+missing_values <- colSums(is.na(youtube_df))
+print(missing_values)
 ```
 
