@@ -16,4 +16,8 @@ library(tidyverse)
 youtube_df <- read_csv("Data/Global YouTube Statistics.csv")|>
   janitor::clean_names()
 ```
+checking NA values
+```{r}
+sum(is.na(youtube_df))
+```
 
