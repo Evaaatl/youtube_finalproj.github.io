@@ -8,3 +8,12 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+```{r}
+library(tidyverse)
+```
+```{r}
+youtube_df <- read_csv("Data/Global YouTube Statistics.csv")|>
+  janitor::clean_names()
+```
+
