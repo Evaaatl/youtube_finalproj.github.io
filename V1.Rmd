@@ -1,0 +1,24 @@
+---
+title: "Final_v1"
+author: "Tongxi Yu"
+date: "2023-12-03"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+```{r}
+youtube_df <- read_csv("Data/Global YouTube Statistics.csv")|>
+  janitor::clean_names()
+```
+checking NA values
+```{r}
+missing_values <- colSums(is.na(youtube_df))
+print(missing_values)
+```
+
