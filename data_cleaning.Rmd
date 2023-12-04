@@ -1,0 +1,30 @@
+---
+title: "Data cleaning"
+output: github_document
+---
+
+```{r}
+library(dplyr)
+library(tidyr)
+
+# Import dataset
+df <-
+  read.csv("Global YouTube Statistics.csv") |>
+  janitor::clean_names()
+
+# Check variable names 
+variable_names <- names(df)
+print(variable_names)
+
+cleaned_df <- 
+  df |>
+  select(-youtuber,-title,-video_views_rank, -country_rank,-channel_type_rank, -created_month, -created_date, -gross_tertiary_education_enrollment, -unemployment_rate, -urban_population) |>
+  rename(id = rank)
+
+head(cleaned_df, 10)
+
+# Save as new dataset
+write.csv(cleaned_df, "cleaned_youtube_df.csv", row.names = FALSE)
+
+```
+
