@@ -23,8 +23,10 @@ cleaned_df <-
 
 head(cleaned_df, 10)
 
-# Save as new dataset
+# Save as a new dataset
 write.csv(cleaned_df, "cleaned_youtube_df.csv", row.names = FALSE)
+
+read.csv("cleaned_youtube_df.csv")
 
 ```
 
