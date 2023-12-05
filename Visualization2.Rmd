@@ -1,0 +1,26 @@
+---
+title: "Visulization Part 2"
+author: "You Wu"
+date: "2023-12-05"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Load necessary packages.
+```{r}
+library(tidyverse)
+library(plotly)
+```
+Read the dataset and drop `NA` vlaues.
+```{r}
+youtube_df <- read_csv("Data/cleaned_youtube_df.csv")|>
+  janitor::clean_names()|>
+  drop_na()
+```
+
+```{r}
+summary(youtube_df)
+```
+
