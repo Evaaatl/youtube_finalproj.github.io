@@ -18,15 +18,15 @@ variable_names <- names(df)
 print(variable_names)
 
 cleaned_df <- df |>
-  select(-youtuber,-title,-video_views_rank, -country_rank,-channel_type_rank, -created_month, -created_date, -gross_tertiary_education_enrollment_percent, -unemployment_rate, -urban_population) |>
+  select(-youtuber,-title,-video_views_rank, -country_rank,-channel_type_rank, -created_month, -created_date, -gross_tertiary_education_enrollment_percent, -unemployment_rate, -urban_population) |> 
   rename(id = rank)
 
 head(cleaned_df, 10)
 
 # Save as a new dataset
-write.csv(cleaned_df, "cleaned_youtube_df.csv", row.names = FALSE)
+write_csv(cleaned_df, path = "./Data/cleaned_youtube_df.csv")
 
-read.csv("cleaned_youtube_df.csv")
+read_csv("Data/cleaned_youtube_df.csv")
 
 ```
 
