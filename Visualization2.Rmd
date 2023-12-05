@@ -1,17 +1,10 @@
 ---
-title: "Visulization Part 2"
-author: "You Wu"
-date: "2023-12-05"
-output: github_document
+title: "Data Visualization"
+output: 
+  html_document:
+    toc: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-options(
-  ggplot2.continuous.colour = "RdBu_r",
-  ggplot2.continuous.fill = "RdBu_r"
-)
-```
 Load necessary packages.
 ```{r}
 library(tidyverse)
@@ -19,7 +12,16 @@ library(plotly)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
+library(scales)
+
+knitr::opts_chunk$set(
+  fig.width = 10,
+  fig.asp = .8,
+  out.width = "90%"
+)
+
 ```
+
 Read the dataset and drop `NA` vlaues.
 ```{r}
 youtube_df <- read_csv("Data/cleaned_youtube_df.csv")|>
@@ -31,8 +33,8 @@ youtube_df <- read_csv("Data/cleaned_youtube_df.csv")|>
 summary(youtube_df)
 ```
 
-Visualize Numeric Data.
-```{r}
+Visualize Numeric Data 
+```{r fig.width = 10,fig.asp = 1.5,out.width = "100%"}
 
 
 all_columns <- colnames(youtube_df)
@@ -42,15 +44,31 @@ columns_to_plot <- all_columns[!all_columns %in% c("id", "category","country","a
 numeric_data_long <- youtube_df[, columns_to_plot] %>% 
   gather(key = "variable", value = "value")
 
-# Set a constant color for the histograms
-color <- "steelblue"  # You can change this to any color you prefer
+color <- "steelblue"
 
 # Create a single plot with facets for each numeric variable
-p <- ggplot(numeric_data_long, aes(x = value)) + 
-  geom_histogram(bins = 30, fill = color, alpha = 0.7) +
-  facet_wrap(~ variable, scales = "free") +
-  labs(title = "Distribution of Numeric Variables", x = "Value", y = "Frequency")
-
+p <- ggplot(numeric_data_long, aes(x = value)) +
+  geom_histogram(aes(y = ..density..),bins = 20, fill = "#8dab7f", alpha = 0.8) +
+  geom_density(color="#6b8e23")+
+  facet_wrap(~ variable, scales = "free", ncol = 3) +
+  scale_x_continuous(labels = scales::comma) +
+  theme_minimal(base_size = 10) +  
+  theme(
+    strip.text.x = element_text(size = 10, face = "bold"), 
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1,size=6,face = "bold"), # Angle x-axis labels for readability
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.margin = margin(2.5, 2.5, 2.5, 2.5, "cm"), # Adjust the plot margins
+    strip.background = element_blank(),
+    panel.spacing = unit(2, "lines")
+  ) +
+  labs(
+    title = "Distribution of Numeric Variables",
+    x = "Value",
+    y = "Frequency",
+    caption = "Source: YouTube Data"
+  )
 # Convert to an interactive plot
 ggplotly(p)
 ```
