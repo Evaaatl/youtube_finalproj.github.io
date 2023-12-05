@@ -6,19 +6,19 @@ output: github_document
 ```{r}
 library(dplyr)
 library(tidyr)
+library(tidyverse)
 
 # Import dataset
 df <-
-  read.csv("Global YouTube Statistics.csv") |>
+  read_csv("Data/Global YouTube Statistics.csv") |>
   janitor::clean_names()
 
 # Check variable names 
 variable_names <- names(df)
 print(variable_names)
 
-cleaned_df <- 
-  df |>
-  select(-youtuber,-title,-video_views_rank, -country_rank,-channel_type_rank, -created_month, -created_date, -gross_tertiary_education_enrollment, -unemployment_rate, -urban_population) |>
+cleaned_df <- df |>
+  select(-youtuber,-title,-video_views_rank, -country_rank,-channel_type_rank, -created_month, -created_date, -gross_tertiary_education_enrollment_percent, -unemployment_rate, -urban_population) |>
   rename(id = rank)
 
 head(cleaned_df, 10)
@@ -28,5 +28,14 @@ write.csv(cleaned_df, "cleaned_youtube_df.csv", row.names = FALSE)
 
 read.csv("cleaned_youtube_df.csv")
 
+```
+
+```{r}
+table(cleaned_df$category)
+table(cleaned_df$channel_type)
+```
+
+```{r}
+table(cleaned_df$country)
 ```
 

@@ -18,96 +18,97 @@ library(dplyr)
 
 ``` r
 library(tidyr)
+library(tidyverse)
+```
 
+    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+    ## ✔ forcats   1.0.0     ✔ readr     2.1.4
+    ## ✔ ggplot2   3.4.3     ✔ stringr   1.5.0
+    ## ✔ lubridate 1.9.2     ✔ tibble    3.2.1
+    ## ✔ purrr     1.0.2
+
+    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+    ## ✖ dplyr::filter() masks stats::filter()
+    ## ✖ dplyr::lag()    masks stats::lag()
+    ## ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+
+``` r
 # Import dataset
 df <-
-  read.csv("Global YouTube Statistics.csv") |>
+  read_csv("Data/Global YouTube Statistics.csv") |>
   janitor::clean_names()
+```
 
+    ## Rows: 995 Columns: 28
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr  (7): Youtuber, category, Title, Country, Abbreviation, channel_type, cr...
+    ## dbl (21): rank, subscribers, video views, uploads, video_views_rank, country...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
 # Check variable names 
 variable_names <- names(df)
 print(variable_names)
 ```
 
-    ##  [1] "rank"                                "youtuber"                           
-    ##  [3] "subscribers"                         "video_views"                        
-    ##  [5] "category"                            "title"                              
-    ##  [7] "uploads"                             "country"                            
-    ##  [9] "abbreviation"                        "channel_type"                       
-    ## [11] "video_views_rank"                    "country_rank"                       
-    ## [13] "channel_type_rank"                   "video_views_for_the_last_30_days"   
-    ## [15] "lowest_monthly_earnings"             "highest_monthly_earnings"           
-    ## [17] "lowest_yearly_earnings"              "highest_yearly_earnings"            
-    ## [19] "subscribers_for_last_30_days"        "created_year"                       
-    ## [21] "created_month"                       "created_date"                       
-    ## [23] "gross_tertiary_education_enrollment" "population"                         
-    ## [25] "unemployment_rate"                   "urban_population"                   
-    ## [27] "latitude"                            "longitude"
+    ##  [1] "rank"                                       
+    ##  [2] "youtuber"                                   
+    ##  [3] "subscribers"                                
+    ##  [4] "video_views"                                
+    ##  [5] "category"                                   
+    ##  [6] "title"                                      
+    ##  [7] "uploads"                                    
+    ##  [8] "country"                                    
+    ##  [9] "abbreviation"                               
+    ## [10] "channel_type"                               
+    ## [11] "video_views_rank"                           
+    ## [12] "country_rank"                               
+    ## [13] "channel_type_rank"                          
+    ## [14] "video_views_for_the_last_30_days"           
+    ## [15] "lowest_monthly_earnings"                    
+    ## [16] "highest_monthly_earnings"                   
+    ## [17] "lowest_yearly_earnings"                     
+    ## [18] "highest_yearly_earnings"                    
+    ## [19] "subscribers_for_last_30_days"               
+    ## [20] "created_year"                               
+    ## [21] "created_month"                              
+    ## [22] "created_date"                               
+    ## [23] "gross_tertiary_education_enrollment_percent"
+    ## [24] "population"                                 
+    ## [25] "unemployment_rate"                          
+    ## [26] "urban_population"                           
+    ## [27] "latitude"                                   
+    ## [28] "longitude"
 
 ``` r
-cleaned_df <- 
-  df |>
-  select(-youtuber,-title,-video_views_rank, -country_rank,-channel_type_rank, -created_month, -created_date, -gross_tertiary_education_enrollment, -unemployment_rate, -urban_population) |>
+cleaned_df <- df |>
+  select(-youtuber,-title,-video_views_rank, -country_rank,-channel_type_rank, -created_month, -created_date, -gross_tertiary_education_enrollment_percent, -unemployment_rate, -urban_population) |>
   rename(id = rank)
 
 head(cleaned_df, 10)
 ```
 
-    ##    id subscribers  video_views         category uploads       country
-    ## 1   1   245000000 228000000000            Music   20082         India
-    ## 2   2   170000000            0 Film & Animation       1 United States
-    ## 3   3   166000000  28368841870    Entertainment     741 United States
-    ## 4   4   162000000 164000000000        Education     966 United States
-    ## 5   5   159000000 148000000000            Shows  116536         India
-    ## 6   6   119000000            0              nan       0           nan
-    ## 7   7   112000000  93247040539   People & Blogs    1111 United States
-    ## 8   8   111000000  29058044447           Gaming    4716         Japan
-    ## 9   9   106000000  90479060027   People & Blogs     493        Russia
-    ## 10 10    98900000  77180169894    Entertainment     574 United States
-    ##    abbreviation  channel_type video_views_for_the_last_30_days
-    ## 1            IN         Music                       2258000000
-    ## 2            US         Games                               12
-    ## 3            US Entertainment                       1348000000
-    ## 4            US     Education                       1975000000
-    ## 5            IN Entertainment                       1824000000
-    ## 6           nan         Music                              NaN
-    ## 7            US Entertainment                        731674000
-    ## 8            JP Entertainment                         39184000
-    ## 9            RU        People                         48947000
-    ## 10           US Entertainment                        580574000
-    ##    lowest_monthly_earnings highest_monthly_earnings lowest_yearly_earnings
-    ## 1                   564600                9.000e+06              6.800e+06
-    ## 2                        0                5.000e-02              4.000e-02
-    ## 3                   337000                5.400e+06              4.000e+06
-    ## 4                   493800                7.900e+06              5.900e+06
-    ## 5                   455900                7.300e+06              5.500e+06
-    ## 6                        0                0.000e+00              0.000e+00
-    ## 7                   182900                2.900e+06              2.200e+06
-    ## 8                     9800                1.567e+05              1.176e+05
-    ## 9                    12200                1.958e+05              1.468e+05
-    ## 10                  145100                2.300e+06              1.700e+06
-    ##    highest_yearly_earnings subscribers_for_last_30_days created_year population
-    ## 1                1.084e+08                        2e+06         2006 1366417754
-    ## 2                5.800e-01                          NaN         2006  328239523
-    ## 3                6.470e+07                        8e+06         2012  328239523
-    ## 4                9.480e+07                        1e+06         2006  328239523
-    ## 5                8.750e+07                        1e+06         2006 1366417754
-    ## 6                0.000e+00                          NaN         2013        NaN
-    ## 7                3.510e+07                          NaN         2015  328239523
-    ## 8                1.900e+06                          NaN         2010  126226568
-    ## 9                2.300e+06                        1e+05         2016  144373535
-    ## 10               2.790e+07                        6e+05         2018  328239523
-    ##    latitude longitude
-    ## 1  20.59368  78.96288
-    ## 2  37.09024 -95.71289
-    ## 3  37.09024 -95.71289
-    ## 4  37.09024 -95.71289
-    ## 5  20.59368  78.96288
-    ## 6       NaN       NaN
-    ## 7  37.09024 -95.71289
-    ## 8  36.20482 138.25292
-    ## 9  61.52401 105.31876
-    ## 10 37.09024 -95.71289
+    ## # A tibble: 10 × 18
+    ##       id subscribers  video_views category         uploads country  abbreviation
+    ##    <dbl>       <dbl>        <dbl> <chr>              <dbl> <chr>    <chr>       
+    ##  1     1   245000000 228000000000 Music              20082 India    IN          
+    ##  2     2   170000000            0 Film & Animation       1 United … US          
+    ##  3     3   166000000  28368841870 Entertainment        741 United … US          
+    ##  4     4   162000000 164000000000 Education            966 United … US          
+    ##  5     5   159000000 148000000000 Shows             116536 India    IN          
+    ##  6     6   119000000            0 nan                    0 nan      nan         
+    ##  7     7   112000000  93247040539 People & Blogs      1111 United … US          
+    ##  8     8   111000000  29058044447 Gaming              4716 Japan    JP          
+    ##  9     9   106000000  90479060027 People & Blogs       493 Russia   RU          
+    ## 10    10    98900000  77180169894 Entertainment        574 United … US          
+    ## # ℹ 11 more variables: channel_type <chr>,
+    ## #   video_views_for_the_last_30_days <dbl>, lowest_monthly_earnings <dbl>,
+    ## #   highest_monthly_earnings <dbl>, lowest_yearly_earnings <dbl>,
+    ## #   highest_yearly_earnings <dbl>, subscribers_for_last_30_days <dbl>,
+    ## #   created_year <dbl>, population <dbl>, latitude <dbl>, longitude <dbl>
 
 ``` r
 # Save as a new dataset
@@ -117,1001 +118,1001 @@ read.csv("cleaned_youtube_df.csv")
 ```
 
     ##      id subscribers  video_views              category uploads
-    ## 1     1   245000000 228000000000                 Music   20082
-    ## 2     2   170000000            0      Film & Animation       1
-    ## 3     3   166000000  28368841870         Entertainment     741
-    ## 4     4   162000000 164000000000             Education     966
-    ## 5     5   159000000 148000000000                 Shows  116536
-    ## 6     6   119000000            0                   nan       0
-    ## 7     7   112000000  93247040539        People & Blogs    1111
-    ## 8     8   111000000  29058044447                Gaming    4716
-    ## 9     9   106000000  90479060027        People & Blogs     493
-    ## 10   10    98900000  77180169894         Entertainment     574
-    ## 11   11    96700000  57856289381                 Music    8548
-    ## 12   12    96000000  77428473662                Sports   70127
-    ## 13   13    93600000            0                   nan       0
-    ## 14   14    89800000  32144597566        People & Blogs     543
-    ## 15   15    86900000  24118230580      Film & Animation       1
-    ## 16   16    83000000 101000000000                 Shows   71270
-    ## 17   17    80100000  26236790209         Howto & Style       1
-    ## 18   18    75600000  20826993957                 Music    2281
-    ## 19   19    75000000            0                   nan       3
-    ## 20   20    71600000  30608119724                 Music     249
-    ## 21   21    71300000  28634566938                 Music    1337
-    ## 22   22    70500000  73139054467         Entertainment  129204
-    ## 23   23    68200000  38843229963             Education    2865
-    ## 24   24    66500000  36775585925                 Music    2572
-    ## 25   25    65900000  45757850229             Education     633
-    ## 26   26    65600000  28648024439                 Music    8502
-    ## 27   27    64600000  61510906457                 Shows  112915
-    ## 28   28    61000000  29533230328                 Music      13
-    ## 29   29    59500000  16241549158                Sports     389
-    ## 30   30    59500000  59316472754      Film & Animation   39113
-    ## 31   31    59300000  33431802698                 Music    4741
-    ## 32   32    58400000  57271630846                 Music    1510
-    ## 33   33    58000000  40602020243                 Music   19487
-    ## 34   34    57600000  25307753534       News & Politics  283775
-    ## 35   35    57200000  28837144516                 Music    3882
-    ## 36   36    56900000  27073872856                 Music     156
-    ## 37   37    56400000  14696003229         Entertainment     436
-    ## 38   38    54600000  35302243691      Film & Animation    3707
-    ## 39   39    54000000  32312431239                 Music      11
-    ## 40   40    53500000  30367676736                 Music     383
-    ## 41   41    53300000  30516172739             Education     577
-    ## 42   42    52900000  29884657286                 Music     216
-    ## 43   43    52700000  24004842608                 Music     147
-    ## 44   44    52200000   9877365274             Education     847
-    ## 45   45    48100000  14631710289                Gaming    2052
-    ## 46   46    47900000  13626331061                 Music      65
-    ## 47   47    47500000  30788679536         Entertainment    3322
-    ## 48   48    47400000  22519705183         Entertainment   11451
-    ## 49   49    46800000  19398045702         Entertainment       1
-    ## 50   50    46600000  27286058807                 Music    3444
-    ## 51   51    46300000  22936630813                Gaming       1
-    ## 52   52    46100000  30686342319                 Music       1
-    ## 53   53    46100000  10323391593                Gaming     543
-    ## 54   54    45500000  21388725229         Entertainment    4660
-    ## 55   55    45200000  16602198273         Entertainment    4331
-    ## 56   56    44700000   7828610828         Entertainment    1558
-    ## 57   57    44600000  41139050371         Entertainment  100755
-    ## 58   58    44500000  10708531817         Howto & Style       0
-    ## 59   59    44200000  25458952022                 Music     128
-    ## 60   60    44200000   4274709210                Comedy     558
-    ## 61   61    44200000  50292540392        People & Blogs  193890
-    ## 62   62    43700000  12884264778                 Music       8
-    ## 63   63    43600000   4831311245         Entertainment       6
-    ## 64   64    43500000  27568757295        People & Blogs     326
-    ## 65   65    43200000  36458726976      Film & Animation    1478
-    ## 66   66    43200000  37939780685         Entertainment  109871
-    ## 67   67    42500000  26820902622                 Music   10938
-    ## 68   68    42400000  24519022988                 Shows    1218
-    ## 69   69    42400000  19547696190         Entertainment     618
-    ## 70   70    41900000  22477745835         Entertainment      84
-    ## 71   71    41400000  17608931161              Trailers    4510
-    ## 72   72    41300000   5603111948        People & Blogs     291
-    ## 73   73    40900000  39450824833             Education    2423
-    ## 74   74    40600000   8670473639                Comedy       0
-    ## 75   75    40400000   7410536668                Gaming     703
-    ## 76   76    40300000  47005053156         Entertainment       4
-    ## 77   77    39700000  23884824160        People & Blogs    1596
-    ## 78   78    39400000  22302547082        People & Blogs       1
-    ## 79   79    39200000   3294013141                Comedy     186
-    ## 80   80    39200000  10507474316                 Music     133
-    ## 81   81    39200000  44900897958             Education     744
-    ## 82   82    39100000  16118181673                Gaming    1876
-    ## 83   83    39000000  36131228583         Entertainment   72580
-    ## 84   84    38900000  25154232306                 Music    3043
-    ## 85   85    38600000   7339333120 Nonprofits & Activism  200933
-    ## 86   86    38400000  21528116909        People & Blogs     982
-    ## 87   87    38300000  16718192386                 Music    3532
-    ## 88   88    38200000  13598903820                 Music      11
-    ## 89   89    38200000  22756581750         Entertainment   15672
-    ## 90   90    38200000  28519339489                 Shows   24089
-    ## 91   91    38000000  22731415608                 Music     505
-    ## 92   92    37900000  23510152352                   nan     515
-    ## 93   93    37600000  18208196857         Entertainment     743
-    ## 94   94    37500000  27262462114         Entertainment  117152
-    ## 95   95    37200000  16402066717                Comedy     220
-    ## 96   96    37000000  13102611515        People & Blogs  301308
-    ## 97   97    37000000  24188861917        People & Blogs     744
-    ## 98   98    36700000  19378155425                 Music      99
-    ## 99   99    36600000  22553923546                 Music     171
-    ## 100 100    36600000  15653786446              Trailers    9168
-    ## 101 101    36500000  18961241905      Film & Animation    5621
-    ## 102 102    36300000   3010784935       News & Politics     744
-    ## 103 103    36300000            0                   nan       0
-    ## 104 104    36200000  23355801606                 Music     196
-    ## 105 105    36100000   6331332547                Gaming       5
-    ## 106 106    35700000  27118354077                 Music     654
-    ## 107 107    35500000  15657673422         Entertainment    7566
-    ## 108 108    35500000  16105023749       News & Politics  273255
-    ## 109 109    35400000  22637783517                 Music    2010
-    ## 110 110    35400000   5556364230                Gaming       1
-    ## 111 111    35200000  20297931219                Gaming    5490
-    ## 112 112    35200000  55299840198         Entertainment    2453
-    ## 113 113    34900000  25607397308             Education     617
-    ## 114 114    34600000  21306315429                 Music       0
-    ## 115 115    34400000   9690499664                Gaming       1
-    ## 116 116    34300000  12746535822                 Music     679
-    ## 117 117    34100000  23005313609                 Music     141
-    ## 118 118    34000000   3963007415         Entertainment    2284
-    ## 119 119    34000000  11351015824      Film & Animation     240
-    ## 120 120    33800000  15432929204                Gaming    7606
-    ## 121 121    33800000  27274550757      Film & Animation      66
-    ## 122 122    33700000  23492684419                Gaming    3366
-    ## 123 123    33700000  10189027455                 Music       2
-    ## 124 124    33600000  13013567335      Film & Animation     188
-    ## 125 125    33500000  14864294792                 Music    3741
-    ## 126 126    33500000  29611914495         Entertainment   96214
-    ## 127 127    33500000  11405809704                Comedy     217
-    ## 128 128    33400000  10530729078                 Music    1331
-    ## 129 129    33400000  20269857567             Education     338
-    ## 130 130    33300000   5994136760        People & Blogs    2736
-    ## 131 131    32800000  26355088167             Education    2122
-    ## 132 132    32700000  17853798780         Entertainment    1521
-    ## 133 133    32700000  19180039918                   nan    2738
-    ## 134 134    32700000  28516250629                 Music    2068
-    ## 135 135    32600000  23379969006                 Music     169
-    ## 136 136    32200000  16613441479      Film & Animation       2
-    ## 137 137    32100000  18699145555                 Music     134
-    ## 138 138    32100000  10602236110                 Shows    3091
-    ## 139 139    32100000  13061739758                Gaming   11882
-    ## 140 140    32000000  26800674545         Entertainment   44892
-    ## 141 141    31900000  27330239663                 Music    4158
-    ## 142 142    31900000  19428308461         Entertainment   93311
-    ## 143 143    31800000   6762424690         Howto & Style    6734
-    ## 144 144    31700000   5711208484  Science & Technology     929
-    ## 145 145    31700000  16476978876                 Music    6518
-    ## 146 146    31700000  21031745531         Entertainment     166
-    ## 147 147    31700000   2930015381                Gaming     116
-    ## 148 148    31600000  11615848291         Entertainment    1321
-    ## 149 149    31600000  26583873105                 Music     204
-    ## 150 150    31400000  15176762479         Entertainment       0
-    ## 151 151    31400000  22919271731      Film & Animation    3589
-    ## 152 152    31200000   9673649438        People & Blogs      65
-    ## 153 153    31200000  17111726160                Comedy    8976
-    ## 154 154    31200000   6187804950         Entertainment    3027
-    ## 155 155    30700000  16793072362                 Music      92
-    ## 156 156    30700000  12355992466                   nan     578
-    ## 157 157    30700000   3145161634                Comedy      67
-    ## 158 158    30500000  16709857823       News & Politics  180092
-    ## 159 159    30500000   4521573939                Gaming     641
-    ## 160 160    30400000   4332274962         Entertainment    2197
-    ## 161 161    30400000  14037426379                 Music    2725
-    ## 162 162    30400000  17999961915                   nan     532
-    ## 163 163    30300000  13546549817         Entertainment     223
-    ## 164 164    30200000  14199108016                 Music      15
-    ## 165 165    30200000  15199330166                Comedy       2
-    ## 166 166    30200000  27684955537         Entertainment    3254
-    ## 167 167    30100000   7277493940                Gaming       0
-    ## 168 168    30100000  19607009165                 Music   11501
-    ## 169 169    30100000  22593193994             Education    1349
-    ## 170 170    30100000  16246625836                Gaming    5114
-    ## 171 171    30000000  12831200855                 Music     133
-    ## 172 172    29800000   4457913639                Comedy     151
-    ## 173 173    29600000  17208027242                 Music    4903
-    ## 174 174    29300000            0                   nan       3
-    ## 175 175    29300000  21226945136                 Music      14
-    ## 176 176    29200000  14727238483         Entertainment    1513
-    ## 177 177    29200000  11627437847                Comedy    3654
-    ## 178 178    29200000   4079141673                Comedy     404
-    ## 179 179    29000000  19466238065                Comedy      42
-    ## 180 180    28900000  17930570614             Education     555
-    ## 181 181    28500000  25857994495                 Music       0
-    ## 182 182    28400000   9956764048         Entertainment    5809
-    ## 183 183    28400000  10062770060                Movies    5436
-    ## 184 184    28300000  13577142726      Film & Animation       6
-    ## 185 185    28300000  14814192034             Education     505
-    ## 186 186    28300000  23844936965         Entertainment  106983
-    ## 187 187    28200000   7600740993         Entertainment    3009
-    ## 188 188    28200000  14412474625                 Music      15
-    ## 189 189    28100000  15318895118                 Music       3
-    ## 190 190    28000000   8603468420      Film & Animation    3878
-    ## 191 191    27800000   2303069221        People & Blogs       0
-    ## 192 192    27800000  21037851468                 Music     292
-    ## 193 193    27700000  15777682516                 Music     619
-    ## 194 194    27500000   4552581106        People & Blogs      27
-    ## 195 195    27500000  13379395501                 Music     682
-    ## 196 196    27400000  19883150017                 Music    1753
-    ## 197 197    27400000  10336420490        People & Blogs     642
-    ## 198 198    27400000  19417887510                Gaming    3664
-    ## 199 199    27300000  22440611155      Film & Animation    5438
-    ## 200 200    27300000   7705492350         Entertainment    1259
-    ## 201 201    27100000  15916882228         Entertainment       2
-    ## 202 202    27100000  17318452893         Entertainment     889
-    ## 203 203    27100000  12732444881         Howto & Style     545
-    ## 204 204    27000000   6570935979                Comedy     554
-    ## 205 205    26900000   7938616641         Entertainment    3956
-    ## 206 206    26700000   4388047013        People & Blogs     241
-    ## 207 207    26700000  10317306313                Comedy     975
-    ## 208 208    26700000   7173668905         Entertainment    6471
-    ## 209 209    26500000  15065753455       News & Politics   10022
-    ## 210 210    26500000  20358117330                 Music    6873
-    ## 211 211    26400000   8595760553      Film & Animation    3622
-    ## 212 212    26400000  27006526665                Comedy     865
-    ## 213 213    26400000  17211600007         Entertainment     967
-    ## 214 214    26300000   4749833967         Entertainment     190
-    ## 215 215    26200000  31977463002                   nan     775
-    ## 216 216    26200000  16097531087         Entertainment    5985
-    ## 217 217    26100000  10435474336                Comedy    1619
-    ## 218 218    26100000   7886440199         Entertainment       0
-    ## 219 219    26000000  14101010609        People & Blogs     868
-    ## 220 220    26000000  17308961985                 Music     240
-    ## 221 221    26000000  18597534412                 Music       1
-    ## 222 222    25900000  11372071889                 Music   65286
-    ## 223 223    25800000  15541421838                Gaming    1762
-    ## 224 224    25700000  17793809548                 Music     749
-    ## 225 225    25700000   7466926260        People & Blogs     982
-    ## 226 226    25700000  10242981063                 Music      42
-    ## 227 227    25600000   7962725960         Howto & Style       0
-    ## 228 228    25600000  25592378292                 Music     287
-    ## 229 229    25500000   2726917087      Film & Animation       5
-    ## 230 230    25500000  14401218086                 Music      78
-    ## 231 231    25400000   6430853035        People & Blogs    3716
-    ## 232 232    25400000  34300482066                Comedy    8775
-    ## 233 233    25300000  17331663193                 Music     398
-    ## 234 234    25200000   9602246828        People & Blogs       4
-    ## 235 235    25200000  11081602368        People & Blogs    2025
-    ## 236 236    25200000   7968363381        People & Blogs      12
-    ## 237 237    25200000  15520569496                 Music       0
-    ## 238 238    25200000  10409352249       News & Politics   51129
-    ## 239 239    25100000  19458807708                 Music     118
-    ## 240 240    25100000  16357064198                 Music   24837
-    ## 241 241    25000000  14169516119         Entertainment   89179
-    ## 242 242    25000000  14827085149                 Music     147
-    ## 243 243    24800000  17387583720         Entertainment    1644
-    ## 244 244    24800000   2588501115         Howto & Style     672
-    ## 245 245    24800000   3699352704         Entertainment    1894
-    ## 246 246    24800000  14655527943        People & Blogs     872
-    ## 247 247    24700000  20531704527                 Music     104
-    ## 248 248    24700000   2994726412         Howto & Style     412
-    ## 249 249    24600000  23755792542                 Music     175
-    ## 250 250    24600000   3647987299  Science & Technology     120
-    ## 251 251    24500000  23962070944                 Music   18950
-    ## 252 252    24400000  12385924995         Entertainment     658
-    ## 253 253    24300000   2380248899         Entertainment      17
-    ## 254 254    24300000   6608773195      Film & Animation    1667
-    ## 255 255    24200000   2700914170         Entertainment      67
-    ## 256 256    24200000  15724160183                   nan     469
-    ## 257 257    24100000    329774870                   nan      36
-    ## 258 258    24100000  10999000479                Comedy     802
-    ## 259 259    24100000  12916159065                Comedy     287
-    ## 260 260    24100000  56106087508                 Music   23491
-    ## 261 261    24100000   8425505919                 Music     252
-    ## 262 262    24100000  11041261296                   nan     590
-    ## 263 263    24100000   6002166932         Entertainment    1252
-    ## 264 264    24000000  13943030228                Comedy     901
-    ## 265 265    24000000   5652938599      Film & Animation       3
-    ## 266 266    24000000   8279004442                Gaming    4009
-    ## 267 267    23900000   4067878931         Entertainment     505
-    ## 268 268    23900000   6582932625         Entertainment     257
-    ## 269 269    23900000   7213499085        People & Blogs     511
-    ## 270 270    23800000   5663125358         Entertainment      70
-    ## 271 271    23800000  10414479943         Howto & Style    2425
-    ## 272 272    23800000  17688774915                 Music     443
-    ## 273 273    23700000   2543809954                Gaming    1732
-    ## 274 274    23700000   7451792132                Gaming       0
-    ## 275 275    23700000  15510153803        People & Blogs    1099
-    ## 276 276    23700000  20289689389        Pets & Animals     769
-    ## 277 277    23600000  15901824841                 Music     392
-    ## 278 278    23600000   2135644776         Entertainment     226
-    ## 279 279    23600000   5994002464         Entertainment     719
-    ## 280 280    23600000   6766461070         Entertainment     552
-    ## 281 281    23600000   7920637200      Film & Animation    1251
-    ## 282 282    23500000  14777034543                Gaming    6066
-    ## 283 283    23500000  14696994366        People & Blogs    1044
-    ## 284 284    23400000   9465863821      Film & Animation    6672
-    ## 285 285    23400000   7926899136      Film & Animation    1291
-    ## 286 286    23300000  22471357411         Entertainment    3657
-    ## 287 287    23200000         2634  Science & Technology       1
-    ## 288 288    23200000  15751661213        People & Blogs     172
-    ## 289 289    23200000   7966720147         Entertainment     595
-    ## 290 290    23100000  12889240875                 Music   22578
-    ## 291 291    23100000  25579831081                 Music   15462
-    ## 292 292    23100000   2551113422        People & Blogs    4445
-    ## 293 293    23100000   9299371231                 Music     456
-    ## 294 294    23100000  13151870846                 Shows    3781
-    ## 295 295    23000000  31494513067         Entertainment    2905
-    ## 296 296    23000000   3378047383  Science & Technology    5041
-    ## 297 297    23000000   6041264489         Entertainment    1598
-    ## 298 298    23000000  10939966484         Entertainment    5718
-    ## 299 299    22900000   5320485069                Movies    1670
-    ## 300 300    22900000   5380073627      Film & Animation       0
-    ## 301 301    22900000  16298342829                 Music    1159
-    ## 302 302    22900000  13206471140             Education    1251
-    ## 303 303    22800000  17988347989         Entertainment    1841
-    ## 304 304    22700000  10115316784        People & Blogs     985
-    ## 305 305    22700000  11568118121         Entertainment     654
-    ## 306 306    22600000  20847038152        People & Blogs   60964
-    ## 307 307    22600000   9223534599                Comedy     495
-    ## 308 308    22600000  14231943358                 Music     180
-    ## 309 309    22600000  17507060680        People & Blogs    1189
-    ## 310 310    22600000  13405849040                 Music     171
-    ## 311 311    22600000  27084848152        People & Blogs    2321
-    ## 312 312    22500000   2431154438      Film & Animation    3377
-    ## 313 313    22500000  10613701948                   nan     526
-    ## 314 314    22500000  13835173331                Gaming    3315
-    ## 315 315    22400000   8040036209                 Music      58
-    ## 316 316    22300000   8663830163        People & Blogs      34
-    ## 317 317    22300000  24059336857                Gaming    1724
-    ## 318 318    22200000  11136266461         Entertainment     999
-    ## 319 319    22000000   9924807127                 Music     157
-    ## 320 320    22000000   8594440895                   nan     515
-    ## 321 321    22000000  18347969186         Entertainment    6274
-    ## 322 322    21900000   4454917643      Film & Animation     301
-    ## 323 323    21900000   5918314128        People & Blogs     946
-    ## 324 324    21900000  15552070846                Comedy     816
-    ## 325 325    21900000  20657571751         Entertainment     116
-    ## 326 326    21800000   4469711607        People & Blogs     257
-    ## 327 327    21800000   5614621131  Science & Technology   10162
-    ## 328 328    21800000  11288359365                 Music     164
-    ## 329 329    21800000  12140232004                 Music     266
-    ## 330 330    21800000  19329351143                 Music     135
-    ## 331 331    21800000   7780934187        People & Blogs       1
-    ## 332 332    21700000   9392093496        People & Blogs    1390
-    ## 333 333    21700000   8507818877                   nan   15126
-    ## 334 334    21600000   9597894786      Autos & Vehicles    2942
-    ## 335 335    21600000   5863377051         Howto & Style     219
-    ## 336 336    21600000   9346383505         Entertainment     228
-    ## 337 337    21500000   5890180734        People & Blogs      51
-    ## 338 338    21500000  15013096899       News & Politics     158
-    ## 339 339    21500000  22065582014        People & Blogs       6
-    ## 340 340    21500000   8409641722                Gaming      17
-    ## 341 341    21400000   1573058816                Comedy       0
-    ## 342 342    21400000   6264261757                 Music     114
-    ## 343 343    21300000   6269945014        People & Blogs     733
-    ## 344 344    21300000  10644857969                 Music      78
-    ## 345 345    21300000  12761253839        People & Blogs     951
-    ## 346 346    21300000   5141834668         Entertainment    1608
-    ## 347 347    21300000  10047736580         Entertainment     669
-    ## 348 348    21300000  12895427184         Entertainment   20225
-    ## 349 349    21200000   2073073070             Education       1
-    ## 350 350    21200000  11364908616         Entertainment   31989
-    ## 351 351    21100000   5783557209         Howto & Style    4728
-    ## 352 352    21100000   4526271677        People & Blogs    2325
-    ## 353 353    21000000   4380564906         Entertainment     403
-    ## 354 354    21000000   7762905663         Entertainment    2883
-    ## 355 355    21000000  10631638628         Entertainment     420
-    ## 356 356    21000000   9789121606                   nan     498
-    ## 357 357    20900000   1693149479             Education     896
-    ## 358 358    20900000   3828000587         Entertainment    6262
-    ## 359 359    20900000   4927879069        Pets & Animals     982
-    ## 360 360    20900000  11058049885        People & Blogs    9850
-    ## 361 361    20900000            0                   nan       0
-    ## 362 362    20900000  17324976752                 Music       6
-    ## 363 363    20800000   1870608170                Comedy     288
-    ## 364 364    20800000   2378448129             Education     193
-    ## 365 365    20700000  17963202261         Entertainment     619
-    ## 366 366    20700000   5091618606         Howto & Style    5062
-    ## 367 367    20700000   5410164682         Entertainment       6
-    ## 368 368    20700000   8658941531        People & Blogs     889
-    ## 369 369    20700000  12624879732                Sports   47926
-    ## 370 370    20600000   4956090094         Entertainment      15
-    ## 371 371    20600000   7657171980                Comedy      83
-    ## 372 372    20600000  10292874715                 Music     156
-    ## 373 373    20500000  15038593883         Entertainment   33229
-    ## 374 374    20500000   8768697257                Gaming    1323
-    ## 375 375    20500000  11009148579         Entertainment     296
-    ## 376 376    20400000   1796227417      Film & Animation     206
-    ## 377 377    20400000   7311322368        People & Blogs    1006
-    ## 378 378    20400000  13397000296                 Music       0
-    ## 379 379    20400000  29406206620         Entertainment   51515
-    ## 380 380    20400000   4707412332         Entertainment     462
-    ## 381 381    20400000   3579555124                 Music     239
-    ## 382 382    20300000   2441288701         Entertainment    1245
-    ## 383 383    20300000  11022391339             Education     107
-    ## 384 384    20300000  11819051552             Education     875
-    ## 385 385    20200000   2951914200         Entertainment     460
-    ## 386 386    20200000   2764127969                Comedy     693
-    ## 387 387    20200000   7066711323         Entertainment       0
-    ## 388 388    20200000   7274150246             Education     226
-    ## 389 389    20200000  20919403720                Comedy    1935
-    ## 390 390    20200000  19694265358                Comedy     761
-    ## 391 391    20200000   6098644584                Gaming    3713
-    ## 392 392    20100000  23353115850         Entertainment    3774
-    ## 393 393    20100000   6618524158                 Music     241
-    ## 394 394    20100000   8920141342                Gaming    4974
-    ## 395 395    20100000  10366850490         Entertainment       0
-    ## 396 396    20100000  11317309935      Film & Animation    1481
-    ## 397 397    20100000  14816075927                 Music    2384
-    ## 398 398    20100000   6119294270         Howto & Style    5491
-    ## 399 399    20100000   5634695322         Entertainment       1
-    ## 400 400    20100000  17913237851        People & Blogs    7737
-    ## 401 401    20000000  13154314376         Entertainment    4339
-    ## 402 402    20000000    559765455                 Music    1527
-    ## 403 403    20000000   3875172235         Entertainment    1527
-    ## 404 404    20000000   6033295543                 Music       1
-    ## 405 405    20000000   9715291883      Film & Animation    1476
-    ## 406 406    19900000  13917423958                 Music     416
-    ## 407 407    19800000   3234880084  Science & Technology    1411
-    ## 408 408    19800000   5759442450        People & Blogs     760
-    ## 409 409    19800000  12293479945       News & Politics    9930
-    ## 410 410    19700000   1803249241                Comedy     250
-    ## 411 411    19700000   7452667615        People & Blogs    2912
-    ## 412 412    19700000  10955619815      Film & Animation       1
-    ## 413 413    19700000  11323617496         Entertainment    4225
-    ## 414 414    19700000   9808676159         Entertainment     267
-    ## 415 415    19600000   2851024430                Gaming      17
-    ## 416 416    19600000  13930021471                 Shows   18661
-    ## 417 417    19600000   8779729549         Entertainment    1306
-    ## 418 418    19600000   7906181776      Film & Animation     214
-    ## 419 419    19600000   3961318438                Gaming     674
-    ## 420 420    19500000   5234251168         Entertainment     847
-    ## 421 421    19400000   2255542592       News & Politics    4750
-    ## 422 422    19400000   1577859332        People & Blogs      85
-    ## 423 423    19400000  23038014291         Entertainment  125974
-    ## 424 424    19400000   5529131886                Sports   10728
-    ## 425 425    19300000    264228052                   nan     335
-    ## 426 426    19300000   2897907132  Science & Technology     462
-    ## 427 427    19300000   4508184467  Science & Technology    2175
-    ## 428 428    19200000   4329121104        People & Blogs     570
-    ## 429 429    19200000   7590582024         Entertainment    8285
-    ## 430 430    19100000  13124645973         Entertainment    6526
-    ## 431 431    19100000   4566120190                Comedy     139
-    ## 432 432    19100000   5194942269      Film & Animation    2948
-    ## 433 433    19100000   6339584661                 Music      37
-    ## 434 434    19000000   4924054368             Education      60
-    ## 435 435    19000000   7229175322         Howto & Style     903
-    ## 436 436    19000000   8281724393      Film & Animation    1525
-    ## 437 437    19000000  13824277846      Film & Animation    1154
-    ## 438 438    19000000  16014044618                 Music      79
-    ## 439 439    19000000  15126092508         Entertainment   64496
-    ## 440 440    18900000   2855519150        People & Blogs     375
-    ## 441 441    18900000   8301731337                 Shows       0
-    ## 442 442    18900000   9813245108             Education     719
-    ## 443 443    18800000   3654621568             Education    2072
-    ## 444 444    18800000   5257834105         Entertainment     312
-    ## 445 445    18800000   7634430188        People & Blogs       9
-    ## 446 446    18800000   7762077012                   nan       2
-    ## 447 447    18800000   9573641299                 Music     217
-    ## 448 448    18800000   9594188708         Entertainment     530
-    ## 449 449    18800000   3276891538                Comedy     304
-    ## 450 450    18700000  12295637162         Entertainment      16
-    ## 451 451    18700000   6148303268                Gaming       2
-    ## 452 452    18600000   6047584292         Entertainment    4487
-    ## 453 453    18600000   7008250496                   nan     457
-    ## 454 454    18600000  20196704276                 Music    6287
-    ## 455 455    18600000   8761255550                Gaming    6289
-    ## 456 456    18500000   2908120896                 Music    1329
-    ## 457 457    18500000   3457618361                Gaming     374
-    ## 458 458    18500000   4558380251        People & Blogs     712
-    ## 459 459    18500000   8147575884        People & Blogs     493
-    ## 460 460    18500000   4051072188        People & Blogs     679
-    ## 461 461    18400000   4120324310         Entertainment     111
-    ## 462 462    18400000   7038827526                Comedy    6943
-    ## 463 463    18400000  11544297793                 Music    3159
-    ## 464 464    18400000  11280732382        People & Blogs       0
-    ## 465 465    18400000  25367126292                 Music     197
-    ## 466 466    18300000   1606834186        People & Blogs     786
-    ## 467 467    18300000   7760819588         Entertainment     142
-    ## 468 468    18300000   1556003039                Gaming    1324
-    ## 469 469    18300000   8798044678         Entertainment       0
-    ## 470 470    18200000   9937823152        People & Blogs     442
-    ## 471 471    18200000   3213324455        People & Blogs    6903
-    ## 472 472    18100000  13378360425         Entertainment     420
-    ## 473 473    18100000   3306242674         Entertainment    1037
-    ## 474 474    18100000   9983065083                Gaming    1521
-    ## 475 475    18100000  14857290259             Education     707
-    ## 476 476    18100000  10703830496                 Music     131
-    ## 477 477    18100000  12249828886         Entertainment       0
-    ## 478 478    18000000   3980991248         Howto & Style    2470
-    ## 479 479    18000000   9601137077                Sports     650
-    ## 480 480    18000000  15412333005         Entertainment      45
-    ## 481 481    18000000  10463166404       News & Politics     237
-    ## 482 482    18000000  17921124985                 Music    5692
-    ## 483 483    18000000   6404852037                Gaming    3566
-    ## 484 484    18000000   8716982055      Film & Animation     748
-    ## 485 485    17900000   7176572299        People & Blogs     536
-    ## 486 486    17900000   3841205465        People & Blogs     982
-    ## 487 487    17900000   5168721499         Entertainment    1344
-    ## 488 488    17900000   5244917119                Comedy     185
-    ## 489 489    17900000   6888074944                 Music     314
-    ## 490 490    17900000   9867515979         Entertainment     602
-    ## 491 491    17900000   9887116267                 Music     830
-    ## 492 492    17900000  16174530046                 Shows    1426
-    ## 493 493    17900000   6746269458        People & Blogs       2
-    ## 494 494    17800000  11057945183        People & Blogs     772
-    ## 495 495    17800000   8588704539      Film & Animation      26
-    ## 496 496    17700000  19206701832                   nan    1646
-    ## 497 497    17700000   7387621644                   nan    1888
-    ## 498 498    17700000  20115544708                 Music     178
-    ## 499 499    17700000   7912733203        People & Blogs     512
-    ## 500 500    17700000   3647267655        People & Blogs     739
-    ## 501 501    17700000   4196061192                 Music      60
-    ## 502 502    17700000   7739048000         Entertainment    2240
-    ## 503 503    17700000   8396875537       News & Politics  211620
-    ## 504 504    17700000   9059696049      Film & Animation    1716
-    ## 505 505    17700000  17247584185      Film & Animation    1316
-    ## 506 506    17600000   9269174070                Gaming    3151
-    ## 507 507    17600000   2274007523                Comedy     233
-    ## 508 508    17600000   2977741577         Howto & Style     128
-    ## 509 509    17600000   3752347262                Gaming       0
-    ## 510 510    17600000   6306204566                Gaming    4702
-    ## 511 511    17600000   3802280098                 Music     326
-    ## 512 512    17500000   2238134438         Entertainment     709
-    ## 513 513    17500000   7263619576       News & Politics  182742
-    ## 514 514    17500000   7612385622         Entertainment     149
-    ## 515 515    17500000  16107116549                Gaming  156215
-    ## 516 516    17400000  17763586483                Gaming    4411
-    ## 517 517    17400000  13043561912         Entertainment  118448
-    ## 518 518    17400000  11144195464                 Music    2133
-    ## 519 519    17400000  16560557488        People & Blogs    2078
-    ## 520 520    17300000   1026425106  Science & Technology     180
-    ## 521 521    17300000    902225615      Film & Animation     287
-    ## 522 522    17300000  11371738047         Entertainment    4778
-    ## 523 523    17300000   3684816159         Howto & Style     582
-    ## 524 524    17200000  14573155899                Gaming    4685
-    ## 525 525    17200000   3606912471  Science & Technology    1567
-    ## 526 526    17200000   7337212581                 Music     138
-    ## 527 527    17200000   8903647480             Education      83
-    ## 528 528    17200000  11445492404             Education    1007
-    ## 529 529    17200000   5024088947                Gaming    7550
-    ## 530 530    17100000   4448334716                Comedy     498
-    ## 531 531    17100000   9710962528         Entertainment  148225
-    ## 532 532    17100000   2173106162                Comedy     142
-    ## 533 533    17000000  10847948832                 Music    1015
-    ## 534 534    17000000   1001465469                Comedy    1407
-    ## 535 535    17000000   8229883114         Entertainment       1
-    ## 536 536    17000000  14543594822                 Music      97
-    ## 537 537    16900000   8684010451                 Music    2235
-    ## 538 538    16900000   9111000228                Gaming    1910
-    ## 539 539    16900000   3827906874         Entertainment     366
-    ## 540 540    16900000   4609753237         Entertainment    3900
-    ## 541 541    16900000   9270331567                Comedy     441
-    ## 542 542    16900000   9544277833        People & Blogs    2337
-    ## 543 543    16900000   3523578665 Nonprofits & Activism    4891
-    ## 544 544    16800000   2315962318         Entertainment       1
-    ## 545 545    16800000   6518418501         Entertainment       0
-    ## 546 546    16800000   7206462713        People & Blogs      41
-    ## 547 547    16800000   7195314800         Entertainment     502
-    ## 548 548    16800000   3693798804      Film & Animation    1491
-    ## 549 549    16700000  10393037902         Entertainment       3
-    ## 550 550    16700000   7102965621                Gaming    1693
-    ## 551 551    16700000   8826138204         Entertainment     920
-    ## 552 552    16700000   7979736581                 Music      13
-    ## 553 553    16700000   5089284369        People & Blogs    8741
-    ## 554 554    16600000   1318442641                   nan     180
-    ## 555 555    16600000   2798273962         Entertainment       0
-    ## 556 556    16600000   3696973456         Howto & Style     216
-    ## 557 557    16600000   7435180827       News & Politics  112261
-    ## 558 558    16600000   9439857193         Entertainment   20102
-    ## 559 559    16600000  11946217860                 Music    8976
-    ## 560 560    16600000  15278668857         Entertainment    2200
-    ## 561 561    16600000   5819508534         Entertainment     413
-    ## 562 562    16500000   2440934034         Entertainment     421
-    ## 563 563    16500000   3037260680                Comedy     438
-    ## 564 564    16500000   7043235131       News & Politics   21243
-    ## 565 565    16500000   7406207930         Entertainment     735
-    ## 566 566    16400000   3955426159         Howto & Style    1091
-    ## 567 567    16400000   4434679706                Comedy     428
-    ## 568 568    16400000   7135820721                Sports   14662
-    ## 569 569    16400000   9463244435         Entertainment   56203
-    ## 570 570    16400000  13478392540         Entertainment       1
-    ## 571 571    16400000  14431830557         Entertainment       1
-    ## 572 572    16400000  12844432341         Entertainment   23952
-    ## 573 573    16300000   3527627264         Entertainment      54
-    ## 574 574    16300000   6578828147                 Music     490
-    ## 575 575    16300000   6613422635                 Music      80
-    ## 576 576    16300000   7520242626                 Music     278
-    ## 577 577    16300000  10170264839                 Music     230
-    ## 578 578    16300000  12475714382                 Music     352
-    ## 579 579    16300000   7141825267         Entertainment    1444
-    ## 580 580    16300000   1656452554                Gaming     989
-    ## 581 581    16300000   4768370464                Gaming     652
-    ## 582 582    16200000  10227242833                 Music     258
-    ## 583 583    16200000   8091706232         Entertainment     593
-    ## 584 584    16200000   2990185467                Comedy    1930
-    ## 585 585    16200000   4076692623                Gaming    1294
-    ## 586 586    16200000   9763592867                 Music    3943
-    ## 587 587    16200000  14563841315       News & Politics  244899
-    ## 588 588    16200000  20522339099         Entertainment   31889
-    ## 589 589    16200000  14784781923        People & Blogs     189
-    ## 590 590    16200000   4488680903         Entertainment      10
-    ## 591 591    16200000   4813127504        People & Blogs       2
-    ## 592 592    16100000   1517638132         Entertainment    2805
-    ## 593 593    16100000            0                   nan       0
-    ## 594 594    16100000   7399296005                   nan     510
-    ## 595 595    16100000   2687443643        People & Blogs     723
-    ## 596 596    16100000   5055576881                 Music    1123
-    ## 597 597    16100000   6872702790         Entertainment     671
-    ## 598 598    16100000   7126210721                 Music      41
-    ## 599 599    16100000   7155736006                   nan     667
-    ## 600 600    16100000  15812009296         Entertainment    4045
-    ## 601 601    16100000   9642146451         Entertainment       0
-    ## 602 602    16000000   6543629679        People & Blogs     453
-    ## 603 603    16000000   3018032423             Education   52144
-    ## 604 604    16000000   3029872908                Gaming     687
-    ## 605 605    16000000   9786595271                Gaming       0
-    ## 606 606    16000000   5997599089      Film & Animation     344
-    ## 607 607    15900000   1845329502        People & Blogs       0
-    ## 608 608    15900000   9962188084                 Music    2035
-    ## 609 609    15900000   2609358468         Howto & Style     433
-    ## 610 610    15900000   6534326412                Gaming    4906
-    ## 611 611    15900000   9198986881                 Music    5105
-    ## 612 612    15900000   9052367553                Gaming     796
-    ## 613 613    15900000   6802382479                 Music     132
-    ## 614 614    15800000   1349288771             Education     633
-    ## 615 615    15800000   3392918989       News & Politics   20679
-    ## 616 616    15800000   4122634467        People & Blogs     542
-    ## 617 617    15800000  13116313599      Film & Animation   10441
-    ## 618 618    15700000   9787697838      Film & Animation   16874
-    ## 619 619    15700000   5914071870                 Music      79
-    ## 620 620    15700000   6153495609                   nan     150
-    ## 621 621    15700000   6626563508                 Music   19703
-    ## 622 622    15700000   5558051295                 Music    1640
-    ## 623 623    15700000   8696631898         Entertainment    7090
-    ## 624 624    15600000   1511794214         Entertainment     483
-    ## 625 625    15600000   6862529416                Gaming    6623
-    ## 626 626    15600000   7172386509  Science & Technology    6542
-    ## 627 627    15600000   3869457097         Entertainment    2019
-    ## 628 628    15600000   6165757696        People & Blogs    4245
-    ## 629 629    15500000   8984089026        People & Blogs     598
-    ## 630 630    15500000   5070970714         Entertainment       0
-    ## 631 631    15500000   6386271870                 Music     220
-    ## 632 632    15500000   7776706184             Education     359
-    ## 633 633    15500000   8265129639                 Shows    1021
-    ## 634 634    15500000  14619523361                 Music     325
-    ## 635 635    15500000  12880388253  Science & Technology       0
-    ## 636 636    15500000  12714141740         Entertainment    1525
-    ## 637 637    15500000   6396049701         Entertainment     417
-    ## 638 638    15500000   4499826716         Howto & Style    5183
-    ## 639 639    15400000   1781226000                Comedy     165
-    ## 640 640    15400000  11513738907                Gaming     379
-    ## 641 641    15400000   1543608082                Gaming    1647
-    ## 642 642    15400000   5469103954        People & Blogs    1756
-    ## 643 643    15400000   3736069980  Science & Technology    1577
-    ## 644 644    15400000  14564170905                 Music    1725
-    ## 645 645    15400000   4909687948                 Music      21
-    ## 646 646    15400000   4750420071        People & Blogs    4186
-    ## 647 647    15300000   2656528205                Sports   10988
-    ## 648 648    15300000  10714145606             Education     851
-    ## 649 649    15300000   1640078055                Gaming    1397
-    ## 650 650    15300000   9938811455        People & Blogs    2175
-    ## 651 651    15300000  16545966132         Entertainment   87864
-    ## 652 652    15200000    857725714        People & Blogs     194
-    ## 653 653    15200000   4503880875                Comedy     106
-    ## 654 654    15200000   1491452935         Entertainment     443
-    ## 655 655    15200000   6391679636                 Music    5056
-    ## 656 656    15200000   7151683497         Entertainment   11099
-    ## 657 657    15200000   7564652648         Entertainment    9862
-    ## 658 658    15200000   8333387785         Entertainment     654
-    ## 659 659    15200000  14198154095       News & Politics  160405
-    ## 660 660    15200000   6624168155       News & Politics   91704
-    ## 661 661    15100000   1777072487        People & Blogs     210
-    ## 662 662    15100000   1576633086                 Music      18
-    ## 663 663    15100000   2143140898             Education    3810
-    ## 664 664    15100000   2400037562         Howto & Style     159
-    ## 665 665    15100000   1760131384        People & Blogs     533
-    ## 666 666    15100000   3060202847        People & Blogs    1037
-    ## 667 667    15100000   2761547758         Howto & Style    2618
-    ## 668 668    15100000   4236036141                Gaming    2997
-    ## 669 669    15100000   4967784343        People & Blogs       1
-    ## 670 670    15100000   5324913850        People & Blogs     753
-    ## 671 671    15100000   6668507856                Gaming    3733
-    ## 672 672    15100000   7857371770                 Music     776
-    ## 673 673    15100000   9477021288                Comedy     921
-    ## 674 674    15100000  10489367372       News & Politics  209520
-    ## 675 675    15100000  13897932103         Entertainment    2717
-    ## 676 676    15100000  12413869881                 Music      52
-    ## 677 677    15000000   4352427049                Gaming    2324
-    ## 678 678    15000000   9924103188        People & Blogs     899
-    ## 679 679    15000000   8897705695         Entertainment     795
-    ## 680 680    15000000   7159750970                Gaming    1362
-    ## 681 681    15000000   2730879024             Education       0
-    ## 682 682    15000000   4008801873         Entertainment     724
-    ## 683 683    15000000   4741434420                Gaming   20292
-    ## 684 684    15000000   6889304306                Gaming    5198
-    ## 685 685    15000000   7536093065       News & Politics     206
-    ## 686 686    15000000   8658553456         Entertainment     965
-    ## 687 687    15000000   9978734160                 Music    2726
-    ## 688 688    15000000   9996133066                Gaming      68
-    ## 689 689    15000000  10239836582         Entertainment    1803
-    ## 690 690    15000000  11827310821       News & Politics  269050
-    ## 691 691    15000000  13562853889                Comedy    1788
-    ## 692 692    15000000  11506702632                 Music     340
-    ## 693 693    15000000   8932038210         Entertainment    3168
-    ## 694 694    14900000  10069000444                 Music     419
-    ## 695 695    14900000   8074260978         Entertainment   66362
-    ## 696 696    14900000   4033400167         Entertainment      86
-    ## 697 697    14900000   4395184343                 Music     127
-    ## 698 698    14900000   4977284539         Entertainment    8420
-    ## 699 699    14900000   5549770244         Entertainment   27944
-    ## 700 700    14900000  15913320995        People & Blogs    1363
-    ## 701 701    14900000       439098        People & Blogs       1
-    ## 702 702    14900000   5956193599                Gaming    4175
-    ## 703 703    14900000   8615618825         Entertainment      93
-    ## 704 704    14800000  13356517783                 Music    1210
-    ## 705 705    14800000   1833519700             Education    1481
-    ## 706 706    14800000   3587576784                 Music     195
-    ## 707 707    14800000   5269059435                Gaming    3834
-    ## 708 708    14800000   7018015062         Howto & Style    2387
-    ## 709 709    14800000   8649303688        People & Blogs     233
-    ## 710 710    14800000   9076642765                 Music     318
-    ## 711 711    14800000   9383431376                 Music       0
-    ## 712 712    14800000    272678287        People & Blogs      34
-    ## 713 713    14800000  15788208522                   nan    2222
-    ## 714 714    14800000   8866012877        People & Blogs    3867
-    ## 715 715    14700000   2230986039         Entertainment    1385
-    ## 716 716    14700000   1321380490         Entertainment      85
-    ## 717 717    14700000   1506796393         Entertainment     554
-    ## 718 718    14700000   2465473772         Entertainment     317
-    ## 719 719    14700000   4029253667             Education   43564
-    ## 720 720    14700000   6751985988                Comedy     698
-    ## 721 721    14700000   7255848125                Comedy    4340
-    ## 722 722    14700000   8882319696             Education    1996
-    ## 723 723    14700000  12362331529         Entertainment   23490
-    ## 724 724    14700000  12961669452       News & Politics   80830
-    ## 725 725    14700000   4684983333                 Music    3978
-    ## 726 726    14600000   2613197447         Entertainment     490
-    ## 727 727    14600000   3337074920        People & Blogs     961
-    ## 728 728    14600000   3603556207                Gaming    1244
-    ## 729 729    14600000   4622581344        People & Blogs     951
-    ## 730 730    14600000   5766647017                Gaming    4009
-    ## 731 731    14600000   6017932195                 Music     365
-    ## 732 732    14600000  11182302317                 Music    1206
-    ## 733 733    14600000   7952268926                 Music      67
-    ## 734 734    14600000   2750902766         Howto & Style     603
-    ## 735 735    14600000   5525773746                Comedy     560
-    ## 736 736    14500000   2440718089                 Music       0
-    ## 737 737    14500000   6944967581         Entertainment     479
-    ## 738 738    14500000   4577292740         Entertainment     453
-    ## 739 739    14500000   1739129375                   nan     514
-    ## 740 740    14500000   3551889957         Howto & Style    5430
-    ## 741 741    14500000   4260187928         Entertainment    1717
-    ## 742 742    14500000   4598387043       News & Politics   18972
-    ## 743 743    14500000   4821183481                   nan     605
-    ## 744 744    14500000   5014888374        People & Blogs     618
-    ## 745 745    14500000   6290721701                 Music    4790
-    ## 746 746    14500000   8582696157         Entertainment   19201
-    ## 747 747    14500000   9383692066         Entertainment   68606
-    ## 748 748    14500000  10303519926        People & Blogs  293516
-    ## 749 749    14500000  20042571499                 Music     147
-    ## 750 750    14500000   4315486422                 Music     176
-    ## 751 751    14500000   9201428420                 Music      39
-    ## 752 752    14500000   3517662420                Comedy    1064
-    ## 753 753    14400000    600154268         Entertainment     364
-    ## 754 754    14400000   2224121890                Gaming    3086
-    ## 755 755    14400000   1629801448         Entertainment     399
-    ## 756 756    14400000    351763324                Gaming       2
-    ## 757 757    14400000   2972474215         Entertainment     381
-    ## 758 758    14400000   3086254545                Comedy     222
-    ## 759 759    14400000   3900312631                Comedy     463
-    ## 760 760    14400000   4035738731                 Music     450
-    ## 761 761    14400000   4156427797        People & Blogs    1838
-    ## 762 762    14400000   4597228794         Howto & Style    1248
-    ## 763 763    14400000   5689224452        People & Blogs       0
-    ## 764 764    14400000   6543282459                   nan     516
-    ## 765 765    14400000   8011977288         Entertainment    5628
-    ## 766 766    14400000   9023952946      Film & Animation     978
-    ## 767 767    14400000  11423792969                 Music     186
-    ## 768 768    14400000  18515587421         Entertainment  101401
-    ## 769 769    14300000   4776507159        People & Blogs     576
-    ## 770 770    14300000   6388439235                Comedy       1
-    ## 771 771    14200000   6048517979                 Music    1823
-    ## 772 772    14200000   4040297006      Film & Animation    1281
-    ## 773 773    14200000   6973932553         Entertainment      60
-    ## 774 774    14200000   1778318927         Howto & Style     876
-    ## 775 775    14200000   2084791147                Gaming     342
-    ## 776 776    14200000   3920559552                Gaming    1300
-    ## 777 777    14200000   6554000320             Education     433
-    ## 778 778    14200000   7946322061                 Music       0
-    ## 779 779    14200000   9964116817        Pets & Animals       8
-    ## 780 780    14200000  10238593147                Comedy     872
-    ## 781 781    14200000  11428794827         Entertainment  132398
-    ## 782 782    14200000   3317805543         Entertainment    1724
-    ## 783 783    14100000   2131548711                 Music     149
-    ## 784 784    14100000   3594936775         Entertainment     846
-    ## 785 785    14100000   3920221322         Entertainment      65
-    ## 786 786    14100000   5129529846                 Music       3
-    ## 787 787    14100000   5405563355      Autos & Vehicles     855
-    ## 788 788    14100000   6036496916         Entertainment    2854
-    ## 789 789    14100000   6884215292                 Music      43
-    ## 790 790    14100000  19013942981                 Music     182
-    ## 791 791    14100000   3280481927                Sports     777
-    ## 792 792    14100000   4627069704         Entertainment    1540
-    ## 793 793    14000000   4959982720                Gaming    5757
-    ## 794 794    14000000   2214167846         Howto & Style     431
-    ## 795 795    14000000   4674164601        People & Blogs     651
-    ## 796 796    14000000   7719743112                Gaming    2210
-    ## 797 797    14000000   8623705301                 Music     294
-    ## 798 798    14000000   9660950823                 Music      62
-    ## 799 799    14000000  18917687143        People & Blogs   41117
-    ## 800 800    14000000  13542939513        People & Blogs    9652
-    ## 801 801    14000000  12597067132         Entertainment       3
-    ## 802 802    14000000   5094050461         Entertainment    1307
-    ## 803 803    13900000   5673347763                Gaming    5494
-    ## 804 804    13900000   9106781518         Entertainment    2254
-    ## 805 805    13900000   2244318380      Film & Animation     183
-    ## 806 806    13900000   7450345720        People & Blogs     324
-    ## 807 807    13900000   5217553897         Entertainment   15075
-    ## 808 808    13900000   5465532801         Entertainment     503
-    ## 809 809    13900000  12129583055       News & Politics       6
-    ## 810 810    13900000  12513842343                 Music    1660
-    ## 811 811    13900000   8451754769                   nan     504
-    ## 812 812    13900000   2165885634             Education     369
-    ## 813 813    13900000   3193226072         Howto & Style     288
-    ## 814 814    13800000   2224911030         Entertainment     173
-    ## 815 815    13800000   1820559912  Science & Technology     887
-    ## 816 816    13800000   1493776391        People & Blogs      16
-    ## 817 817    13800000   2480957682                Gaming    1952
-    ## 818 818    13800000   5019136690        People & Blogs     520
-    ## 819 819    13800000   5727888539       News & Politics  190093
-    ## 820 820    13800000   6646953396                 Shows    1505
-    ## 821 821    13800000  11039343563                 Music    4978
-    ## 822 822    13700000   1967930734                Comedy     696
-    ## 823 823    13700000   1973638757         Entertainment     975
-    ## 824 824    13700000   1950178163         Entertainment    3298
-    ## 825 825    13700000   9596430464                Comedy    1040
-    ## 826 826    13700000   2939201386         Howto & Style    2158
-    ## 827 827    13700000   4963275018        People & Blogs     340
-    ## 828 828    13700000   5457203710                Comedy     863
-    ## 829 829    13700000   8134379376                 Music     438
-    ## 830 830    13700000   5178142148             Education     495
-    ## 831 831    13700000   2135195239                Gaming       1
-    ## 832 832    13600000   2122062016                Gaming     368
-    ## 833 833    13600000    896891351                   nan     273
-    ## 834 834    13600000   1948925559                Sports     412
-    ## 835 835    13600000   3764608356                 Music     199
-    ## 836 836    13600000   5141201173             Education    1097
-    ## 837 837    13600000   9685060624        Pets & Animals   16047
-    ## 838 838    13600000  14717282742         Entertainment    8335
-    ## 839 839    13500000   1181292450                Gaming     319
-    ## 840 840    13500000   4301581610                Gaming    4312
-    ## 841 841    13500000   3445794123         Howto & Style     591
-    ## 842 842    13500000   5380132790         Entertainment      19
-    ## 843 843    13500000   5545936485                 Music     814
-    ## 844 844    13500000   8265920659         Entertainment    1403
-    ## 845 845    13500000   3912334359         Entertainment    1793
-    ## 846 846    13500000  11717217293                Comedy     975
-    ## 847 847    13500000   7958771872         Entertainment    1357
-    ## 848 848    13500000   2750993392                 Music     321
-    ## 849 849    13500000   1900272833         Howto & Style     462
-    ## 850 850    13400000   4622628957                   nan     477
-    ## 851 851    13400000  11789678655                 Music    7356
-    ## 852 852    13400000   2139769210        People & Blogs    1028
-    ## 853 853    13400000     20563378                   nan     256
-    ## 854 854    13400000   2650061211         Entertainment       0
-    ## 855 855    13400000   2319515787         Howto & Style    1349
-    ## 856 856    13400000   3363634923                Comedy    1195
-    ## 857 857    13400000   4356686216                Gaming    3727
-    ## 858 858    13400000   9569814790       News & Politics  296272
-    ## 859 859    13400000  10022557589        People & Blogs     319
-    ## 860 860    13400000   4306212515        People & Blogs      96
-    ## 861 861    13300000   2262690743  Science & Technology    3640
-    ## 862 862    13300000   6050102764                Gaming    8195
-    ## 863 863    13300000   3299216601         Entertainment     331
-    ## 864 864    13300000   3364230487        People & Blogs       3
-    ## 865 865    13300000   3733856870         Entertainment     698
-    ## 866 866    13300000   4177184071         Entertainment    3166
-    ## 867 867    13300000   6482687220        People & Blogs     608
-    ## 868 868    13300000   9088562002        People & Blogs    2742
-    ## 869 869    13300000   7923901253         Entertainment    2411
-    ## 870 870    13300000   7773543609                Gaming    4613
-    ## 871 871    13300000   7406628736                Comedy    6916
-    ## 872 872    13300000   2831275503         Howto & Style    1489
-    ## 873 873    13300000   4129249415                Gaming    1640
-    ## 874 874    13300000   6412313570                Gaming    1749
-    ## 875 875    13200000   9884886099         Entertainment     538
-    ## 876 876    13200000   1148422000         Entertainment     192
-    ## 877 877    13200000   2036408398                Gaming     172
-    ## 878 878    13200000   3568392223         Entertainment       0
-    ## 879 879    13200000   3789736218         Entertainment    8019
-    ## 880 880    13200000   4205664894                   nan    1324
-    ## 881 881    13200000   5224764969         Entertainment     413
-    ## 882 882    13200000   5263540904             Education    4279
-    ## 883 883    13200000  20743586601                 Music     237
-    ## 884 884    13200000   9378175604        People & Blogs    6888
-    ## 885 885    13200000   1138262456  Science & Technology    1022
-    ## 886 886    13200000   1758603195        People & Blogs     393
-    ## 887 887    13100000   2182651464         Entertainment      33
-    ## 888 888    13100000   1401914513        People & Blogs     287
-    ## 889 889    13100000   2733682792                   nan     289
-    ## 890 890    13100000   9110348202         Entertainment    1327
-    ## 891 891    13100000   4712624489                 Music    1262
-    ## 892 892    13100000   1936582704        People & Blogs       7
-    ## 893 893    13100000   2555801802        People & Blogs    1077
-    ## 894 894    13100000   4214172991      Film & Animation    1365
-    ## 895 895    13100000   4399833602        People & Blogs     435
-    ## 896 896    13100000   4608751851                 Music      73
-    ## 897 897    13100000   2879263916        People & Blogs    1444
-    ## 898 898    13100000   5333569294         Entertainment   36760
-    ## 899 899    13100000   5264039679                 Music     194
-    ## 900 900    13100000   6637820731                 Music      12
-    ## 901 901    13000000   2683297849         Entertainment     838
-    ## 902 902    13000000   1024467771                Comedy     625
-    ## 903 903    13000000     10664585         Entertainment      29
-    ## 904 904    13000000   1698279553                 Music     409
-    ## 905 905    13000000   5057163256         Entertainment       8
-    ## 906 906    13000000   8739174649                Gaming     510
-    ## 907 907    13000000   9999238237         Entertainment     716
-    ## 908 908    13000000    301547793                   nan      22
-    ## 909 909    13000000   6270909026         Entertainment    1299
-    ## 910 910    13000000   4349562794                 Music     521
-    ## 911 911    13000000   4637474071                Comedy     612
-    ## 912 912    12900000   2112274210        People & Blogs    4712
-    ## 913 913    12900000    140022442         Entertainment      69
-    ## 914 914    12900000   2509752944                Sports    1572
-    ## 915 915    12900000   3178222797         Entertainment     193
-    ## 916 916    12900000   3643698504         Entertainment    1598
-    ## 917 917    12900000   6300933122                 Music      39
-    ## 918 918    12900000   7520379951        People & Blogs  169304
-    ## 919 919    12900000  11504090820                 Music     168
-    ## 920 920    12900000  15446707595                 Music     137
-    ## 921 921    12900000   5585085130                 Shows    1255
-    ## 922 922    12900000   2848466522             Education    2337
-    ## 923 923    12800000   3632438963         Entertainment     233
-    ## 924 924    12800000   5863456698                Comedy    1727
-    ## 925 925    12800000   6662288136                 Music     323
-    ## 926 926    12800000   6804072897         Howto & Style    2385
-    ## 927 927    12800000   6970899521         Entertainment    3483
-    ## 928 928    12800000   9502983550                Comedy     681
-    ## 929 929    12800000   7876740921             Education    2044
-    ## 930 930    12800000  14185611472                 Music     168
-    ## 931 931    12700000   1159290255                   nan     782
-    ## 932 932    12700000   1450874545         Entertainment      50
-    ## 933 933    12700000   4266957149                Comedy    2483
-    ## 934 934    12700000   4579773883                 Music     594
-    ## 935 935    12700000   5567832210                   nan     534
-    ## 936 936    12700000   5958994201                 Music       1
-    ## 937 937    12700000   9927699419                 Music     119
-    ## 938 938    12700000  13174393401         Entertainment     142
-    ## 939 939    12700000   4733873025         Howto & Style     812
-    ## 940 940    12700000   2709954270         Entertainment     846
-    ## 941 941    12700000   1081285962                Gaming     504
-    ## 942 942    12700000   6001189018                   nan     600
-    ## 943 943    12700000   1714955279        People & Blogs     252
-    ## 944 944    12600000   3303595310                Gaming     825
-    ## 945 945    12600000   3152402405        People & Blogs    1101
-    ## 946 946    12600000   3485373675        People & Blogs     683
-    ## 947 947    12600000   8831179714                 Music      99
-    ## 948 948    12600000   6969178081                 Music     218
-    ## 949 949    12500000   1612094871         Entertainment     385
-    ## 950 950    12500000   1136534702         Entertainment     601
-    ## 951 951    12500000    161254021                   nan      61
-    ## 952 952    12500000   1302818088        People & Blogs       0
-    ## 953 953    12500000   1002219689         Howto & Style    1810
-    ## 954 954    12500000   1402042328                Gaming    1109
-    ## 955 955    12500000   6956320454             Education    1459
-    ## 956 956    12500000   2983799729         Howto & Style    1076
-    ## 957 957    12500000   3140883140       Travel & Events     766
-    ## 958 958    12500000   4163639093                   nan     322
-    ## 959 959    12500000   4384177908         Howto & Style    2738
-    ## 960 960    12500000   4625777945         Entertainment    1888
-    ## 961 961    12500000   4935793409         Entertainment  151136
-    ## 962 962    12500000   7489455451                 Music     377
-    ## 963 963    12500000  10384848759         Entertainment    1699
-    ## 964 964    12500000  11552190002         Entertainment  102699
-    ## 965 965    12500000  11691081301         Entertainment   11907
-    ## 966 966    12500000  16690788752                 Music     253
-    ## 967 967    12500000   5146004207                 Music   19899
-    ## 968 968    12500000   5379684248        People & Blogs       8
-    ## 969 969    12500000   4465772496                Comedy     117
-    ## 970 970    12500000   4340213066  Science & Technology     223
-    ## 971 971    12400000   7597013023                Comedy     398
-    ## 972 972    12400000   1971226335                   nan     218
-    ## 973 973    12400000   1689090619        People & Blogs     689
-    ## 974 974    12400000   2394143260                Gaming     690
-    ## 975 975    12400000   2862685032        People & Blogs     226
-    ## 976 976    12400000   2602614088                Comedy       9
-    ## 977 977    12400000   1113066203         Entertainment     409
-    ## 978 978    12400000   2840137980                Gaming    1024
-    ## 979 979    12400000   4021409291         Entertainment     813
-    ## 980 980    12400000   6933660906                Gaming   12419
-    ## 981 981    12400000   7683670251      Film & Animation    1212
-    ## 982 982    12400000   7741764747        People & Blogs     459
-    ## 983 983    12400000  12607488647                 Music    4422
-    ## 984 984    12400000  16086808918                Comedy       0
-    ## 985 985    12400000   2315226648         Howto & Style     729
-    ## 986 986    12400000   3392022527             Education       0
-    ## 987 987    12400000  13959586308        People & Blogs       1
-    ## 988 988    12400000   6202090191                 Music     205
-    ## 989 989    12400000   4779139505             Education    1340
-    ## 990 990    12400000   6993406259                 Music      99
-    ## 991 991    12300000   9029609749                Sports    1200
-    ## 992 992    12300000   1674409945        People & Blogs    1500
-    ## 993 993    12300000   2214684303                   nan    2452
-    ## 994 994    12300000    374123483                Gaming      39
-    ## 995 995    12300000   2129773714                Comedy      62
+    ## 1     1    2.45e+08 228000000000                 Music   20082
+    ## 2     2    1.70e+08            0      Film & Animation       1
+    ## 3     3    1.66e+08  28368841870         Entertainment     741
+    ## 4     4    1.62e+08 164000000000             Education     966
+    ## 5     5    1.59e+08 148000000000                 Shows  116536
+    ## 6     6    1.19e+08            0                   nan       0
+    ## 7     7    1.12e+08  93247040539        People & Blogs    1111
+    ## 8     8    1.11e+08  29058044447                Gaming    4716
+    ## 9     9    1.06e+08  90479060027        People & Blogs     493
+    ## 10   10    9.89e+07  77180169894         Entertainment     574
+    ## 11   11    9.67e+07  57856289381                 Music    8548
+    ## 12   12    9.60e+07  77428473662                Sports   70127
+    ## 13   13    9.36e+07            0                   nan       0
+    ## 14   14    8.98e+07  32144597566        People & Blogs     543
+    ## 15   15    8.69e+07  24118230580      Film & Animation       1
+    ## 16   16    8.30e+07 101000000000                 Shows   71270
+    ## 17   17    8.01e+07  26236790209         Howto & Style       1
+    ## 18   18    7.56e+07  20826993957                 Music    2281
+    ## 19   19    7.50e+07            0                   nan       3
+    ## 20   20    7.16e+07  30608119724                 Music     249
+    ## 21   21    7.13e+07  28634566938                 Music    1337
+    ## 22   22    7.05e+07  73139054467         Entertainment  129204
+    ## 23   23    6.82e+07  38843229963             Education    2865
+    ## 24   24    6.65e+07  36775585925                 Music    2572
+    ## 25   25    6.59e+07  45757850229             Education     633
+    ## 26   26    6.56e+07  28648024439                 Music    8502
+    ## 27   27    6.46e+07  61510906457                 Shows  112915
+    ## 28   28    6.10e+07  29533230328                 Music      13
+    ## 29   29    5.95e+07  16241549158                Sports     389
+    ## 30   30    5.95e+07  59316472754      Film & Animation   39113
+    ## 31   31    5.93e+07  33431802698                 Music    4741
+    ## 32   32    5.84e+07  57271630846                 Music    1510
+    ## 33   33    5.80e+07  40602020243                 Music   19487
+    ## 34   34    5.76e+07  25307753534       News & Politics  283775
+    ## 35   35    5.72e+07  28837144516                 Music    3882
+    ## 36   36    5.69e+07  27073872856                 Music     156
+    ## 37   37    5.64e+07  14696003229         Entertainment     436
+    ## 38   38    5.46e+07  35302243691      Film & Animation    3707
+    ## 39   39    5.40e+07  32312431239                 Music      11
+    ## 40   40    5.35e+07  30367676736                 Music     383
+    ## 41   41    5.33e+07  30516172739             Education     577
+    ## 42   42    5.29e+07  29884657286                 Music     216
+    ## 43   43    5.27e+07  24004842608                 Music     147
+    ## 44   44    5.22e+07   9877365274             Education     847
+    ## 45   45    4.81e+07  14631710289                Gaming    2052
+    ## 46   46    4.79e+07  13626331061                 Music      65
+    ## 47   47    4.75e+07  30788679536         Entertainment    3322
+    ## 48   48    4.74e+07  22519705183         Entertainment   11451
+    ## 49   49    4.68e+07  19398045702         Entertainment       1
+    ## 50   50    4.66e+07  27286058807                 Music    3444
+    ## 51   51    4.63e+07  22936630813                Gaming       1
+    ## 52   52    4.61e+07  30686342319                 Music       1
+    ## 53   53    4.61e+07  10323391593                Gaming     543
+    ## 54   54    4.55e+07  21388725229         Entertainment    4660
+    ## 55   55    4.52e+07  16602198273         Entertainment    4331
+    ## 56   56    4.47e+07   7828610828         Entertainment    1558
+    ## 57   57    4.46e+07  41139050371         Entertainment  100755
+    ## 58   58    4.45e+07  10708531817         Howto & Style       0
+    ## 59   59    4.42e+07  25458952022                 Music     128
+    ## 60   60    4.42e+07   4274709210                Comedy     558
+    ## 61   61    4.42e+07  50292540392        People & Blogs  193890
+    ## 62   62    4.37e+07  12884264778                 Music       8
+    ## 63   63    4.36e+07   4831311245         Entertainment       6
+    ## 64   64    4.35e+07  27568757295        People & Blogs     326
+    ## 65   65    4.32e+07  36458726976      Film & Animation    1478
+    ## 66   66    4.32e+07  37939780685         Entertainment  109871
+    ## 67   67    4.25e+07  26820902622                 Music   10938
+    ## 68   68    4.24e+07  24519022988                 Shows    1218
+    ## 69   69    4.24e+07  19547696190         Entertainment     618
+    ## 70   70    4.19e+07  22477745835         Entertainment      84
+    ## 71   71    4.14e+07  17608931161              Trailers    4510
+    ## 72   72    4.13e+07   5603111948        People & Blogs     291
+    ## 73   73    4.09e+07  39450824833             Education    2423
+    ## 74   74    4.06e+07   8670473639                Comedy       0
+    ## 75   75    4.04e+07   7410536668                Gaming     703
+    ## 76   76    4.03e+07  47005053156         Entertainment       4
+    ## 77   77    3.97e+07  23884824160        People & Blogs    1596
+    ## 78   78    3.94e+07  22302547082        People & Blogs       1
+    ## 79   79    3.92e+07   3294013141                Comedy     186
+    ## 80   80    3.92e+07  10507474316                 Music     133
+    ## 81   81    3.92e+07  44900897958             Education     744
+    ## 82   82    3.91e+07  16118181673                Gaming    1876
+    ## 83   83    3.90e+07  36131228583         Entertainment   72580
+    ## 84   84    3.89e+07  25154232306                 Music    3043
+    ## 85   85    3.86e+07   7339333120 Nonprofits & Activism  200933
+    ## 86   86    3.84e+07  21528116909        People & Blogs     982
+    ## 87   87    3.83e+07  16718192386                 Music    3532
+    ## 88   88    3.82e+07  13598903820                 Music      11
+    ## 89   89    3.82e+07  22756581750         Entertainment   15672
+    ## 90   90    3.82e+07  28519339489                 Shows   24089
+    ## 91   91    3.80e+07  22731415608                 Music     505
+    ## 92   92    3.79e+07  23510152352                   nan     515
+    ## 93   93    3.76e+07  18208196857         Entertainment     743
+    ## 94   94    3.75e+07  27262462114         Entertainment  117152
+    ## 95   95    3.72e+07  16402066717                Comedy     220
+    ## 96   96    3.70e+07  13102611515        People & Blogs  301308
+    ## 97   97    3.70e+07  24188861917        People & Blogs     744
+    ## 98   98    3.67e+07  19378155425                 Music      99
+    ## 99   99    3.66e+07  22553923546                 Music     171
+    ## 100 100    3.66e+07  15653786446              Trailers    9168
+    ## 101 101    3.65e+07  18961241905      Film & Animation    5621
+    ## 102 102    3.63e+07   3010784935       News & Politics     744
+    ## 103 103    3.63e+07            0                   nan       0
+    ## 104 104    3.62e+07  23355801606                 Music     196
+    ## 105 105    3.61e+07   6331332547                Gaming       5
+    ## 106 106    3.57e+07  27118354077                 Music     654
+    ## 107 107    3.55e+07  15657673422         Entertainment    7566
+    ## 108 108    3.55e+07  16105023749       News & Politics  273255
+    ## 109 109    3.54e+07  22637783517                 Music    2010
+    ## 110 110    3.54e+07   5556364230                Gaming       1
+    ## 111 111    3.52e+07  20297931219                Gaming    5490
+    ## 112 112    3.52e+07  55299840198         Entertainment    2453
+    ## 113 113    3.49e+07  25607397308             Education     617
+    ## 114 114    3.46e+07  21306315429                 Music       0
+    ## 115 115    3.44e+07   9690499664                Gaming       1
+    ## 116 116    3.43e+07  12746535822                 Music     679
+    ## 117 117    3.41e+07  23005313609                 Music     141
+    ## 118 118    3.40e+07   3963007415         Entertainment    2284
+    ## 119 119    3.40e+07  11351015824      Film & Animation     240
+    ## 120 120    3.38e+07  15432929204                Gaming    7606
+    ## 121 121    3.38e+07  27274550757      Film & Animation      66
+    ## 122 122    3.37e+07  23492684419                Gaming    3366
+    ## 123 123    3.37e+07  10189027455                 Music       2
+    ## 124 124    3.36e+07  13013567335      Film & Animation     188
+    ## 125 125    3.35e+07  14864294792                 Music    3741
+    ## 126 126    3.35e+07  29611914495         Entertainment   96214
+    ## 127 127    3.35e+07  11405809704                Comedy     217
+    ## 128 128    3.34e+07  10530729078                 Music    1331
+    ## 129 129    3.34e+07  20269857567             Education     338
+    ## 130 130    3.33e+07   5994136760        People & Blogs    2736
+    ## 131 131    3.28e+07  26355088167             Education    2122
+    ## 132 132    3.27e+07  17853798780         Entertainment    1521
+    ## 133 133    3.27e+07  19180039918                   nan    2738
+    ## 134 134    3.27e+07  28516250629                 Music    2068
+    ## 135 135    3.26e+07  23379969006                 Music     169
+    ## 136 136    3.22e+07  16613441479      Film & Animation       2
+    ## 137 137    3.21e+07  18699145555                 Music     134
+    ## 138 138    3.21e+07  10602236110                 Shows    3091
+    ## 139 139    3.21e+07  13061739758                Gaming   11882
+    ## 140 140    3.20e+07  26800674545         Entertainment   44892
+    ## 141 141    3.19e+07  27330239663                 Music    4158
+    ## 142 142    3.19e+07  19428308461         Entertainment   93311
+    ## 143 143    3.18e+07   6762424690         Howto & Style    6734
+    ## 144 144    3.17e+07   5711208484  Science & Technology     929
+    ## 145 145    3.17e+07  16476978876                 Music    6518
+    ## 146 146    3.17e+07  21031745531         Entertainment     166
+    ## 147 147    3.17e+07   2930015381                Gaming     116
+    ## 148 148    3.16e+07  11615848291         Entertainment    1321
+    ## 149 149    3.16e+07  26583873105                 Music     204
+    ## 150 150    3.14e+07  15176762479         Entertainment       0
+    ## 151 151    3.14e+07  22919271731      Film & Animation    3589
+    ## 152 152    3.12e+07   9673649438        People & Blogs      65
+    ## 153 153    3.12e+07  17111726160                Comedy    8976
+    ## 154 154    3.12e+07   6187804950         Entertainment    3027
+    ## 155 155    3.07e+07  16793072362                 Music      92
+    ## 156 156    3.07e+07  12355992466                   nan     578
+    ## 157 157    3.07e+07   3145161634                Comedy      67
+    ## 158 158    3.05e+07  16709857823       News & Politics  180092
+    ## 159 159    3.05e+07   4521573939                Gaming     641
+    ## 160 160    3.04e+07   4332274962         Entertainment    2197
+    ## 161 161    3.04e+07  14037426379                 Music    2725
+    ## 162 162    3.04e+07  17999961915                   nan     532
+    ## 163 163    3.03e+07  13546549817         Entertainment     223
+    ## 164 164    3.02e+07  14199108016                 Music      15
+    ## 165 165    3.02e+07  15199330166                Comedy       2
+    ## 166 166    3.02e+07  27684955537         Entertainment    3254
+    ## 167 167    3.01e+07   7277493940                Gaming       0
+    ## 168 168    3.01e+07  19607009165                 Music   11501
+    ## 169 169    3.01e+07  22593193994             Education    1349
+    ## 170 170    3.01e+07  16246625836                Gaming    5114
+    ## 171 171    3.00e+07  12831200855                 Music     133
+    ## 172 172    2.98e+07   4457913639                Comedy     151
+    ## 173 173    2.96e+07  17208027242                 Music    4903
+    ## 174 174    2.93e+07            0                   nan       3
+    ## 175 175    2.93e+07  21226945136                 Music      14
+    ## 176 176    2.92e+07  14727238483         Entertainment    1513
+    ## 177 177    2.92e+07  11627437847                Comedy    3654
+    ## 178 178    2.92e+07   4079141673                Comedy     404
+    ## 179 179    2.90e+07  19466238065                Comedy      42
+    ## 180 180    2.89e+07  17930570614             Education     555
+    ## 181 181    2.85e+07  25857994495                 Music       0
+    ## 182 182    2.84e+07   9956764048         Entertainment    5809
+    ## 183 183    2.84e+07  10062770060                Movies    5436
+    ## 184 184    2.83e+07  13577142726      Film & Animation       6
+    ## 185 185    2.83e+07  14814192034             Education     505
+    ## 186 186    2.83e+07  23844936965         Entertainment  106983
+    ## 187 187    2.82e+07   7600740993         Entertainment    3009
+    ## 188 188    2.82e+07  14412474625                 Music      15
+    ## 189 189    2.81e+07  15318895118                 Music       3
+    ## 190 190    2.80e+07   8603468420      Film & Animation    3878
+    ## 191 191    2.78e+07   2303069221        People & Blogs       0
+    ## 192 192    2.78e+07  21037851468                 Music     292
+    ## 193 193    2.77e+07  15777682516                 Music     619
+    ## 194 194    2.75e+07   4552581106        People & Blogs      27
+    ## 195 195    2.75e+07  13379395501                 Music     682
+    ## 196 196    2.74e+07  19883150017                 Music    1753
+    ## 197 197    2.74e+07  10336420490        People & Blogs     642
+    ## 198 198    2.74e+07  19417887510                Gaming    3664
+    ## 199 199    2.73e+07  22440611155      Film & Animation    5438
+    ## 200 200    2.73e+07   7705492350         Entertainment    1259
+    ## 201 201    2.71e+07  15916882228         Entertainment       2
+    ## 202 202    2.71e+07  17318452893         Entertainment     889
+    ## 203 203    2.71e+07  12732444881         Howto & Style     545
+    ## 204 204    2.70e+07   6570935979                Comedy     554
+    ## 205 205    2.69e+07   7938616641         Entertainment    3956
+    ## 206 206    2.67e+07   4388047013        People & Blogs     241
+    ## 207 207    2.67e+07  10317306313                Comedy     975
+    ## 208 208    2.67e+07   7173668905         Entertainment    6471
+    ## 209 209    2.65e+07  15065753455       News & Politics   10022
+    ## 210 210    2.65e+07  20358117330                 Music    6873
+    ## 211 211    2.64e+07   8595760553      Film & Animation    3622
+    ## 212 212    2.64e+07  27006526665                Comedy     865
+    ## 213 213    2.64e+07  17211600007         Entertainment     967
+    ## 214 214    2.63e+07   4749833967         Entertainment     190
+    ## 215 215    2.62e+07  31977463002                   nan     775
+    ## 216 216    2.62e+07  16097531087         Entertainment    5985
+    ## 217 217    2.61e+07  10435474336                Comedy    1619
+    ## 218 218    2.61e+07   7886440199         Entertainment       0
+    ## 219 219    2.60e+07  14101010609        People & Blogs     868
+    ## 220 220    2.60e+07  17308961985                 Music     240
+    ## 221 221    2.60e+07  18597534412                 Music       1
+    ## 222 222    2.59e+07  11372071889                 Music   65286
+    ## 223 223    2.58e+07  15541421838                Gaming    1762
+    ## 224 224    2.57e+07  17793809548                 Music     749
+    ## 225 225    2.57e+07   7466926260        People & Blogs     982
+    ## 226 226    2.57e+07  10242981063                 Music      42
+    ## 227 227    2.56e+07   7962725960         Howto & Style       0
+    ## 228 228    2.56e+07  25592378292                 Music     287
+    ## 229 229    2.55e+07   2726917087      Film & Animation       5
+    ## 230 230    2.55e+07  14401218086                 Music      78
+    ## 231 231    2.54e+07   6430853035        People & Blogs    3716
+    ## 232 232    2.54e+07  34300482066                Comedy    8775
+    ## 233 233    2.53e+07  17331663193                 Music     398
+    ## 234 234    2.52e+07   9602246828        People & Blogs       4
+    ## 235 235    2.52e+07  11081602368        People & Blogs    2025
+    ## 236 236    2.52e+07   7968363381        People & Blogs      12
+    ## 237 237    2.52e+07  15520569496                 Music       0
+    ## 238 238    2.52e+07  10409352249       News & Politics   51129
+    ## 239 239    2.51e+07  19458807708                 Music     118
+    ## 240 240    2.51e+07  16357064198                 Music   24837
+    ## 241 241    2.50e+07  14169516119         Entertainment   89179
+    ## 242 242    2.50e+07  14827085149                 Music     147
+    ## 243 243    2.48e+07  17387583720         Entertainment    1644
+    ## 244 244    2.48e+07   2588501115         Howto & Style     672
+    ## 245 245    2.48e+07   3699352704         Entertainment    1894
+    ## 246 246    2.48e+07  14655527943        People & Blogs     872
+    ## 247 247    2.47e+07  20531704527                 Music     104
+    ## 248 248    2.47e+07   2994726412         Howto & Style     412
+    ## 249 249    2.46e+07  23755792542                 Music     175
+    ## 250 250    2.46e+07   3647987299  Science & Technology     120
+    ## 251 251    2.45e+07  23962070944                 Music   18950
+    ## 252 252    2.44e+07  12385924995         Entertainment     658
+    ## 253 253    2.43e+07   2380248899         Entertainment      17
+    ## 254 254    2.43e+07   6608773195      Film & Animation    1667
+    ## 255 255    2.42e+07   2700914170         Entertainment      67
+    ## 256 256    2.42e+07  15724160183                   nan     469
+    ## 257 257    2.41e+07    329774870                   nan      36
+    ## 258 258    2.41e+07  10999000479                Comedy     802
+    ## 259 259    2.41e+07  12916159065                Comedy     287
+    ## 260 260    2.41e+07  56106087508                 Music   23491
+    ## 261 261    2.41e+07   8425505919                 Music     252
+    ## 262 262    2.41e+07  11041261296                   nan     590
+    ## 263 263    2.41e+07   6002166932         Entertainment    1252
+    ## 264 264    2.40e+07  13943030228                Comedy     901
+    ## 265 265    2.40e+07   5652938599      Film & Animation       3
+    ## 266 266    2.40e+07   8279004442                Gaming    4009
+    ## 267 267    2.39e+07   4067878931         Entertainment     505
+    ## 268 268    2.39e+07   6582932625         Entertainment     257
+    ## 269 269    2.39e+07   7213499085        People & Blogs     511
+    ## 270 270    2.38e+07   5663125358         Entertainment      70
+    ## 271 271    2.38e+07  10414479943         Howto & Style    2425
+    ## 272 272    2.38e+07  17688774915                 Music     443
+    ## 273 273    2.37e+07   2543809954                Gaming    1732
+    ## 274 274    2.37e+07   7451792132                Gaming       0
+    ## 275 275    2.37e+07  15510153803        People & Blogs    1099
+    ## 276 276    2.37e+07  20289689389        Pets & Animals     769
+    ## 277 277    2.36e+07  15901824841                 Music     392
+    ## 278 278    2.36e+07   2135644776         Entertainment     226
+    ## 279 279    2.36e+07   5994002464         Entertainment     719
+    ## 280 280    2.36e+07   6766461070         Entertainment     552
+    ## 281 281    2.36e+07   7920637200      Film & Animation    1251
+    ## 282 282    2.35e+07  14777034543                Gaming    6066
+    ## 283 283    2.35e+07  14696994366        People & Blogs    1044
+    ## 284 284    2.34e+07   9465863821      Film & Animation    6672
+    ## 285 285    2.34e+07   7926899136      Film & Animation    1291
+    ## 286 286    2.33e+07  22471357411         Entertainment    3657
+    ## 287 287    2.32e+07         2634  Science & Technology       1
+    ## 288 288    2.32e+07  15751661213        People & Blogs     172
+    ## 289 289    2.32e+07   7966720147         Entertainment     595
+    ## 290 290    2.31e+07  12889240875                 Music   22578
+    ## 291 291    2.31e+07  25579831081                 Music   15462
+    ## 292 292    2.31e+07   2551113422        People & Blogs    4445
+    ## 293 293    2.31e+07   9299371231                 Music     456
+    ## 294 294    2.31e+07  13151870846                 Shows    3781
+    ## 295 295    2.30e+07  31494513067         Entertainment    2905
+    ## 296 296    2.30e+07   3378047383  Science & Technology    5041
+    ## 297 297    2.30e+07   6041264489         Entertainment    1598
+    ## 298 298    2.30e+07  10939966484         Entertainment    5718
+    ## 299 299    2.29e+07   5320485069                Movies    1670
+    ## 300 300    2.29e+07   5380073627      Film & Animation       0
+    ## 301 301    2.29e+07  16298342829                 Music    1159
+    ## 302 302    2.29e+07  13206471140             Education    1251
+    ## 303 303    2.28e+07  17988347989         Entertainment    1841
+    ## 304 304    2.27e+07  10115316784        People & Blogs     985
+    ## 305 305    2.27e+07  11568118121         Entertainment     654
+    ## 306 306    2.26e+07  20847038152        People & Blogs   60964
+    ## 307 307    2.26e+07   9223534599                Comedy     495
+    ## 308 308    2.26e+07  14231943358                 Music     180
+    ## 309 309    2.26e+07  17507060680        People & Blogs    1189
+    ## 310 310    2.26e+07  13405849040                 Music     171
+    ## 311 311    2.26e+07  27084848152        People & Blogs    2321
+    ## 312 312    2.25e+07   2431154438      Film & Animation    3377
+    ## 313 313    2.25e+07  10613701948                   nan     526
+    ## 314 314    2.25e+07  13835173331                Gaming    3315
+    ## 315 315    2.24e+07   8040036209                 Music      58
+    ## 316 316    2.23e+07   8663830163        People & Blogs      34
+    ## 317 317    2.23e+07  24059336857                Gaming    1724
+    ## 318 318    2.22e+07  11136266461         Entertainment     999
+    ## 319 319    2.20e+07   9924807127                 Music     157
+    ## 320 320    2.20e+07   8594440895                   nan     515
+    ## 321 321    2.20e+07  18347969186         Entertainment    6274
+    ## 322 322    2.19e+07   4454917643      Film & Animation     301
+    ## 323 323    2.19e+07   5918314128        People & Blogs     946
+    ## 324 324    2.19e+07  15552070846                Comedy     816
+    ## 325 325    2.19e+07  20657571751         Entertainment     116
+    ## 326 326    2.18e+07   4469711607        People & Blogs     257
+    ## 327 327    2.18e+07   5614621131  Science & Technology   10162
+    ## 328 328    2.18e+07  11288359365                 Music     164
+    ## 329 329    2.18e+07  12140232004                 Music     266
+    ## 330 330    2.18e+07  19329351143                 Music     135
+    ## 331 331    2.18e+07   7780934187        People & Blogs       1
+    ## 332 332    2.17e+07   9392093496        People & Blogs    1390
+    ## 333 333    2.17e+07   8507818877                   nan   15126
+    ## 334 334    2.16e+07   9597894786      Autos & Vehicles    2942
+    ## 335 335    2.16e+07   5863377051         Howto & Style     219
+    ## 336 336    2.16e+07   9346383505         Entertainment     228
+    ## 337 337    2.15e+07   5890180734        People & Blogs      51
+    ## 338 338    2.15e+07  15013096899       News & Politics     158
+    ## 339 339    2.15e+07  22065582014        People & Blogs       6
+    ## 340 340    2.15e+07   8409641722                Gaming      17
+    ## 341 341    2.14e+07   1573058816                Comedy       0
+    ## 342 342    2.14e+07   6264261757                 Music     114
+    ## 343 343    2.13e+07   6269945014        People & Blogs     733
+    ## 344 344    2.13e+07  10644857969                 Music      78
+    ## 345 345    2.13e+07  12761253839        People & Blogs     951
+    ## 346 346    2.13e+07   5141834668         Entertainment    1608
+    ## 347 347    2.13e+07  10047736580         Entertainment     669
+    ## 348 348    2.13e+07  12895427184         Entertainment   20225
+    ## 349 349    2.12e+07   2073073070             Education       1
+    ## 350 350    2.12e+07  11364908616         Entertainment   31989
+    ## 351 351    2.11e+07   5783557209         Howto & Style    4728
+    ## 352 352    2.11e+07   4526271677        People & Blogs    2325
+    ## 353 353    2.10e+07   4380564906         Entertainment     403
+    ## 354 354    2.10e+07   7762905663         Entertainment    2883
+    ## 355 355    2.10e+07  10631638628         Entertainment     420
+    ## 356 356    2.10e+07   9789121606                   nan     498
+    ## 357 357    2.09e+07   1693149479             Education     896
+    ## 358 358    2.09e+07   3828000587         Entertainment    6262
+    ## 359 359    2.09e+07   4927879069        Pets & Animals     982
+    ## 360 360    2.09e+07  11058049885        People & Blogs    9850
+    ## 361 361    2.09e+07            0                   nan       0
+    ## 362 362    2.09e+07  17324976752                 Music       6
+    ## 363 363    2.08e+07   1870608170                Comedy     288
+    ## 364 364    2.08e+07   2378448129             Education     193
+    ## 365 365    2.07e+07  17963202261         Entertainment     619
+    ## 366 366    2.07e+07   5091618606         Howto & Style    5062
+    ## 367 367    2.07e+07   5410164682         Entertainment       6
+    ## 368 368    2.07e+07   8658941531        People & Blogs     889
+    ## 369 369    2.07e+07  12624879732                Sports   47926
+    ## 370 370    2.06e+07   4956090094         Entertainment      15
+    ## 371 371    2.06e+07   7657171980                Comedy      83
+    ## 372 372    2.06e+07  10292874715                 Music     156
+    ## 373 373    2.05e+07  15038593883         Entertainment   33229
+    ## 374 374    2.05e+07   8768697257                Gaming    1323
+    ## 375 375    2.05e+07  11009148579         Entertainment     296
+    ## 376 376    2.04e+07   1796227417      Film & Animation     206
+    ## 377 377    2.04e+07   7311322368        People & Blogs    1006
+    ## 378 378    2.04e+07  13397000296                 Music       0
+    ## 379 379    2.04e+07  29406206620         Entertainment   51515
+    ## 380 380    2.04e+07   4707412332         Entertainment     462
+    ## 381 381    2.04e+07   3579555124                 Music     239
+    ## 382 382    2.03e+07   2441288701         Entertainment    1245
+    ## 383 383    2.03e+07  11022391339             Education     107
+    ## 384 384    2.03e+07  11819051552             Education     875
+    ## 385 385    2.02e+07   2951914200         Entertainment     460
+    ## 386 386    2.02e+07   2764127969                Comedy     693
+    ## 387 387    2.02e+07   7066711323         Entertainment       0
+    ## 388 388    2.02e+07   7274150246             Education     226
+    ## 389 389    2.02e+07  20919403720                Comedy    1935
+    ## 390 390    2.02e+07  19694265358                Comedy     761
+    ## 391 391    2.02e+07   6098644584                Gaming    3713
+    ## 392 392    2.01e+07  23353115850         Entertainment    3774
+    ## 393 393    2.01e+07   6618524158                 Music     241
+    ## 394 394    2.01e+07   8920141342                Gaming    4974
+    ## 395 395    2.01e+07  10366850490         Entertainment       0
+    ## 396 396    2.01e+07  11317309935      Film & Animation    1481
+    ## 397 397    2.01e+07  14816075927                 Music    2384
+    ## 398 398    2.01e+07   6119294270         Howto & Style    5491
+    ## 399 399    2.01e+07   5634695322         Entertainment       1
+    ## 400 400    2.01e+07  17913237851        People & Blogs    7737
+    ## 401 401    2.00e+07  13154314376         Entertainment    4339
+    ## 402 402    2.00e+07    559765455                 Music    1527
+    ## 403 403    2.00e+07   3875172235         Entertainment    1527
+    ## 404 404    2.00e+07   6033295543                 Music       1
+    ## 405 405    2.00e+07   9715291883      Film & Animation    1476
+    ## 406 406    1.99e+07  13917423958                 Music     416
+    ## 407 407    1.98e+07   3234880084  Science & Technology    1411
+    ## 408 408    1.98e+07   5759442450        People & Blogs     760
+    ## 409 409    1.98e+07  12293479945       News & Politics    9930
+    ## 410 410    1.97e+07   1803249241                Comedy     250
+    ## 411 411    1.97e+07   7452667615        People & Blogs    2912
+    ## 412 412    1.97e+07  10955619815      Film & Animation       1
+    ## 413 413    1.97e+07  11323617496         Entertainment    4225
+    ## 414 414    1.97e+07   9808676159         Entertainment     267
+    ## 415 415    1.96e+07   2851024430                Gaming      17
+    ## 416 416    1.96e+07  13930021471                 Shows   18661
+    ## 417 417    1.96e+07   8779729549         Entertainment    1306
+    ## 418 418    1.96e+07   7906181776      Film & Animation     214
+    ## 419 419    1.96e+07   3961318438                Gaming     674
+    ## 420 420    1.95e+07   5234251168         Entertainment     847
+    ## 421 421    1.94e+07   2255542592       News & Politics    4750
+    ## 422 422    1.94e+07   1577859332        People & Blogs      85
+    ## 423 423    1.94e+07  23038014291         Entertainment  125974
+    ## 424 424    1.94e+07   5529131886                Sports   10728
+    ## 425 425    1.93e+07    264228052                   nan     335
+    ## 426 426    1.93e+07   2897907132  Science & Technology     462
+    ## 427 427    1.93e+07   4508184467  Science & Technology    2175
+    ## 428 428    1.92e+07   4329121104        People & Blogs     570
+    ## 429 429    1.92e+07   7590582024         Entertainment    8285
+    ## 430 430    1.91e+07  13124645973         Entertainment    6526
+    ## 431 431    1.91e+07   4566120190                Comedy     139
+    ## 432 432    1.91e+07   5194942269      Film & Animation    2948
+    ## 433 433    1.91e+07   6339584661                 Music      37
+    ## 434 434    1.90e+07   4924054368             Education      60
+    ## 435 435    1.90e+07   7229175322         Howto & Style     903
+    ## 436 436    1.90e+07   8281724393      Film & Animation    1525
+    ## 437 437    1.90e+07  13824277846      Film & Animation    1154
+    ## 438 438    1.90e+07  16014044618                 Music      79
+    ## 439 439    1.90e+07  15126092508         Entertainment   64496
+    ## 440 440    1.89e+07   2855519150        People & Blogs     375
+    ## 441 441    1.89e+07   8301731337                 Shows       0
+    ## 442 442    1.89e+07   9813245108             Education     719
+    ## 443 443    1.88e+07   3654621568             Education    2072
+    ## 444 444    1.88e+07   5257834105         Entertainment     312
+    ## 445 445    1.88e+07   7634430188        People & Blogs       9
+    ## 446 446    1.88e+07   7762077012                   nan       2
+    ## 447 447    1.88e+07   9573641299                 Music     217
+    ## 448 448    1.88e+07   9594188708         Entertainment     530
+    ## 449 449    1.88e+07   3276891538                Comedy     304
+    ## 450 450    1.87e+07  12295637162         Entertainment      16
+    ## 451 451    1.87e+07   6148303268                Gaming       2
+    ## 452 452    1.86e+07   6047584292         Entertainment    4487
+    ## 453 453    1.86e+07   7008250496                   nan     457
+    ## 454 454    1.86e+07  20196704276                 Music    6287
+    ## 455 455    1.86e+07   8761255550                Gaming    6289
+    ## 456 456    1.85e+07   2908120896                 Music    1329
+    ## 457 457    1.85e+07   3457618361                Gaming     374
+    ## 458 458    1.85e+07   4558380251        People & Blogs     712
+    ## 459 459    1.85e+07   8147575884        People & Blogs     493
+    ## 460 460    1.85e+07   4051072188        People & Blogs     679
+    ## 461 461    1.84e+07   4120324310         Entertainment     111
+    ## 462 462    1.84e+07   7038827526                Comedy    6943
+    ## 463 463    1.84e+07  11544297793                 Music    3159
+    ## 464 464    1.84e+07  11280732382        People & Blogs       0
+    ## 465 465    1.84e+07  25367126292                 Music     197
+    ## 466 466    1.83e+07   1606834186        People & Blogs     786
+    ## 467 467    1.83e+07   7760819588         Entertainment     142
+    ## 468 468    1.83e+07   1556003039                Gaming    1324
+    ## 469 469    1.83e+07   8798044678         Entertainment       0
+    ## 470 470    1.82e+07   9937823152        People & Blogs     442
+    ## 471 471    1.82e+07   3213324455        People & Blogs    6903
+    ## 472 472    1.81e+07  13378360425         Entertainment     420
+    ## 473 473    1.81e+07   3306242674         Entertainment    1037
+    ## 474 474    1.81e+07   9983065083                Gaming    1521
+    ## 475 475    1.81e+07  14857290259             Education     707
+    ## 476 476    1.81e+07  10703830496                 Music     131
+    ## 477 477    1.81e+07  12249828886         Entertainment       0
+    ## 478 478    1.80e+07   3980991248         Howto & Style    2470
+    ## 479 479    1.80e+07   9601137077                Sports     650
+    ## 480 480    1.80e+07  15412333005         Entertainment      45
+    ## 481 481    1.80e+07  10463166404       News & Politics     237
+    ## 482 482    1.80e+07  17921124985                 Music    5692
+    ## 483 483    1.80e+07   6404852037                Gaming    3566
+    ## 484 484    1.80e+07   8716982055      Film & Animation     748
+    ## 485 485    1.79e+07   7176572299        People & Blogs     536
+    ## 486 486    1.79e+07   3841205465        People & Blogs     982
+    ## 487 487    1.79e+07   5168721499         Entertainment    1344
+    ## 488 488    1.79e+07   5244917119                Comedy     185
+    ## 489 489    1.79e+07   6888074944                 Music     314
+    ## 490 490    1.79e+07   9867515979         Entertainment     602
+    ## 491 491    1.79e+07   9887116267                 Music     830
+    ## 492 492    1.79e+07  16174530046                 Shows    1426
+    ## 493 493    1.79e+07   6746269458        People & Blogs       2
+    ## 494 494    1.78e+07  11057945183        People & Blogs     772
+    ## 495 495    1.78e+07   8588704539      Film & Animation      26
+    ## 496 496    1.77e+07  19206701832                   nan    1646
+    ## 497 497    1.77e+07   7387621644                   nan    1888
+    ## 498 498    1.77e+07  20115544708                 Music     178
+    ## 499 499    1.77e+07   7912733203        People & Blogs     512
+    ## 500 500    1.77e+07   3647267655        People & Blogs     739
+    ## 501 501    1.77e+07   4196061192                 Music      60
+    ## 502 502    1.77e+07   7739048000         Entertainment    2240
+    ## 503 503    1.77e+07   8396875537       News & Politics  211620
+    ## 504 504    1.77e+07   9059696049      Film & Animation    1716
+    ## 505 505    1.77e+07  17247584185      Film & Animation    1316
+    ## 506 506    1.76e+07   9269174070                Gaming    3151
+    ## 507 507    1.76e+07   2274007523                Comedy     233
+    ## 508 508    1.76e+07   2977741577         Howto & Style     128
+    ## 509 509    1.76e+07   3752347262                Gaming       0
+    ## 510 510    1.76e+07   6306204566                Gaming    4702
+    ## 511 511    1.76e+07   3802280098                 Music     326
+    ## 512 512    1.75e+07   2238134438         Entertainment     709
+    ## 513 513    1.75e+07   7263619576       News & Politics  182742
+    ## 514 514    1.75e+07   7612385622         Entertainment     149
+    ## 515 515    1.75e+07  16107116549                Gaming  156215
+    ## 516 516    1.74e+07  17763586483                Gaming    4411
+    ## 517 517    1.74e+07  13043561912         Entertainment  118448
+    ## 518 518    1.74e+07  11144195464                 Music    2133
+    ## 519 519    1.74e+07  16560557488        People & Blogs    2078
+    ## 520 520    1.73e+07   1026425106  Science & Technology     180
+    ## 521 521    1.73e+07    902225615      Film & Animation     287
+    ## 522 522    1.73e+07  11371738047         Entertainment    4778
+    ## 523 523    1.73e+07   3684816159         Howto & Style     582
+    ## 524 524    1.72e+07  14573155899                Gaming    4685
+    ## 525 525    1.72e+07   3606912471  Science & Technology    1567
+    ## 526 526    1.72e+07   7337212581                 Music     138
+    ## 527 527    1.72e+07   8903647480             Education      83
+    ## 528 528    1.72e+07  11445492404             Education    1007
+    ## 529 529    1.72e+07   5024088947                Gaming    7550
+    ## 530 530    1.71e+07   4448334716                Comedy     498
+    ## 531 531    1.71e+07   9710962528         Entertainment  148225
+    ## 532 532    1.71e+07   2173106162                Comedy     142
+    ## 533 533    1.70e+07  10847948832                 Music    1015
+    ## 534 534    1.70e+07   1001465469                Comedy    1407
+    ## 535 535    1.70e+07   8229883114         Entertainment       1
+    ## 536 536    1.70e+07  14543594822                 Music      97
+    ## 537 537    1.69e+07   8684010451                 Music    2235
+    ## 538 538    1.69e+07   9111000228                Gaming    1910
+    ## 539 539    1.69e+07   3827906874         Entertainment     366
+    ## 540 540    1.69e+07   4609753237         Entertainment    3900
+    ## 541 541    1.69e+07   9270331567                Comedy     441
+    ## 542 542    1.69e+07   9544277833        People & Blogs    2337
+    ## 543 543    1.69e+07   3523578665 Nonprofits & Activism    4891
+    ## 544 544    1.68e+07   2315962318         Entertainment       1
+    ## 545 545    1.68e+07   6518418501         Entertainment       0
+    ## 546 546    1.68e+07   7206462713        People & Blogs      41
+    ## 547 547    1.68e+07   7195314800         Entertainment     502
+    ## 548 548    1.68e+07   3693798804      Film & Animation    1491
+    ## 549 549    1.67e+07  10393037902         Entertainment       3
+    ## 550 550    1.67e+07   7102965621                Gaming    1693
+    ## 551 551    1.67e+07   8826138204         Entertainment     920
+    ## 552 552    1.67e+07   7979736581                 Music      13
+    ## 553 553    1.67e+07   5089284369        People & Blogs    8741
+    ## 554 554    1.66e+07   1318442641                   nan     180
+    ## 555 555    1.66e+07   2798273962         Entertainment       0
+    ## 556 556    1.66e+07   3696973456         Howto & Style     216
+    ## 557 557    1.66e+07   7435180827       News & Politics  112261
+    ## 558 558    1.66e+07   9439857193         Entertainment   20102
+    ## 559 559    1.66e+07  11946217860                 Music    8976
+    ## 560 560    1.66e+07  15278668857         Entertainment    2200
+    ## 561 561    1.66e+07   5819508534         Entertainment     413
+    ## 562 562    1.65e+07   2440934034         Entertainment     421
+    ## 563 563    1.65e+07   3037260680                Comedy     438
+    ## 564 564    1.65e+07   7043235131       News & Politics   21243
+    ## 565 565    1.65e+07   7406207930         Entertainment     735
+    ## 566 566    1.64e+07   3955426159         Howto & Style    1091
+    ## 567 567    1.64e+07   4434679706                Comedy     428
+    ## 568 568    1.64e+07   7135820721                Sports   14662
+    ## 569 569    1.64e+07   9463244435         Entertainment   56203
+    ## 570 570    1.64e+07  13478392540         Entertainment       1
+    ## 571 571    1.64e+07  14431830557         Entertainment       1
+    ## 572 572    1.64e+07  12844432341         Entertainment   23952
+    ## 573 573    1.63e+07   3527627264         Entertainment      54
+    ## 574 574    1.63e+07   6578828147                 Music     490
+    ## 575 575    1.63e+07   6613422635                 Music      80
+    ## 576 576    1.63e+07   7520242626                 Music     278
+    ## 577 577    1.63e+07  10170264839                 Music     230
+    ## 578 578    1.63e+07  12475714382                 Music     352
+    ## 579 579    1.63e+07   7141825267         Entertainment    1444
+    ## 580 580    1.63e+07   1656452554                Gaming     989
+    ## 581 581    1.63e+07   4768370464                Gaming     652
+    ## 582 582    1.62e+07  10227242833                 Music     258
+    ## 583 583    1.62e+07   8091706232         Entertainment     593
+    ## 584 584    1.62e+07   2990185467                Comedy    1930
+    ## 585 585    1.62e+07   4076692623                Gaming    1294
+    ## 586 586    1.62e+07   9763592867                 Music    3943
+    ## 587 587    1.62e+07  14563841315       News & Politics  244899
+    ## 588 588    1.62e+07  20522339099         Entertainment   31889
+    ## 589 589    1.62e+07  14784781923        People & Blogs     189
+    ## 590 590    1.62e+07   4488680903         Entertainment      10
+    ## 591 591    1.62e+07   4813127504        People & Blogs       2
+    ## 592 592    1.61e+07   1517638132         Entertainment    2805
+    ## 593 593    1.61e+07            0                   nan       0
+    ## 594 594    1.61e+07   7399296005                   nan     510
+    ## 595 595    1.61e+07   2687443643        People & Blogs     723
+    ## 596 596    1.61e+07   5055576881                 Music    1123
+    ## 597 597    1.61e+07   6872702790         Entertainment     671
+    ## 598 598    1.61e+07   7126210721                 Music      41
+    ## 599 599    1.61e+07   7155736006                   nan     667
+    ## 600 600    1.61e+07  15812009296         Entertainment    4045
+    ## 601 601    1.61e+07   9642146451         Entertainment       0
+    ## 602 602    1.60e+07   6543629679        People & Blogs     453
+    ## 603 603    1.60e+07   3018032423             Education   52144
+    ## 604 604    1.60e+07   3029872908                Gaming     687
+    ## 605 605    1.60e+07   9786595271                Gaming       0
+    ## 606 606    1.60e+07   5997599089      Film & Animation     344
+    ## 607 607    1.59e+07   1845329502        People & Blogs       0
+    ## 608 608    1.59e+07   9962188084                 Music    2035
+    ## 609 609    1.59e+07   2609358468         Howto & Style     433
+    ## 610 610    1.59e+07   6534326412                Gaming    4906
+    ## 611 611    1.59e+07   9198986881                 Music    5105
+    ## 612 612    1.59e+07   9052367553                Gaming     796
+    ## 613 613    1.59e+07   6802382479                 Music     132
+    ## 614 614    1.58e+07   1349288771             Education     633
+    ## 615 615    1.58e+07   3392918989       News & Politics   20679
+    ## 616 616    1.58e+07   4122634467        People & Blogs     542
+    ## 617 617    1.58e+07  13116313599      Film & Animation   10441
+    ## 618 618    1.57e+07   9787697838      Film & Animation   16874
+    ## 619 619    1.57e+07   5914071870                 Music      79
+    ## 620 620    1.57e+07   6153495609                   nan     150
+    ## 621 621    1.57e+07   6626563508                 Music   19703
+    ## 622 622    1.57e+07   5558051295                 Music    1640
+    ## 623 623    1.57e+07   8696631898         Entertainment    7090
+    ## 624 624    1.56e+07   1511794214         Entertainment     483
+    ## 625 625    1.56e+07   6862529416                Gaming    6623
+    ## 626 626    1.56e+07   7172386509  Science & Technology    6542
+    ## 627 627    1.56e+07   3869457097         Entertainment    2019
+    ## 628 628    1.56e+07   6165757696        People & Blogs    4245
+    ## 629 629    1.55e+07   8984089026        People & Blogs     598
+    ## 630 630    1.55e+07   5070970714         Entertainment       0
+    ## 631 631    1.55e+07   6386271870                 Music     220
+    ## 632 632    1.55e+07   7776706184             Education     359
+    ## 633 633    1.55e+07   8265129639                 Shows    1021
+    ## 634 634    1.55e+07  14619523361                 Music     325
+    ## 635 635    1.55e+07  12880388253  Science & Technology       0
+    ## 636 636    1.55e+07  12714141740         Entertainment    1525
+    ## 637 637    1.55e+07   6396049701         Entertainment     417
+    ## 638 638    1.55e+07   4499826716         Howto & Style    5183
+    ## 639 639    1.54e+07   1781226000                Comedy     165
+    ## 640 640    1.54e+07  11513738907                Gaming     379
+    ## 641 641    1.54e+07   1543608082                Gaming    1647
+    ## 642 642    1.54e+07   5469103954        People & Blogs    1756
+    ## 643 643    1.54e+07   3736069980  Science & Technology    1577
+    ## 644 644    1.54e+07  14564170905                 Music    1725
+    ## 645 645    1.54e+07   4909687948                 Music      21
+    ## 646 646    1.54e+07   4750420071        People & Blogs    4186
+    ## 647 647    1.53e+07   2656528205                Sports   10988
+    ## 648 648    1.53e+07  10714145606             Education     851
+    ## 649 649    1.53e+07   1640078055                Gaming    1397
+    ## 650 650    1.53e+07   9938811455        People & Blogs    2175
+    ## 651 651    1.53e+07  16545966132         Entertainment   87864
+    ## 652 652    1.52e+07    857725714        People & Blogs     194
+    ## 653 653    1.52e+07   4503880875                Comedy     106
+    ## 654 654    1.52e+07   1491452935         Entertainment     443
+    ## 655 655    1.52e+07   6391679636                 Music    5056
+    ## 656 656    1.52e+07   7151683497         Entertainment   11099
+    ## 657 657    1.52e+07   7564652648         Entertainment    9862
+    ## 658 658    1.52e+07   8333387785         Entertainment     654
+    ## 659 659    1.52e+07  14198154095       News & Politics  160405
+    ## 660 660    1.52e+07   6624168155       News & Politics   91704
+    ## 661 661    1.51e+07   1777072487        People & Blogs     210
+    ## 662 662    1.51e+07   1576633086                 Music      18
+    ## 663 663    1.51e+07   2143140898             Education    3810
+    ## 664 664    1.51e+07   2400037562         Howto & Style     159
+    ## 665 665    1.51e+07   1760131384        People & Blogs     533
+    ## 666 666    1.51e+07   3060202847        People & Blogs    1037
+    ## 667 667    1.51e+07   2761547758         Howto & Style    2618
+    ## 668 668    1.51e+07   4236036141                Gaming    2997
+    ## 669 669    1.51e+07   4967784343        People & Blogs       1
+    ## 670 670    1.51e+07   5324913850        People & Blogs     753
+    ## 671 671    1.51e+07   6668507856                Gaming    3733
+    ## 672 672    1.51e+07   7857371770                 Music     776
+    ## 673 673    1.51e+07   9477021288                Comedy     921
+    ## 674 674    1.51e+07  10489367372       News & Politics  209520
+    ## 675 675    1.51e+07  13897932103         Entertainment    2717
+    ## 676 676    1.51e+07  12413869881                 Music      52
+    ## 677 677    1.50e+07   4352427049                Gaming    2324
+    ## 678 678    1.50e+07   9924103188        People & Blogs     899
+    ## 679 679    1.50e+07   8897705695         Entertainment     795
+    ## 680 680    1.50e+07   7159750970                Gaming    1362
+    ## 681 681    1.50e+07   2730879024             Education       0
+    ## 682 682    1.50e+07   4008801873         Entertainment     724
+    ## 683 683    1.50e+07   4741434420                Gaming   20292
+    ## 684 684    1.50e+07   6889304306                Gaming    5198
+    ## 685 685    1.50e+07   7536093065       News & Politics     206
+    ## 686 686    1.50e+07   8658553456         Entertainment     965
+    ## 687 687    1.50e+07   9978734160                 Music    2726
+    ## 688 688    1.50e+07   9996133066                Gaming      68
+    ## 689 689    1.50e+07  10239836582         Entertainment    1803
+    ## 690 690    1.50e+07  11827310821       News & Politics  269050
+    ## 691 691    1.50e+07  13562853889                Comedy    1788
+    ## 692 692    1.50e+07  11506702632                 Music     340
+    ## 693 693    1.50e+07   8932038210         Entertainment    3168
+    ## 694 694    1.49e+07  10069000444                 Music     419
+    ## 695 695    1.49e+07   8074260978         Entertainment   66362
+    ## 696 696    1.49e+07   4033400167         Entertainment      86
+    ## 697 697    1.49e+07   4395184343                 Music     127
+    ## 698 698    1.49e+07   4977284539         Entertainment    8420
+    ## 699 699    1.49e+07   5549770244         Entertainment   27944
+    ## 700 700    1.49e+07  15913320995        People & Blogs    1363
+    ## 701 701    1.49e+07       439098        People & Blogs       1
+    ## 702 702    1.49e+07   5956193599                Gaming    4175
+    ## 703 703    1.49e+07   8615618825         Entertainment      93
+    ## 704 704    1.48e+07  13356517783                 Music    1210
+    ## 705 705    1.48e+07   1833519700             Education    1481
+    ## 706 706    1.48e+07   3587576784                 Music     195
+    ## 707 707    1.48e+07   5269059435                Gaming    3834
+    ## 708 708    1.48e+07   7018015062         Howto & Style    2387
+    ## 709 709    1.48e+07   8649303688        People & Blogs     233
+    ## 710 710    1.48e+07   9076642765                 Music     318
+    ## 711 711    1.48e+07   9383431376                 Music       0
+    ## 712 712    1.48e+07    272678287        People & Blogs      34
+    ## 713 713    1.48e+07  15788208522                   nan    2222
+    ## 714 714    1.48e+07   8866012877        People & Blogs    3867
+    ## 715 715    1.47e+07   2230986039         Entertainment    1385
+    ## 716 716    1.47e+07   1321380490         Entertainment      85
+    ## 717 717    1.47e+07   1506796393         Entertainment     554
+    ## 718 718    1.47e+07   2465473772         Entertainment     317
+    ## 719 719    1.47e+07   4029253667             Education   43564
+    ## 720 720    1.47e+07   6751985988                Comedy     698
+    ## 721 721    1.47e+07   7255848125                Comedy    4340
+    ## 722 722    1.47e+07   8882319696             Education    1996
+    ## 723 723    1.47e+07  12362331529         Entertainment   23490
+    ## 724 724    1.47e+07  12961669452       News & Politics   80830
+    ## 725 725    1.47e+07   4684983333                 Music    3978
+    ## 726 726    1.46e+07   2613197447         Entertainment     490
+    ## 727 727    1.46e+07   3337074920        People & Blogs     961
+    ## 728 728    1.46e+07   3603556207                Gaming    1244
+    ## 729 729    1.46e+07   4622581344        People & Blogs     951
+    ## 730 730    1.46e+07   5766647017                Gaming    4009
+    ## 731 731    1.46e+07   6017932195                 Music     365
+    ## 732 732    1.46e+07  11182302317                 Music    1206
+    ## 733 733    1.46e+07   7952268926                 Music      67
+    ## 734 734    1.46e+07   2750902766         Howto & Style     603
+    ## 735 735    1.46e+07   5525773746                Comedy     560
+    ## 736 736    1.45e+07   2440718089                 Music       0
+    ## 737 737    1.45e+07   6944967581         Entertainment     479
+    ## 738 738    1.45e+07   4577292740         Entertainment     453
+    ## 739 739    1.45e+07   1739129375                   nan     514
+    ## 740 740    1.45e+07   3551889957         Howto & Style    5430
+    ## 741 741    1.45e+07   4260187928         Entertainment    1717
+    ## 742 742    1.45e+07   4598387043       News & Politics   18972
+    ## 743 743    1.45e+07   4821183481                   nan     605
+    ## 744 744    1.45e+07   5014888374        People & Blogs     618
+    ## 745 745    1.45e+07   6290721701                 Music    4790
+    ## 746 746    1.45e+07   8582696157         Entertainment   19201
+    ## 747 747    1.45e+07   9383692066         Entertainment   68606
+    ## 748 748    1.45e+07  10303519926        People & Blogs  293516
+    ## 749 749    1.45e+07  20042571499                 Music     147
+    ## 750 750    1.45e+07   4315486422                 Music     176
+    ## 751 751    1.45e+07   9201428420                 Music      39
+    ## 752 752    1.45e+07   3517662420                Comedy    1064
+    ## 753 753    1.44e+07    600154268         Entertainment     364
+    ## 754 754    1.44e+07   2224121890                Gaming    3086
+    ## 755 755    1.44e+07   1629801448         Entertainment     399
+    ## 756 756    1.44e+07    351763324                Gaming       2
+    ## 757 757    1.44e+07   2972474215         Entertainment     381
+    ## 758 758    1.44e+07   3086254545                Comedy     222
+    ## 759 759    1.44e+07   3900312631                Comedy     463
+    ## 760 760    1.44e+07   4035738731                 Music     450
+    ## 761 761    1.44e+07   4156427797        People & Blogs    1838
+    ## 762 762    1.44e+07   4597228794         Howto & Style    1248
+    ## 763 763    1.44e+07   5689224452        People & Blogs       0
+    ## 764 764    1.44e+07   6543282459                   nan     516
+    ## 765 765    1.44e+07   8011977288         Entertainment    5628
+    ## 766 766    1.44e+07   9023952946      Film & Animation     978
+    ## 767 767    1.44e+07  11423792969                 Music     186
+    ## 768 768    1.44e+07  18515587421         Entertainment  101401
+    ## 769 769    1.43e+07   4776507159        People & Blogs     576
+    ## 770 770    1.43e+07   6388439235                Comedy       1
+    ## 771 771    1.42e+07   6048517979                 Music    1823
+    ## 772 772    1.42e+07   4040297006      Film & Animation    1281
+    ## 773 773    1.42e+07   6973932553         Entertainment      60
+    ## 774 774    1.42e+07   1778318927         Howto & Style     876
+    ## 775 775    1.42e+07   2084791147                Gaming     342
+    ## 776 776    1.42e+07   3920559552                Gaming    1300
+    ## 777 777    1.42e+07   6554000320             Education     433
+    ## 778 778    1.42e+07   7946322061                 Music       0
+    ## 779 779    1.42e+07   9964116817        Pets & Animals       8
+    ## 780 780    1.42e+07  10238593147                Comedy     872
+    ## 781 781    1.42e+07  11428794827         Entertainment  132398
+    ## 782 782    1.42e+07   3317805543         Entertainment    1724
+    ## 783 783    1.41e+07   2131548711                 Music     149
+    ## 784 784    1.41e+07   3594936775         Entertainment     846
+    ## 785 785    1.41e+07   3920221322         Entertainment      65
+    ## 786 786    1.41e+07   5129529846                 Music       3
+    ## 787 787    1.41e+07   5405563355      Autos & Vehicles     855
+    ## 788 788    1.41e+07   6036496916         Entertainment    2854
+    ## 789 789    1.41e+07   6884215292                 Music      43
+    ## 790 790    1.41e+07  19013942981                 Music     182
+    ## 791 791    1.41e+07   3280481927                Sports     777
+    ## 792 792    1.41e+07   4627069704         Entertainment    1540
+    ## 793 793    1.40e+07   4959982720                Gaming    5757
+    ## 794 794    1.40e+07   2214167846         Howto & Style     431
+    ## 795 795    1.40e+07   4674164601        People & Blogs     651
+    ## 796 796    1.40e+07   7719743112                Gaming    2210
+    ## 797 797    1.40e+07   8623705301                 Music     294
+    ## 798 798    1.40e+07   9660950823                 Music      62
+    ## 799 799    1.40e+07  18917687143        People & Blogs   41117
+    ## 800 800    1.40e+07  13542939513        People & Blogs    9652
+    ## 801 801    1.40e+07  12597067132         Entertainment       3
+    ## 802 802    1.40e+07   5094050461         Entertainment    1307
+    ## 803 803    1.39e+07   5673347763                Gaming    5494
+    ## 804 804    1.39e+07   9106781518         Entertainment    2254
+    ## 805 805    1.39e+07   2244318380      Film & Animation     183
+    ## 806 806    1.39e+07   7450345720        People & Blogs     324
+    ## 807 807    1.39e+07   5217553897         Entertainment   15075
+    ## 808 808    1.39e+07   5465532801         Entertainment     503
+    ## 809 809    1.39e+07  12129583055       News & Politics       6
+    ## 810 810    1.39e+07  12513842343                 Music    1660
+    ## 811 811    1.39e+07   8451754769                   nan     504
+    ## 812 812    1.39e+07   2165885634             Education     369
+    ## 813 813    1.39e+07   3193226072         Howto & Style     288
+    ## 814 814    1.38e+07   2224911030         Entertainment     173
+    ## 815 815    1.38e+07   1820559912  Science & Technology     887
+    ## 816 816    1.38e+07   1493776391        People & Blogs      16
+    ## 817 817    1.38e+07   2480957682                Gaming    1952
+    ## 818 818    1.38e+07   5019136690        People & Blogs     520
+    ## 819 819    1.38e+07   5727888539       News & Politics  190093
+    ## 820 820    1.38e+07   6646953396                 Shows    1505
+    ## 821 821    1.38e+07  11039343563                 Music    4978
+    ## 822 822    1.37e+07   1967930734                Comedy     696
+    ## 823 823    1.37e+07   1973638757         Entertainment     975
+    ## 824 824    1.37e+07   1950178163         Entertainment    3298
+    ## 825 825    1.37e+07   9596430464                Comedy    1040
+    ## 826 826    1.37e+07   2939201386         Howto & Style    2158
+    ## 827 827    1.37e+07   4963275018        People & Blogs     340
+    ## 828 828    1.37e+07   5457203710                Comedy     863
+    ## 829 829    1.37e+07   8134379376                 Music     438
+    ## 830 830    1.37e+07   5178142148             Education     495
+    ## 831 831    1.37e+07   2135195239                Gaming       1
+    ## 832 832    1.36e+07   2122062016                Gaming     368
+    ## 833 833    1.36e+07    896891351                   nan     273
+    ## 834 834    1.36e+07   1948925559                Sports     412
+    ## 835 835    1.36e+07   3764608356                 Music     199
+    ## 836 836    1.36e+07   5141201173             Education    1097
+    ## 837 837    1.36e+07   9685060624        Pets & Animals   16047
+    ## 838 838    1.36e+07  14717282742         Entertainment    8335
+    ## 839 839    1.35e+07   1181292450                Gaming     319
+    ## 840 840    1.35e+07   4301581610                Gaming    4312
+    ## 841 841    1.35e+07   3445794123         Howto & Style     591
+    ## 842 842    1.35e+07   5380132790         Entertainment      19
+    ## 843 843    1.35e+07   5545936485                 Music     814
+    ## 844 844    1.35e+07   8265920659         Entertainment    1403
+    ## 845 845    1.35e+07   3912334359         Entertainment    1793
+    ## 846 846    1.35e+07  11717217293                Comedy     975
+    ## 847 847    1.35e+07   7958771872         Entertainment    1357
+    ## 848 848    1.35e+07   2750993392                 Music     321
+    ## 849 849    1.35e+07   1900272833         Howto & Style     462
+    ## 850 850    1.34e+07   4622628957                   nan     477
+    ## 851 851    1.34e+07  11789678655                 Music    7356
+    ## 852 852    1.34e+07   2139769210        People & Blogs    1028
+    ## 853 853    1.34e+07     20563378                   nan     256
+    ## 854 854    1.34e+07   2650061211         Entertainment       0
+    ## 855 855    1.34e+07   2319515787         Howto & Style    1349
+    ## 856 856    1.34e+07   3363634923                Comedy    1195
+    ## 857 857    1.34e+07   4356686216                Gaming    3727
+    ## 858 858    1.34e+07   9569814790       News & Politics  296272
+    ## 859 859    1.34e+07  10022557589        People & Blogs     319
+    ## 860 860    1.34e+07   4306212515        People & Blogs      96
+    ## 861 861    1.33e+07   2262690743  Science & Technology    3640
+    ## 862 862    1.33e+07   6050102764                Gaming    8195
+    ## 863 863    1.33e+07   3299216601         Entertainment     331
+    ## 864 864    1.33e+07   3364230487        People & Blogs       3
+    ## 865 865    1.33e+07   3733856870         Entertainment     698
+    ## 866 866    1.33e+07   4177184071         Entertainment    3166
+    ## 867 867    1.33e+07   6482687220        People & Blogs     608
+    ## 868 868    1.33e+07   9088562002        People & Blogs    2742
+    ## 869 869    1.33e+07   7923901253         Entertainment    2411
+    ## 870 870    1.33e+07   7773543609                Gaming    4613
+    ## 871 871    1.33e+07   7406628736                Comedy    6916
+    ## 872 872    1.33e+07   2831275503         Howto & Style    1489
+    ## 873 873    1.33e+07   4129249415                Gaming    1640
+    ## 874 874    1.33e+07   6412313570                Gaming    1749
+    ## 875 875    1.32e+07   9884886099         Entertainment     538
+    ## 876 876    1.32e+07   1148422000         Entertainment     192
+    ## 877 877    1.32e+07   2036408398                Gaming     172
+    ## 878 878    1.32e+07   3568392223         Entertainment       0
+    ## 879 879    1.32e+07   3789736218         Entertainment    8019
+    ## 880 880    1.32e+07   4205664894                   nan    1324
+    ## 881 881    1.32e+07   5224764969         Entertainment     413
+    ## 882 882    1.32e+07   5263540904             Education    4279
+    ## 883 883    1.32e+07  20743586601                 Music     237
+    ## 884 884    1.32e+07   9378175604        People & Blogs    6888
+    ## 885 885    1.32e+07   1138262456  Science & Technology    1022
+    ## 886 886    1.32e+07   1758603195        People & Blogs     393
+    ## 887 887    1.31e+07   2182651464         Entertainment      33
+    ## 888 888    1.31e+07   1401914513        People & Blogs     287
+    ## 889 889    1.31e+07   2733682792                   nan     289
+    ## 890 890    1.31e+07   9110348202         Entertainment    1327
+    ## 891 891    1.31e+07   4712624489                 Music    1262
+    ## 892 892    1.31e+07   1936582704        People & Blogs       7
+    ## 893 893    1.31e+07   2555801802        People & Blogs    1077
+    ## 894 894    1.31e+07   4214172991      Film & Animation    1365
+    ## 895 895    1.31e+07   4399833602        People & Blogs     435
+    ## 896 896    1.31e+07   4608751851                 Music      73
+    ## 897 897    1.31e+07   2879263916        People & Blogs    1444
+    ## 898 898    1.31e+07   5333569294         Entertainment   36760
+    ## 899 899    1.31e+07   5264039679                 Music     194
+    ## 900 900    1.31e+07   6637820731                 Music      12
+    ## 901 901    1.30e+07   2683297849         Entertainment     838
+    ## 902 902    1.30e+07   1024467771                Comedy     625
+    ## 903 903    1.30e+07     10664585         Entertainment      29
+    ## 904 904    1.30e+07   1698279553                 Music     409
+    ## 905 905    1.30e+07   5057163256         Entertainment       8
+    ## 906 906    1.30e+07   8739174649                Gaming     510
+    ## 907 907    1.30e+07   9999238237         Entertainment     716
+    ## 908 908    1.30e+07    301547793                   nan      22
+    ## 909 909    1.30e+07   6270909026         Entertainment    1299
+    ## 910 910    1.30e+07   4349562794                 Music     521
+    ## 911 911    1.30e+07   4637474071                Comedy     612
+    ## 912 912    1.29e+07   2112274210        People & Blogs    4712
+    ## 913 913    1.29e+07    140022442         Entertainment      69
+    ## 914 914    1.29e+07   2509752944                Sports    1572
+    ## 915 915    1.29e+07   3178222797         Entertainment     193
+    ## 916 916    1.29e+07   3643698504         Entertainment    1598
+    ## 917 917    1.29e+07   6300933122                 Music      39
+    ## 918 918    1.29e+07   7520379951        People & Blogs  169304
+    ## 919 919    1.29e+07  11504090820                 Music     168
+    ## 920 920    1.29e+07  15446707595                 Music     137
+    ## 921 921    1.29e+07   5585085130                 Shows    1255
+    ## 922 922    1.29e+07   2848466522             Education    2337
+    ## 923 923    1.28e+07   3632438963         Entertainment     233
+    ## 924 924    1.28e+07   5863456698                Comedy    1727
+    ## 925 925    1.28e+07   6662288136                 Music     323
+    ## 926 926    1.28e+07   6804072897         Howto & Style    2385
+    ## 927 927    1.28e+07   6970899521         Entertainment    3483
+    ## 928 928    1.28e+07   9502983550                Comedy     681
+    ## 929 929    1.28e+07   7876740921             Education    2044
+    ## 930 930    1.28e+07  14185611472                 Music     168
+    ## 931 931    1.27e+07   1159290255                   nan     782
+    ## 932 932    1.27e+07   1450874545         Entertainment      50
+    ## 933 933    1.27e+07   4266957149                Comedy    2483
+    ## 934 934    1.27e+07   4579773883                 Music     594
+    ## 935 935    1.27e+07   5567832210                   nan     534
+    ## 936 936    1.27e+07   5958994201                 Music       1
+    ## 937 937    1.27e+07   9927699419                 Music     119
+    ## 938 938    1.27e+07  13174393401         Entertainment     142
+    ## 939 939    1.27e+07   4733873025         Howto & Style     812
+    ## 940 940    1.27e+07   2709954270         Entertainment     846
+    ## 941 941    1.27e+07   1081285962                Gaming     504
+    ## 942 942    1.27e+07   6001189018                   nan     600
+    ## 943 943    1.27e+07   1714955279        People & Blogs     252
+    ## 944 944    1.26e+07   3303595310                Gaming     825
+    ## 945 945    1.26e+07   3152402405        People & Blogs    1101
+    ## 946 946    1.26e+07   3485373675        People & Blogs     683
+    ## 947 947    1.26e+07   8831179714                 Music      99
+    ## 948 948    1.26e+07   6969178081                 Music     218
+    ## 949 949    1.25e+07   1612094871         Entertainment     385
+    ## 950 950    1.25e+07   1136534702         Entertainment     601
+    ## 951 951    1.25e+07    161254021                   nan      61
+    ## 952 952    1.25e+07   1302818088        People & Blogs       0
+    ## 953 953    1.25e+07   1002219689         Howto & Style    1810
+    ## 954 954    1.25e+07   1402042328                Gaming    1109
+    ## 955 955    1.25e+07   6956320454             Education    1459
+    ## 956 956    1.25e+07   2983799729         Howto & Style    1076
+    ## 957 957    1.25e+07   3140883140       Travel & Events     766
+    ## 958 958    1.25e+07   4163639093                   nan     322
+    ## 959 959    1.25e+07   4384177908         Howto & Style    2738
+    ## 960 960    1.25e+07   4625777945         Entertainment    1888
+    ## 961 961    1.25e+07   4935793409         Entertainment  151136
+    ## 962 962    1.25e+07   7489455451                 Music     377
+    ## 963 963    1.25e+07  10384848759         Entertainment    1699
+    ## 964 964    1.25e+07  11552190002         Entertainment  102699
+    ## 965 965    1.25e+07  11691081301         Entertainment   11907
+    ## 966 966    1.25e+07  16690788752                 Music     253
+    ## 967 967    1.25e+07   5146004207                 Music   19899
+    ## 968 968    1.25e+07   5379684248        People & Blogs       8
+    ## 969 969    1.25e+07   4465772496                Comedy     117
+    ## 970 970    1.25e+07   4340213066  Science & Technology     223
+    ## 971 971    1.24e+07   7597013023                Comedy     398
+    ## 972 972    1.24e+07   1971226335                   nan     218
+    ## 973 973    1.24e+07   1689090619        People & Blogs     689
+    ## 974 974    1.24e+07   2394143260                Gaming     690
+    ## 975 975    1.24e+07   2862685032        People & Blogs     226
+    ## 976 976    1.24e+07   2602614088                Comedy       9
+    ## 977 977    1.24e+07   1113066203         Entertainment     409
+    ## 978 978    1.24e+07   2840137980                Gaming    1024
+    ## 979 979    1.24e+07   4021409291         Entertainment     813
+    ## 980 980    1.24e+07   6933660906                Gaming   12419
+    ## 981 981    1.24e+07   7683670251      Film & Animation    1212
+    ## 982 982    1.24e+07   7741764747        People & Blogs     459
+    ## 983 983    1.24e+07  12607488647                 Music    4422
+    ## 984 984    1.24e+07  16086808918                Comedy       0
+    ## 985 985    1.24e+07   2315226648         Howto & Style     729
+    ## 986 986    1.24e+07   3392022527             Education       0
+    ## 987 987    1.24e+07  13959586308        People & Blogs       1
+    ## 988 988    1.24e+07   6202090191                 Music     205
+    ## 989 989    1.24e+07   4779139505             Education    1340
+    ## 990 990    1.24e+07   6993406259                 Music      99
+    ## 991 991    1.23e+07   9029609749                Sports    1200
+    ## 992 992    1.23e+07   1674409945        People & Blogs    1500
+    ## 993 993    1.23e+07   2214684303                   nan    2452
+    ## 994 994    1.23e+07    374123483                Gaming      39
+    ## 995 995    1.23e+07   2129773714                Comedy      62
     ##                  country abbreviation  channel_type
     ## 1                  India           IN         Music
     ## 2          United States           US         Games
@@ -5096,3 +5097,75 @@ read.csv("cleaned_youtube_df.csv")
     ## 993                         1000         2006   66834405  55.378051   -3.435973
     ## 994                       100000         2012   10285453  60.128161   18.643501
     ## 995                       100000         2017 1366417754  20.593684   78.962880
+
+``` r
+table(cleaned_df$category)
+```
+
+    ## 
+    ##      Autos & Vehicles                Comedy             Education 
+    ##                     2                    69                    45 
+    ##         Entertainment      Film & Animation                Gaming 
+    ##                   241                    46                    94 
+    ##         Howto & Style                Movies                 Music 
+    ##                    40                     2                   202 
+    ##                   nan       News & Politics Nonprofits & Activism 
+    ##                    46                    26                     2 
+    ##        People & Blogs        Pets & Animals  Science & Technology 
+    ##                   132                     4                    17 
+    ##                 Shows                Sports              Trailers 
+    ##                    13                    11                     2 
+    ##       Travel & Events 
+    ##                     1
+
+``` r
+table(cleaned_df$channel_type)
+```
+
+    ## 
+    ##       Animals         Autos        Comedy     Education Entertainment 
+    ##             3             3            51            49           304 
+    ##          Film         Games         Howto         Music           nan 
+    ##            42            98            36           216            30 
+    ##          News     Nonprofit        People        Sports          Tech 
+    ##            30             2           101            13            17
+
+``` r
+table(cleaned_df$country)
+```
+
+    ## 
+    ##          Afghanistan              Andorra            Argentina 
+    ##                    1                    1                   13 
+    ##            Australia           Bangladesh             Barbados 
+    ##                    9                    1                    1 
+    ##               Brazil               Canada                Chile 
+    ##                   62                   15                    3 
+    ##                China             Colombia                 Cuba 
+    ##                    1                   11                    1 
+    ##              Ecuador                Egypt          El Salvador 
+    ##                    2                    2                    1 
+    ##              Finland               France              Germany 
+    ##                    1                    5                    6 
+    ##                India            Indonesia                 Iraq 
+    ##                  168                   28                    2 
+    ##                Italy                Japan               Jordan 
+    ##                    2                    5                    3 
+    ##               Kuwait               Latvia             Malaysia 
+    ##                    1                    1                    1 
+    ##               Mexico              Morocco                  nan 
+    ##                   33                    1                  122 
+    ##          Netherlands             Pakistan                 Peru 
+    ##                    3                    6                    1 
+    ##          Philippines               Russia                Samoa 
+    ##                   12                   16                    1 
+    ##         Saudi Arabia            Singapore          South Korea 
+    ##                    9                    3                   17 
+    ##                Spain               Sweden          Switzerland 
+    ##                   22                    4                    1 
+    ##             Thailand               Turkey              Ukraine 
+    ##                   18                    4                    8 
+    ## United Arab Emirates       United Kingdom        United States 
+    ##                    7                   43                  313 
+    ##            Venezuela              Vietnam 
+    ##                    1                    3
