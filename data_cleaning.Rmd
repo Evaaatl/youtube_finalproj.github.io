@@ -1,12 +1,14 @@
 ---
 title: "Data cleaning"
-output: github_document
+output: html_document
 ---
 
 ```{r}
 library(dplyr)
 library(tidyr)
 library(tidyverse)
+library(leaflet)
+library(ggplot2)
 
 # Import dataset
 df <-
@@ -37,5 +39,25 @@ table(cleaned_df$channel_type)
 
 ```{r}
 table(cleaned_df$country)
+```
+
+
+
+```{r}
+channel_counts <- cleaned_df%>% 
+  group_by(country, longitude, latitude) %>% 
+  summarise(channel_count = n())
+
+world_map <- leaflet() %>%
+  addTiles() %>%  # Add a tile layer (you can customize the tile layer if needed)
+  addMarkers(
+    data = channel_counts,
+    ~longitude, ~latitude,  # Specify the longitude and latitude columns
+    label = ~paste(country, ": ", channel_count, " channels"),
+    popup = TRUE
+  )
+
+# Show the map
+world_map
 ```
 
