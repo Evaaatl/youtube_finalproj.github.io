@@ -20,6 +20,7 @@ Read the dataset and drop `NA` vlaues.
 ```{r}
 youtube_df <- read_csv("Data/cleaned_youtube_df.csv") %>% 
   janitor::clean_names() %>% 
+  filter(created_year >= 2005) %>% 
   drop_na()
 ```
 
@@ -116,7 +117,7 @@ wordcloud_plot
 ```
 
 Pie chart for channel type.
-```{r fig.width = 4,fig.asp = 1.2}
+```{r fig.width = 3,fig.asp = 1.5,out.width = "100%"}
 channel_type_counts <- table(youtube_df$channel_type)
 
 channel_type_counts <- youtube_df %>%
@@ -171,6 +172,7 @@ youtube_df %>%
 Here I want to investigate the top 10 YouTube channels by the highest yearly earnings. I'll load the original dataset again.
 
 ```{r}
+color <- c("#ffe4b5", "#ffa07a","#d1d17a" , "#D2DFD9", "#A8C0B5", "#D1B9CB", "#B3CDD1", "#BBC1D0", "#E8C3C3")
 earning_plot_data <-
   read_csv("Data/Global YouTube Statistics.csv",locale = locale(encoding = "Windows-1252"))  %>% 
   janitor::clean_names() %>% 
@@ -180,11 +182,25 @@ earning_plot_data <-
   arrange(desc(highest_yearly_earnings)) %>%
   top_n(15, highest_yearly_earnings)
 
-plot_ly(earning_plot_data, y = ~youtuber, x = ~highest_yearly_earnings, type = 'bar', orientation='h',color = ~highest_yearly_earnings, colors = 'Blues') %>% 
+
+
+plot_ly(earning_plot_data, x = ~highest_yearly_earnings, y = ~youtuber, 
+                type = 'bar', orientation = 'h',
+                color = ~channel_type, colors = color,
+                text = ~paste('$', formatC(highest_yearly_earnings, format = "d", big.mark = ",")),
+                textposition = 'inside',
+                insidetextanchor = 'end', 
+                textfont = list(color = 'white'), # text color
+                hoverinfo = 'text',
+                hovertemplate = paste('<b>Youtuber:</b> %{y}<br>',
+                                      '<b>Earnings:</b> $%{x}<extra></extra>')) %>%
   layout(title = 'Top 15 YouTube Channels by Highest Yearly Earnings',
-         xaxis = list(title = 'YouTube Channel'),
-         yaxis = list(title = 'Yearly Earnings ($)')) %>% 
-  add_text(text = ~highest_yearly_earnings, textposition = 'auto')
+         xaxis = list(title = 'Yearly Earnings ($)'),
+         yaxis = list(title = ''),
+         showlegend = TRUE,
+         margin = list(l = 100, r = 25, t = 50, b = 50),
+         font = list(family = "Arial, sans-serif", size = 12, color = "#333333"))
+
 
 
 
