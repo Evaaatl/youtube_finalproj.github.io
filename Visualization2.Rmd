@@ -85,6 +85,7 @@ fig <- fig %>% layout(
 fig
 ```
 
+Wordcloud for channel category.
 
 ```{r}
 category_data <- youtube_df %>%
@@ -114,4 +115,27 @@ wordcloud_plot
 
 ```
 
+Pie chart for channel type.
+```{r fig.width = 4,fig.asp = 1}
+channel_type_counts <- table(youtube_df$channel_type)
+
+channel_type_counts <- youtube_df %>%
+  group_by(channel_type) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+color <- c("#ffcc99","#ffe4b5", "#ffd180","#ffa07a","#d1d17a", "#8dab7f", "#D2DFD9", "#A8C0B5", "#D1B9CB", "#B3CDD1", "#BBC1D0", "#E8C3C3","#C7CEBD", "#D2DFD9","#6b8e23")
+
+# Create a pie chart using plotly with the custom colors
+fig <- plot_ly(channel_type_counts, labels = ~channel_type, values = ~count, type = 'pie',
+               textinfo = 'label+percent',
+               insidetextorientation = 'radial',
+               marker = list(colors = color))
+fig %>% 
+  layout(title = 'Pie Chart of Channel Types',
+         showlegend = FALSE,
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+```
 
