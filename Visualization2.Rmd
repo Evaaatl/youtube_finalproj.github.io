@@ -1,0 +1,87 @@
+---
+title: "Data Visualization"
+output: 
+  html_document:
+    toc: true
+---
+
+Load necessary packages.
+```{r}
+library(tidyverse)
+library(plotly)
+library(ggplot2)
+library(scales)
+library(reshape2)
+
+
+```
+
+Read the dataset and drop `NA` vlaues.
+```{r}
+youtube_df <- read_csv("Data/cleaned_youtube_df.csv") %>% 
+  janitor::clean_names() %>% 
+  drop_na()
+```
+
+```{r}
+summary(youtube_df)
+```
+
+We use histogram and density plot to intuitively visualize the distribution of different variables.
+```{r fig.width = 10,fig.asp = 1.5,out.width = "100%"}
+
+all_columns <- colnames(youtube_df)
+columns_to_plot <- all_columns[!all_columns %in% c("id", "category","country","abbreviation","channel_type","population","latitude","longitude")]
+
+
+numeric_data_long <- 
+  youtube_df[, columns_to_plot] %>% 
+  gather(key = "variable", value = "value")
+
+
+# Create a single plot with facets for each numeric variable
+p <- ggplot(numeric_data_long, aes(x = value)) +
+  geom_histogram(aes(y = ..density..),bins = 20, fill = "#8dab7f", alpha = 0.8) +
+  geom_density(color="#6b8e23")+
+  facet_wrap(~ variable, scales = "free", ncol = 3) +
+  scale_x_continuous(labels = scales::comma) +
+  theme_minimal(base_size = 10) +  
+  theme(
+    strip.text.x = element_text(size = 10, face = "bold"), 
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1,size=6,face = "bold"), # Angle x-axis labels for readability
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.margin = margin(2.5, 2.5, 2.5, 2.5, "cm"), # Adjust the plot margins
+    strip.background = element_blank(),
+    panel.spacing = unit(2, "lines")
+  ) +
+  labs(
+    title = "Distribution of Numeric Variables",
+    x = "Value",
+    y = "Frequency",
+    caption = "Source: YouTube Data"
+  )
+# Convert to an interactive plot
+ggplotly(p)
+```
+
+We plot heatmap to study the relationships among numerical variables.
+```{r}
+
+
+# Calculate the correlation matrix
+cor_matrix <- cor(youtube_df[, columns_to_plot], use = "complete.obs")
+
+fig <- plot_ly(x = colnames(cor_matrix), y = rownames(cor_matrix), z = cor_matrix, 
+               type = "heatmap",colorscale ="Greens"  , zmin = -1, zmax = 1)
+
+fig <- fig %>% layout(
+  yaxis = list(autorange = "reversed"),
+  width=800,
+  height=600,
+  title = "Correlation Matrix")
+
+fig
+```
+
