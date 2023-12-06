@@ -12,7 +12,7 @@ library(plotly)
 library(ggplot2)
 library(scales)
 library(reshape2)
-
+library(ggwordcloud)
 
 ```
 
@@ -28,10 +28,10 @@ summary(youtube_df)
 ```
 
 We use histogram and density plot to intuitively visualize the distribution of different variables.
-```{r fig.width = 10,fig.asp = 1.5,out.width = "100%"}
+```{r fig.width = 9,fig.asp = 1.2,out.width = "100%"}
 
 all_columns <- colnames(youtube_df)
-columns_to_plot <- all_columns[!all_columns %in% c("id", "category","country","abbreviation","channel_type","population","latitude","longitude")]
+columns_to_plot <- all_columns[!all_columns %in% c("id", "category","country","abbreviation","channel_type","population","latitude","longitude","created_year")]
 
 
 numeric_data_long <- 
@@ -41,20 +41,20 @@ numeric_data_long <-
 
 # Create a single plot with facets for each numeric variable
 p <- ggplot(numeric_data_long, aes(x = value)) +
-  geom_histogram(aes(y = ..density..),bins = 20, fill = "#8dab7f", alpha = 0.8) +
+  geom_histogram(aes(y = ..density..),bins = 15, fill = "#8dab7f", alpha = 0.8) +
   geom_density(color="#6b8e23")+
   facet_wrap(~ variable, scales = "free", ncol = 3) +
   scale_x_continuous(labels = scales::comma) +
   theme_minimal(base_size = 10) +  
   theme(
     strip.text.x = element_text(size = 10, face = "bold"), 
-    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1,size=6,face = "bold"), # Angle x-axis labels for readability
+    axis.text.x = element_text(angle = 20, hjust = 1, vjust = 1,size=7,face = "bold"), # Angle x-axis labels for readability
     axis.title.x = element_text(size = 12),
     axis.title.y = element_text(size = 12),
     plot.title = element_text(size = 16, face = "bold"),
-    plot.margin = margin(2.5, 2.5, 2.5, 2.5, "cm"), # Adjust the plot margins
+    plot.margin = margin(1, 1, 1, 1, "cm"), # Adjust the plot margins
     strip.background = element_blank(),
-    panel.spacing = unit(2, "lines")
+    panel.spacing = unit(3, "lines")
   ) +
   labs(
     title = "Distribution of Numeric Variables",
@@ -67,7 +67,7 @@ ggplotly(p)
 ```
 
 We plot heatmap to study the relationships among numerical variables.
-```{r}
+```{r fig.width = 9,fig.asp = 0.8}
 
 
 # Calculate the correlation matrix
@@ -84,4 +84,34 @@ fig <- fig %>% layout(
 
 fig
 ```
+
+
+```{r}
+category_data <- youtube_df %>%
+  filter(!is.na(category) & category != "nan") %>%
+  count(category) %>%
+  mutate(n=n*30) %>% 
+  ungroup()
+
+
+category_data$scaled_size <- log(category_data$n + 1) # adding 1 to avoid log(0)
+
+wordcloud_plot <- ggplot(category_data, aes(label = category, size = scaled_size)) +
+  geom_text_wordcloud(
+    aes(color = n),
+    shape = 'circle',
+    rm_outside = TRUE
+  ) +
+  scale_size_area(max_size = 10) + 
+  scale_color_gradient(low = "#ffcc99", high = "#8dab7f") +
+  theme_void(base_family = "sans") +
+  theme(legend.position = "none", 
+        plot.margin = margin(1, 1, 1, 1, "cm")) # Adjust margins around the plot
+
+# Display the plot
+wordcloud_plot
+
+
+```
+
 
