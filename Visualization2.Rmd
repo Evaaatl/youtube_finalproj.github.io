@@ -9,23 +9,17 @@ Load necessary packages.
 ```{r}
 library(tidyverse)
 library(plotly)
-library(dplyr)
 library(ggplot2)
-library(tidyr)
 library(scales)
+library(reshape2)
 
-knitr::opts_chunk$set(
-  fig.width = 10,
-  fig.asp = .8,
-  out.width = "90%"
-)
 
 ```
 
 Read the dataset and drop `NA` vlaues.
 ```{r}
-youtube_df <- read_csv("Data/cleaned_youtube_df.csv")|>
-  janitor::clean_names()|>
+youtube_df <- read_csv("Data/cleaned_youtube_df.csv") %>% 
+  janitor::clean_names() %>% 
   drop_na()
 ```
 
@@ -36,12 +30,12 @@ summary(youtube_df)
 We use histogram and density plot to intuitively visualize the distribution of different variables.
 ```{r fig.width = 10,fig.asp = 1.5,out.width = "100%"}
 
-
 all_columns <- colnames(youtube_df)
 columns_to_plot <- all_columns[!all_columns %in% c("id", "category","country","abbreviation","channel_type","population","latitude","longitude")]
 
 
-numeric_data_long <- youtube_df[, columns_to_plot] %>% 
+numeric_data_long <- 
+  youtube_df[, columns_to_plot] %>% 
   gather(key = "variable", value = "value")
 
 
@@ -72,8 +66,22 @@ p <- ggplot(numeric_data_long, aes(x = value)) +
 ggplotly(p)
 ```
 
-We plot heatmap to study the relationships among features.
+We plot heatmap to study the relationships among numerical variables.
 ```{r}
 
+
+# Calculate the correlation matrix
+cor_matrix <- cor(youtube_df[, columns_to_plot], use = "complete.obs")
+
+fig <- plot_ly(x = colnames(cor_matrix), y = rownames(cor_matrix), z = cor_matrix, 
+               type = "heatmap",colorscale ="Greens"  , zmin = -1, zmax = 1)
+
+fig <- fig %>% layout(
+  yaxis = list(autorange = "reversed"),
+  width=800,
+  height=600,
+  title = "Correlation Matrix")
+
+fig
 ```
 
