@@ -116,7 +116,7 @@ wordcloud_plot
 ```
 
 Pie chart for channel type.
-```{r fig.width = 4,fig.asp = 1}
+```{r fig.width = 4,fig.asp = 1.2}
 channel_type_counts <- table(youtube_df$channel_type)
 
 channel_type_counts <- youtube_df %>%
@@ -136,6 +136,40 @@ fig %>%
          showlegend = FALSE,
          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+```
+Bubble Chart: Subscribers vs. Video Views by Category
+```{r fig.width = 9}
+
+size_factor <- 10^(-8.7) # Adjust this factor as needed to scale sizes up or down
+
+youtube_df %>%
+  filter(!is.na(category) & category != "nan") %>%
+  plot_ly(
+    x = ~subscribers, 
+    y = ~video_views, 
+    size = ~video_views_for_the_last_30_days * size_factor, 
+    color = ~category,
+    text = ~category,
+    hoverinfo = 'text+x+y',
+    type = 'scatter',
+    mode = 'markers',
+    marker = list(
+      sizemode = 'area',
+      sizeref = 2 * max(youtube_df$video_views_for_the_last_30_days * size_factor)/100
+    )
+  ) %>%
+  layout(
+    title = 'Subscribers vs. Video Views by Category',
+    xaxis = list(type = 'log', title = 'Subscribers'),
+    yaxis = list(type = 'log', title = 'Video Views (in billions)'),
+    hovermode = 'closest',
+    showlegend = TRUE
+  )
+```
+
+
+```{r}
 
 ```
 
