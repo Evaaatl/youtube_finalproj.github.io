@@ -33,7 +33,7 @@ youtube_df <- read_csv("Data/cleaned_youtube_df.csv")|>
 summary(youtube_df)
 ```
 
-Visualize Numeric Data 
+We use histogram and density plot to intuitively visualize the distribution of different variables.
 ```{r fig.width = 10,fig.asp = 1.5,out.width = "100%"}
 
 
@@ -44,7 +44,6 @@ columns_to_plot <- all_columns[!all_columns %in% c("id", "category","country","a
 numeric_data_long <- youtube_df[, columns_to_plot] %>% 
   gather(key = "variable", value = "value")
 
-color <- "steelblue"
 
 # Create a single plot with facets for each numeric variable
 p <- ggplot(numeric_data_long, aes(x = value)) +
@@ -71,5 +70,10 @@ p <- ggplot(numeric_data_long, aes(x = value)) +
   )
 # Convert to an interactive plot
 ggplotly(p)
+```
+
+We plot heatmap to study the relationships among features.
+```{r}
+
 ```
 
