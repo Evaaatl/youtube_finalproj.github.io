@@ -42,22 +42,21 @@ table(cleaned_df$country)
 ```
 
 
-
+map of channel counts in each country
 ```{r}
-channel_counts <- cleaned_df%>% 
-  group_by(country, longitude, latitude) %>% 
+channel_counts_by_location <- cleaned_df|>
+  group_by(country, longitude, latitude) |>
   summarise(channel_count = n())
 
-world_map <- leaflet() %>%
-  addTiles() %>%  # Add a tile layer (you can customize the tile layer if needed)
+world_map <- leaflet() |>
+  addTiles() |>
   addMarkers(
-    data = channel_counts,
-    ~longitude, ~latitude,  # Specify the longitude and latitude columns
+    data = channel_counts_by_location,
+    ~longitude, ~latitude,
     label = ~paste(country, ": ", channel_count, " channels"),
     popup = TRUE
   )
 
-# Show the map
 world_map
 ```
 
