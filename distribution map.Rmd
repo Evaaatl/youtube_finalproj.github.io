@@ -1,0 +1,59 @@
+---
+title: "Untitled"
+author: "Ziqi Wang"
+date: "2023-12-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+
+library(dplyr)
+library(stringr)
+library(ggplot2)
+library(maps)
+library(readr)
+library(sf)
+
+cleaned_youtube_df <- read_csv("cleaned_youtube_df.csv")
+
+world <- map_data("world")
+
+world <- world %>%
+          mutate(region = ifelse(region=="USA", "United States", region),
+                 region = ifelse(region=="UK", "United Kingdom", region))
+
+
+data.1 <- cleaned_youtube_df %>% group_by(country) %>% summarise(count=n()) %>% ungroup()
+world.plus1 <- world %>% left_join(data.1 %>% rename(region = country)) %>% filter(region != "Antarctica")
+
+ggplot(data = world.plus1, mapping = aes(x = long, y = lat, group = group)) + 
+    coord_fixed(1.3) +
+    geom_polygon(aes(fill = count)) +
+    ggtitle("")+
+    scale_fill_distiller(palette ="BrBG") +
+    coord_sf(datum = NA) +
+    ylab("")+
+    xlab("")+
+    theme(
+    axis.text = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    panel.border = element_blank(),
+    panel.grid = element_blank(),
+    axis.title = element_blank(),
+    panel.background = element_rect(fill = "white"),
+    plot.title = element_text(hjust = 0.5)
+  )
+
+
+
+
+
+```
+
