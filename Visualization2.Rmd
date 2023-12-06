@@ -13,7 +13,7 @@ library(ggplot2)
 library(scales)
 library(reshape2)
 library(ggwordcloud)
-
+library(stringi)
 ```
 
 Read the dataset and drop `NA` vlaues.
@@ -168,8 +168,25 @@ youtube_df %>%
   )
 ```
 
+Here I want to investigate the top 10 YouTube channels by the highest yearly earnings. I'll load the original dataset again.
 
 ```{r}
+earning_plot_data <-
+  read_csv("Data/Global YouTube Statistics.csv",locale = locale(encoding = "Windows-1252"))  %>% 
+  janitor::clean_names() %>% 
+  drop_na() %>% 
+  select(youtuber, channel_type, highest_yearly_earnings) %>% 
+  mutate(youtuber = stringi::stri_replace_all_regex(youtuber, "[^\x01-\x7F]", "")) %>% 
+  arrange(desc(highest_yearly_earnings)) %>%
+  top_n(15, highest_yearly_earnings)
+
+plot_ly(earning_plot_data, y = ~youtuber, x = ~highest_yearly_earnings, type = 'bar', orientation='h',color = ~highest_yearly_earnings, colors = 'Blues') %>% 
+  layout(title = 'Top 15 YouTube Channels by Highest Yearly Earnings',
+         xaxis = list(title = 'YouTube Channel'),
+         yaxis = list(title = 'Yearly Earnings ($)')) %>% 
+  add_text(text = ~highest_yearly_earnings, textposition = 'auto')
+
+
 
 ```
 

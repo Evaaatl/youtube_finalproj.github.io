@@ -20,7 +20,7 @@ library(maps)
 library(readr)
 library(sf)
 
-cleaned_youtube_df <- read_csv("cleaned_youtube_df.csv")
+cleaned_youtube_df <- read_csv("Data/cleaned_youtube_df.csv")
 
 world <- map_data("world")
 
