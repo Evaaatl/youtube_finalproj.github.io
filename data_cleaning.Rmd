@@ -1,12 +1,14 @@
 ---
 title: "Data cleaning"
-output: github_document
+output: html_document
 ---
 
 ```{r}
 library(dplyr)
 library(tidyr)
 library(tidyverse)
+library(leaflet)
+library(ggplot2)
 
 # Import dataset
 df <-
@@ -19,7 +21,8 @@ print(variable_names)
 
 cleaned_df <- df |>
   select(-youtuber,-title,-video_views_rank, -country_rank,-channel_type_rank, -created_month, -created_date, -gross_tertiary_education_enrollment_percent, -unemployment_rate, -urban_population) |> 
-  rename(id = rank)
+  rename(id = rank) 
+  
 
 head(cleaned_df, 10)
 
@@ -37,5 +40,45 @@ table(cleaned_df$channel_type)
 
 ```{r}
 table(cleaned_df$country)
+```
+```{r}
+table(cleaned_df$created_year)
+cleaned_df <- cleaned_df |>
+  filter(created_year >= 2005)
+```
+Since YouTube was created at 2005, we removed accounts created before 2005 since those might just be data entry error.
+
+map of channel counts in each country
+```{r}
+channel_counts_by_location <- cleaned_df|>
+  drop_na(c(latitude, longitude)) |>
+  group_by(country, longitude, latitude) |>
+  summarise(channel_count = n())
+
+world_map <- leaflet() |>
+  addTiles() |>
+  addMarkers(
+    data = channel_counts_by_location,
+    ~longitude, ~latitude,
+    label = ~paste(country, ": ", channel_count, " channels"),
+    popup = TRUE
+  )
+
+world_map
+```
+
+channel created year summary
+```{r}
+c("#C7CEBD", "#F2D9B6", "#A8C0B5", "#D1B9CB", "#B3CDD1",
+     "#F4E1C1", "#BBC1D0", "#E8C3C3", "#D2DFD9", "#E0C5A8","#8dab7f","#6b8e23")
+cleaned_df |>
+  ggplot(aes(x = created_year)) + 
+  geom_histogram(color = "white", bins = 30, fill = "#B3CDD1") +
+  theme_minimal() +  
+  labs(
+    title = "Distribution of Channel Creation Years",
+    x = "Year of Creation",
+    y = "Number of Channels"
+  ) 
 ```
 
