@@ -182,8 +182,8 @@ earning_plot_data <-
 
 plot_ly(earning_plot_data, y = ~youtuber, x = ~highest_yearly_earnings, type = 'bar', orientation='h',color = ~highest_yearly_earnings, colors = 'Blues') %>% 
   layout(title = 'Top 15 YouTube Channels by Highest Yearly Earnings',
-         xaxis = list(title = 'YouTube Channel'),
-         yaxis = list(title = 'Yearly Earnings ($)')) %>% 
+         yaxis = list(title = 'YouTube Channel'),
+         xaxis = list(title = 'Yearly Earnings ($)')) %>% 
   add_text(text = ~highest_yearly_earnings, textposition = 'auto')
 
 
