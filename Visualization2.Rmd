@@ -66,6 +66,35 @@ p <- ggplot(numeric_data_long, aes(x = value)) +
 # Convert to an interactive plot
 ggplotly(p)
 ```
+Since it's right skewed, we take the log for all values.
+
+```{r fig.width = 9,fig.asp = 1.2,out.width = "100%"}
+p <- ggplot(numeric_data_long, aes(x = log(value+1))) +
+  geom_histogram(aes(y = ..density..),bins = 15, fill = "#8dab7f", alpha = 0.8) +
+  geom_density(color="#6b8e23")+
+  facet_wrap(~ variable, scales = "free", ncol = 3) +
+  scale_x_continuous(labels = scales::comma) +
+  theme_minimal(base_size = 10) +  
+  theme(
+    strip.text.x = element_text(size = 10, face = "bold"), 
+    axis.text.x = element_text(angle = 20, hjust = 1, vjust = 1,size=7,face = "bold"), # Angle x-axis labels for readability
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.margin = margin(1, 1, 1, 1, "cm"), # Adjust the plot margins
+    strip.background = element_blank(),
+    panel.spacing = unit(3, "lines")
+  ) +
+  labs(
+    title = "Distribution of Numeric Variables",
+    x = "Value",
+    y = "Frequency",
+    caption = "Source: YouTube Data"
+  )
+# Convert to an interactive plot
+ggplotly(p)
+```
+
 
 We plot heatmap to study the relationships among numerical variables.
 ```{r fig.width = 9,fig.asp = 0.8}
@@ -117,7 +146,7 @@ wordcloud_plot
 ```
 
 Pie chart for channel type.
-```{r fig.width = 3,fig.asp = 1.5,out.width = "100%"}
+```{r}
 channel_type_counts <- table(youtube_df$channel_type)
 
 channel_type_counts <- youtube_df %>%
