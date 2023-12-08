@@ -1,7 +1,28 @@
 ---
+<<<<<<< HEAD
 title: "Holy cow!"
 ---
 
 ### I have a webpage!
 
 And I can put all kinds of stuff on it!
+=======
+title: "YouTube final project"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+# YouTube Statistics Final Project
+
+# Motivation
+
+# Data
+[YouTube](https://www.youtube.com/)
+
+# Analysis
+
+# Project Report
+[Report](report.html)
+>>>>>>> 1cf0235 (build a basic website)
