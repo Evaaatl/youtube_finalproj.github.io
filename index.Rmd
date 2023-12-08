@@ -1,16 +1,7 @@
 ---
-title: "Tongxi's Personal Website"
-output: 
-  html_document:
-    toc: true
-    toc_float: true
+title: "Holy cow!"
 ---
 
-## This is Tongxi's website
+### I have a webpage!
 
-
-## Resume
-[Tongxi's Resume](about.html)
-
-## Dashboard
-[Instacart Data Visualization](dashboard.html)
+And I can put all kinds of stuff on it!

@@ -5,12 +5,9 @@ navbar:
   right:
     - text: "About"
       href: about.html
-    - text: "Dashboard"
-      href: dashboard.html
     - icon: fa-envelope fa-lg
-      href: mailto:<ty2520@outlook.com>
+      href: mailto:<you@youremail.com>
     - icon: fa-github fa-lg
-      href: https://github.com/Evaaatl/youtube_finalproj.github.io
+      href: http://github.com/<YOUR_GH_NAME>/
 output:
-  html_document:
-    theme: flatly
+  html_document
