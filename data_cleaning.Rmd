@@ -21,7 +21,8 @@ print(variable_names)
 
 cleaned_df <- df |>
   select(-youtuber,-title,-video_views_rank, -country_rank,-channel_type_rank, -created_month, -created_date, -gross_tertiary_education_enrollment_percent, -unemployment_rate, -urban_population) |> 
-  rename(id = rank) 
+  rename(id = rank) |>
+  na.omit()
   
 
 head(cleaned_df, 10)
@@ -69,16 +70,85 @@ world_map
 
 channel created year summary
 ```{r}
+library(plotly)
 c("#C7CEBD", "#F2D9B6", "#A8C0B5", "#D1B9CB", "#B3CDD1",
      "#F4E1C1", "#BBC1D0", "#E8C3C3", "#D2DFD9", "#E0C5A8","#8dab7f","#6b8e23")
-cleaned_df |>
-  ggplot(aes(x = created_year)) + 
-  geom_histogram(color = "white", bins = 30, fill = "#B3CDD1") +
-  theme_minimal() +  
-  labs(
+year_created_plot <- plot_ly(cleaned_df, x = ~created_year, type = "histogram", 
+                marker = list(color = "#B3CDD1", line = list(color = "white", width = 1)),
+                nbinsx = 30)
+
+# Update layout
+year_created_plot <- year_created_plot |>
+  layout(
     title = "Distribution of Channel Creation Years",
-    x = "Year of Creation",
-    y = "Number of Channels"
-  ) 
+    xaxis = list(title = "Year of Creation"),
+    yaxis = list(title = "Number of Channels"),
+    showlegend = TRUE,
+    template = "plotly_white"  # Optional: Set a template for the plot
+  )
+
+
+year_created_plot
+```
+
+
+```{r}
+summary_data <- cleaned_df |>
+  mutate(earning_diff = highest_yearly_earnings - lowest_yearly_earnings)|>
+  filter(category != "nan")|>
+  group_by(category) |>
+  summarize(mean_earning_diff = mean(earning_diff),
+            median_earning_diff = median(earning_diff),)
+
+# Create a bar plot using Plotly
+plot <- plot_ly(data = summary_data, x = ~category, type = 'bar',
+                y = ~mean_earning_diff, name = 'Mean Earning Difference',marker = list(color = "#F4E1C1")) %>%
+  add_trace(y = ~median_earning_diff, name = 'Median Earning Difference', marker = list(color = "#C7CEBD"))
+
+# Add layout details
+layout <- list(title = 'Earning Difference Summary by Category',
+               xaxis = list(title = 'Category'),
+               yaxis = list(title = 'Earning Difference'))
+
+# Show the plot
+plotly::layout(plot, layout)
+```
+
+```{r}
+perUploadData <- cleaned_df |>
+  mutate(viewsPerUpload = video_views / uploads) |>
+  filter(viewsPerUpload < 600000000)
+scatter_plot <- plot_ly(data = perUploadData, x = ~viewsPerUpload, y = ~highest_yearly_earnings, mode = 'markers')
+
+
+layout <- list(title = 'Relationship between Views per Upload and Highest Yearly Earning',
+               xaxis = list(title = 'Views per Upload'),
+               yaxis = list(title = 'Highest Yearly Earnings'))
+
+
+plotly::layout(scatter_plot, layout)
+
+```
+```{r}
+perUploadData <- cleaned_df %>%
+  mutate(viewsPerUpload = video_views / uploads) %>%
+  filter(viewsPerUpload < 600000000)  # Filter values less than 5 billion
+
+scatter_plot <- plot_ly(data = perUploadData, x = ~viewsPerUpload, y = ~highest_yearly_earnings, type = 'scatter', mode = 'markers')
+
+lm_model <- lm(highest_yearly_earnings ~ viewsPerUpload, data = perUploadData)
+
+scatter_plot <- scatter_plot %>%
+  add_markers()
+
+scatter_plot <- scatter_plot %>%
+  add_trace(x = perUploadData$viewsPerUpload, y = predict(lm_model), 
+            type = 'scatter', mode = 'lines', line = list(color = 'red'), name = 'Regression Line')
+
+layout <- list(title = 'Relationship between viewsPerUpload and highest_yearly_earning',
+               xaxis = list(title = 'viewsPerUpload'),
+               yaxis = list(title = 'highest_yearly_earning'))
+
+plotly::layout(scatter_plot, layout)
 ```
 
