@@ -12,48 +12,53 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-
-library(dplyr)
-library(stringr)
 library(ggplot2)
+library(tidyverse)
 library(maps)
-library(readr)
-library(sf)
+library(forcats)
 
-cleaned_youtube_df <- read_csv("Data/cleaned_youtube_df.csv")
+
+cleaned_youtube_df <- read_csv("Data/cleaned_youtube_df.csv") %>%
+                      filter(created_year >= 2005, !is.na(category), category != "nan")
+
 
 world <- map_data("world")
 
 world <- world %>%
-          mutate(region = ifelse(region=="USA", "United States", region),
-                 region = ifelse(region=="UK", "United Kingdom", region))
+          mutate(region = ifelse(region == "USA", "United States", region),
+                 region = ifelse(region == "UK", "United Kingdom", region))
 
 
-data.1 <- cleaned_youtube_df %>% group_by(country) %>% summarise(count=n()) %>% ungroup()
-world.plus1 <- world %>% left_join(data.1 %>% rename(region = country)) %>% filter(region != "Antarctica")
+popular_category <- cleaned_youtube_df %>%
+                    group_by(country) %>%
+                    summarise(most_popular_category = names(sort(table(category), decreasing = TRUE)[1])) %>%
+                    ungroup()
+
+world.plus1 <- world %>% 
+               left_join(popular_category, by = c("region" = "country")) %>%
+               filter(region != "Antarctica")
+
+world.plus1$most_popular_category[is.na(world.plus1$most_popular_category)] <- "Unknown"
+
+categories <- unique(world.plus1$most_popular_category)
+
+color <- c("#ffd180","#ffa07a","#d1d17a", "#8dab7f", "#D2DFD9", "#A8C0B5", "#D1B9CB", "#B3CDD1", "#BBC1D0", "#E8C3C3","#C7CEBD", "#D2DFD9","#6b8e23")
+
+
+category_colors <- setNames(color, categories)
 
 ggplot(data = world.plus1, mapping = aes(x = long, y = lat, group = group)) + 
     coord_fixed(1.3) +
-    geom_polygon(aes(fill = count)) +
-    ggtitle("")+
-    scale_fill_distiller(palette ="BrBG") +
-    coord_sf(datum = NA) +
-    ylab("")+
-    xlab("")+
+    geom_polygon(aes(fill = most_popular_category)) +
+    ggtitle("Most Popular YouTube Content Categories by Country") +
+    scale_fill_manual(values = category_colors) +
+    theme_minimal() +
     theme(
-    axis.text = element_blank(),
-    axis.line = element_blank(),
-    axis.ticks = element_blank(),
-    panel.border = element_blank(),
-    panel.grid = element_blank(),
-    axis.title = element_blank(),
-    panel.background = element_rect(fill = "white"),
-    plot.title = element_text(hjust = 0.5)
-  )
-
-
-
-
-
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      plot.title = element_text(hjust = 0.5),
+      legend.title = element_blank(),
+      legend.position = "bottom"
+    )
 ```
 
