@@ -1,0 +1,16 @@
+name: "Yay internet!"
+output_dir: "."
+navbar:
+  title: "Home"
+  right:
+    - text: "About"
+      href: about.html
+    - text: "Dashboard"
+      href: dashboard.html
+    - icon: fa-envelope fa-lg
+      href: mailto:<ty2520@outlook.com>
+    - icon: fa-github fa-lg
+      href: http://github.com/ty2520/
+output:
+  html_document:
+    theme: flatly
