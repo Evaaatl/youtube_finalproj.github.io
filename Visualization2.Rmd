@@ -1,0 +1,237 @@
+---
+title: "Data Visualization"
+output: 
+  html_document:
+    toc: true
+---
+
+Load necessary packages.
+```{r}
+library(tidyverse)
+library(plotly)
+library(ggplot2)
+library(scales)
+library(reshape2)
+library(ggwordcloud)
+library(stringi)
+```
+
+Read the dataset and drop `NA` vlaues.
+```{r}
+youtube_df <- read_csv("Data/cleaned_youtube_df.csv") %>% 
+  janitor::clean_names() %>% 
+  filter(created_year >= 2005) %>% 
+  drop_na()
+```
+
+```{r}
+summary(youtube_df)
+```
+
+We use histogram and density plot to intuitively visualize the distribution of different variables.
+```{r fig.width = 9,fig.asp = 1.2,out.width = "100%"}
+
+all_columns <- colnames(youtube_df)
+columns_to_plot <- all_columns[!all_columns %in% c("id", "category","country","abbreviation","channel_type","population","latitude","longitude","created_year")]
+
+
+numeric_data_long <- 
+  youtube_df[, columns_to_plot] %>% 
+  gather(key = "variable", value = "value")
+
+
+# Create a single plot with facets for each numeric variable
+p <- ggplot(numeric_data_long, aes(x = value)) +
+  geom_histogram(aes(y = ..density..),bins = 15, fill = "#8dab7f", alpha = 0.8) +
+  geom_density(color="#6b8e23")+
+  facet_wrap(~ variable, scales = "free", ncol = 3) +
+  scale_x_continuous(labels = scales::comma) +
+  theme_minimal(base_size = 10) +  
+  theme(
+    strip.text.x = element_text(size = 10, face = "bold"), 
+    axis.text.x = element_text(angle = 20, hjust = 1, vjust = 1,size=7,face = "bold"), # Angle x-axis labels for readability
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.margin = margin(1, 1, 1, 1, "cm"), # Adjust the plot margins
+    strip.background = element_blank(),
+    panel.spacing = unit(3, "lines")
+  ) +
+  labs(
+    title = "Distribution of Numeric Variables",
+    x = "Value",
+    y = "Frequency",
+    caption = "Source: YouTube Data"
+  )
+# Convert to an interactive plot
+ggplotly(p)
+```
+Since it's right skewed, we take the log for all values.
+
+```{r fig.width = 9,fig.asp = 1.2,out.width = "100%"}
+p <- ggplot(numeric_data_long, aes(x = log(value+1))) +
+  geom_histogram(aes(y = ..density..),bins = 15, fill = "#8dab7f", alpha = 0.8) +
+  geom_density(color="#6b8e23")+
+  facet_wrap(~ variable, scales = "free", ncol = 3) +
+  scale_x_continuous(labels = scales::comma) +
+  theme_minimal(base_size = 10) +  
+  theme(
+    strip.text.x = element_text(size = 10, face = "bold"), 
+    axis.text.x = element_text(angle = 20, hjust = 1, vjust = 1,size=7,face = "bold"), # Angle x-axis labels for readability
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.margin = margin(1, 1, 1, 1, "cm"), # Adjust the plot margins
+    strip.background = element_blank(),
+    panel.spacing = unit(3, "lines")
+  ) +
+  labs(
+    title = "Distribution of Numeric Variables",
+    x = "Value",
+    y = "Frequency",
+    caption = "Source: YouTube Data"
+  )
+# Convert to an interactive plot
+ggplotly(p)
+```
+
+
+We plot heatmap to study the relationships among numerical variables.
+```{r fig.width = 9,fig.asp = 0.8}
+
+
+# Calculate the correlation matrix
+cor_matrix <- cor(youtube_df[, columns_to_plot], use = "complete.obs")
+
+fig <- plot_ly(x = colnames(cor_matrix), y = rownames(cor_matrix), z = cor_matrix, 
+               type = "heatmap",colorscale ="Greens"  , zmin = -1, zmax = 1)
+
+fig <- fig %>% layout(
+  yaxis = list(autorange = "reversed"),
+  width=800,
+  height=600,
+  title = "Correlation Matrix")
+
+fig
+```
+
+Wordcloud for channel category.
+
+```{r}
+category_data <- youtube_df %>%
+  filter(!is.na(category) & category != "nan") %>%
+  count(category) %>%
+  mutate(n=n*30) %>% 
+  ungroup()
+
+
+category_data$scaled_size <- log(category_data$n + 1) # adding 1 to avoid log(0)
+
+wordcloud_plot <- ggplot(category_data, aes(label = category, size = scaled_size)) +
+  geom_text_wordcloud(
+    aes(color = n),
+    shape = 'circle',
+    rm_outside = TRUE
+  ) +
+  scale_size_area(max_size = 10) + 
+  scale_color_gradient(low = "#ffcc99", high = "#8dab7f") +
+  theme_void(base_family = "sans") +
+  theme(legend.position = "none", 
+        plot.margin = margin(1, 1, 1, 1, "cm")) # Adjust margins around the plot
+
+# Display the plot
+wordcloud_plot
+
+
+```
+
+Pie chart for channel type.
+```{r}
+channel_type_counts <- table(youtube_df$channel_type)
+
+channel_type_counts <- youtube_df %>%
+  group_by(channel_type) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+color <- c("#ffcc99","#ffe4b5", "#ffd180","#ffa07a","#d1d17a", "#8dab7f", "#D2DFD9", "#A8C0B5", "#D1B9CB", "#B3CDD1", "#BBC1D0", "#E8C3C3","#C7CEBD", "#D2DFD9","#6b8e23")
+
+# Create a pie chart using plotly with the custom colors
+fig <- plot_ly(channel_type_counts, labels = ~channel_type, values = ~count, type = 'pie',
+               textinfo = 'label+percent',
+               insidetextorientation = 'radial',
+               marker = list(colors = color))
+fig %>% 
+  layout(title = 'Pie Chart of Channel Types',
+         showlegend = FALSE,
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+```
+Bubble Chart: Subscribers vs. Video Views by Category
+```{r fig.width = 9}
+
+size_factor <- 10^(-8.7) # Adjust this factor as needed to scale sizes up or down
+
+youtube_df %>%
+  filter(!is.na(category) & category != "nan") %>%
+  plot_ly(
+    x = ~subscribers, 
+    y = ~video_views, 
+    size = ~video_views_for_the_last_30_days * size_factor, 
+    color = ~category,
+    text = ~category,
+    hoverinfo = 'text+x+y',
+    type = 'scatter',
+    mode = 'markers',
+    marker = list(
+      sizemode = 'area',
+      sizeref = 2 * max(youtube_df$video_views_for_the_last_30_days * size_factor)/100
+    )
+  ) %>%
+  layout(
+    title = 'Subscribers vs. Video Views by Category',
+    xaxis = list(type = 'log', title = 'Subscribers'),
+    yaxis = list(type = 'log', title = 'Video Views (in billions)'),
+    hovermode = 'closest',
+    showlegend = TRUE
+  )
+```
+
+Here I want to investigate the top 10 YouTube channels by the highest yearly earnings. I'll load the original dataset again.
+
+```{r}
+color <- c("#ffe4b5", "#ffa07a","#d1d17a" , "#D2DFD9", "#A8C0B5", "#D1B9CB", "#B3CDD1", "#BBC1D0", "#E8C3C3")
+earning_plot_data <-
+  read_csv("Data/Global YouTube Statistics.csv",locale = locale(encoding = "Windows-1252"))  %>% 
+  janitor::clean_names() %>% 
+  drop_na() %>% 
+  select(youtuber, channel_type, highest_yearly_earnings) %>% 
+  mutate(youtuber = stringi::stri_replace_all_regex(youtuber, "[^\x01-\x7F]", "")) %>% 
+  arrange(desc(highest_yearly_earnings)) %>%
+  top_n(15, highest_yearly_earnings)
+
+
+
+plot_ly(earning_plot_data, x = ~highest_yearly_earnings, y = ~youtuber, 
+                type = 'bar', orientation = 'h',
+                color = ~channel_type, colors = color,
+                text = ~paste('$', formatC(highest_yearly_earnings, format = "d", big.mark = ",")),
+                textposition = 'inside',
+                insidetextanchor = 'end', 
+                textfont = list(color = 'white'), # text color
+                hoverinfo = 'text',
+                hovertemplate = paste('<b>Youtuber:</b> %{y}<br>',
+                                      '<b>Earnings:</b> $%{x}<extra></extra>')) %>%
+  layout(title = 'Top 15 YouTube Channels by Highest Yearly Earnings',
+         xaxis = list(title = 'Yearly Earnings ($)'),
+         yaxis = list(title = ''),
+         showlegend = TRUE,
+         margin = list(l = 100, r = 25, t = 50, b = 50),
+         font = list(family = "Arial, sans-serif", size = 12, color = "#333333"))
+
+
+
+
+```
+
