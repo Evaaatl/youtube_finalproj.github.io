@@ -41,18 +41,18 @@ Park M et al.'s 2017 study (Cultural values and cross-cultural video consumption
 
 - 1.Define what "success" means in the context of a YouTuber (Subscribers, Views per video or Earnings)?
 - 2.What are the factors that influence the success of YouTubers?
-- 3.Fit models to predict the success of YouTubers.
+- 3.Develop a predictive models to forecast YouTubers' success.
   
 ## Data Cleaning and Preprocessing
 
-We imported the data with read_csv and apply the function clean_names from janitor package to convert all the variable names to lower case and puts underscores in the gaps. Since YouTube was created in 2005, we removed accounts (N=6) created before 2005, which might be data entry error. We select the following variables for further analysis.
+We imported the data and apply the function `janitor::clean_names` to convert all the variable names to lower case and puts underscores in the gaps. Since YouTube was created in 2005, we eliminated 6 accounts created before 2005, which might be data entry error. The 'country' and 'category' variables have been encoded as factors to facilitate categorical analysis. We also add two new variables 'video_per_upload' and 'earning_differences'. For the consideration of data integrity, `NA` are kept for not a  significant reduction in dataset size, and we will process the NA values respecively in each visualization and model fitting. The cleaned dataset comprises 588 observations across 20 variables which are integral for our exploratory data analysis and model fitting processes:
 
-- `rank`: Position of the YouTube channel based on the number of subscribers
+- `id`
 - `subscribers`: Number of subscribers to the channel
 - `video views`: Total views across all videos on the channel
 - `category`: Category or niche of the channel
 - `uploads`: Total number of videos uploaded on the channel
-- `Country`: Country where the YouTube channel originates
+- `country`: Country where the YouTube channel originates
 - `channel_type`: Type of the YouTube channel (e.g., individual, brand)
 - `video_views_rank`: Ranking of the channel based on total video views
 - `country_rank`: Ranking of the channel based on the number of subscribers within its country
@@ -65,11 +65,13 @@ We imported the data with read_csv and apply the function clean_names from janit
 - `subscribers_for_last_30_days`: Number of new subscribers gained in the last 30 days
 - `created_year`: Year when the YouTube channel was created
 - `Population`: Total population of the country
-- `Latitude`: Latitude coordinate of the country's location
-- `Longitude`: Longitude coordinate of the country's location
+- `latitude`: Latitude coordinate of the country's location
+- `longitude`: Longitude coordinate of the country's location
+- `video_per_upload`: Average number of video views per video upload
+- `earning_differences`: Range of yearly earnings for each channel, calculated by subtracting `lowest_yearly_earnings` from `highest_yearly_earnings`.
 
 ```{r}
-# Make sure 'country' and 'category' are factors if they are not already
+# Make sure 'country' and 'category' are factors.
 cleaned_df$country <- as.factor(cleaned_df$country)
 cleaned_df$category <- as.factor(cleaned_df$category)
 
@@ -78,6 +80,8 @@ cleaned_df$video_per_upload <- with(cleaned_df, video_views / uploads)
 cleaned_df$earning_differences <- with(cleaned_df, highest_yearly_earnings - lowest_yearly_earnings)
 ```
 
+
+In order to preserve data integrity and avoid a significant reduction in dataset size, we have opted to retain `NA` values within the dataset. Each instance of `NA` will be addressed individually in subsequent stages of our analysis, ensuring that they are appropriately managed during both the visualization and model fitting processes. 
 
 ## EDA
 
