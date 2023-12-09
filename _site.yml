@@ -8,14 +8,14 @@ navbar:
     - text: "About"
       href: about.html
     - text: "Analysis"
-      menu: 
-      - text: "Data Sources"
-        href: data_cleaning.html
+      menu:
+      - text: "Data Source"
+        href: data.html
       - text: "Model"
-      href model.html
+        href: model.html
+      
     - icon: fa-github fa-lg
       href: https://github.com/Evaaatl/youtube_finalproj.github.io
-      
 output:
   html_document:
     theme: journal
