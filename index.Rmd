@@ -6,6 +6,20 @@ output:
     toc_float: true
 ---
 
+<<<<<<< HEAD
+# YouTube Statistics Final Project
+![](Webpage/youtube-logo.jpg.webp)
+
+## Motivation
+
+## Data
+[YouTube](https://www.youtube.com/)
+
+## Analysis
+
+## Project Report
+[Report](report.html)
+=======
 <style type="text/css">
 
 h1.title {
@@ -20,5 +34,6 @@ h1.title {
 <img src="youtubers.jpg" style="width:70%" class="center">
 </center>
 \
+>>>>>>> e49dd43c94c585790a22f71c3c2734641c02e0c8
 
 ### Screencast
