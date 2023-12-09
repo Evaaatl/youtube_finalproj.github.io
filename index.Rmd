@@ -7,7 +7,7 @@ output:
 ---
 
 # YouTube Statistics Final Project
-![](Webpage/youtube-logo.jpg, style="width:75%")
+![](Webpage/youtube-logo.jpg.webp)
 
 ## Motivation
 
