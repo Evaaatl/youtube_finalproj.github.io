@@ -1,20 +1,24 @@
 ---
-title: "YouTube final project"
+title: "How to evaluate the success of youtubers？"
 output: 
   html_document:
     toc: true
     toc_float: true
 ---
 
-# YouTube Statistics Final Project
+<style type="text/css">
 
-# Motivation
+h1.title {
+  text-align: center;
+}
 
-# Data
-[YouTube](https://www.youtube.com/)
+</style>
 
-# Analysis
+&nbsp;
 
-# Project Report
-[Report](report.html)
+<center>
+<img src="youtubers.jpg" style="width:70%" class="center">
+</center>
+\
 
+### Screencast
