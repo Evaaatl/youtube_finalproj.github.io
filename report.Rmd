@@ -198,17 +198,25 @@ The heat map depicts the Pearson correlation between continuous variables, which
 - Channel created year summary
 
 ```{r}
-cleaned_df |>
-  ggplot(aes(x = created_year)) + 
-  geom_histogram(color = "white", bins = 30, fill = "#B3CDD1") +
-  theme_minimal() +  
-  labs(
+year_created_plot <- plot_ly(cleaned_df, x = ~created_year, type = "histogram", 
+                marker = list(color = "#B3CDD1", line = list(color = "white", width = 1)),
+                nbinsx = 30)
+
+# Update layout
+year_created_plot <- year_created_plot |>
+  layout(
     title = "Distribution of Channel Creation Years",
-    x = "Year of Creation",
-    y = "Number of Channels"
-  ) 
+    xaxis = list(title = "Year of Creation"),
+    yaxis = list(title = "Number of Channels"),
+    showlegend = FALSE,
+    template = "plotly_white"  # Optional: Set a template for the plot
+  )
+
+
+year_created_plot
 ```
 
+The summary plot we generated showcases the relationship between the year of channel creation on the x-axis and the corresponding number of channels on the y-axis. Notably, the data reveals a pronounced peak in the year 2014, with 66 channels coming into existence during that period. This peak suggests a surge in YouTube channel creation, indicating potential shifts in content creation trends, platform popularity, or other influential factors during that specific year. Furthermore, our analysis indicates a sustained period of notable channel creation from 2011 to 2016, highlighting a consistent and relatively high annual rate of channel initiation within this timeframe.
 - Word Cloud
 ```{r}
 category_data <- youtube_df %>%
