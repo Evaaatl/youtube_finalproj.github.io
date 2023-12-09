@@ -30,17 +30,18 @@ cleaned_df<-
 
 ## Motivation
 
-In contemporary times, social media has assumed a multifaceted role. Individuals utilize platforms like YouTube not only for educational purposes but also for listening to music and staying informed with current news. This project specifically delves into the content produced by global YouTubers across various countries, since this disparity provides advertisers and channel owners with broader insights to enhance earnings and garner more followers. The primary dataset comprises information from the top 995-ranked YouTubers in the global YouTube community. We employ data visualization techniques to offer a comprehensive understanding of content differences from a geographical perspective. Additionally, we develop a predictive model for forecasting the success of YouTubers. 
+In contemporary times, social media has assumed a multifaceted role. Individuals utilize platforms like YouTube not only for educational purposes but also for listening to music and staying informed with current news. This versatility makes YouTube a crucial player in shaping digital culture and trends. Consequently, understanding the factors that lead to a YouTuber's success is vital, as it influences not only individual creators but also the broader media landscape. By analyzing data from top YouTubers across various countries, the project aims to provide valuable insights for content creators and advertisers to enhance their engagement and profitability. The primary dataset obtained from [Kaggle](https://www.kaggle.com/datasets/nelgiriyewithana/global-youtube-statistics-2023) comprises information from the top 995-ranked YouTubers in the global YouTube community. We utilize advanced data visualization techniques to deeply analyze top YouTubers' profiles, examining their demographic distribution and the relationships among various success-related variables. Moreover, our project includes the development of a predictive model designed to quantify and forecast YouTubers' success, offering valuable insights into the future trends of content creation and audience engagement on the platform.
 
 ## Related work
 
-Park M et al.'s 2017 study (Cultural values and cross-cultural video consumption on YouTube) explores the consumption patterns of popular videos in countries with variations in cultural values, language, GDP, and Internet penetration. Also one user from [reddit](https://www.reddit.com/r/youtube/comments/15a1vi0/differences_in_the_content_experience_in/?rdt=42149) has a similar question about his channels, which have same contents but there is a big gap of subscribers in English and Ukraine. 
+Park M et al.'s 2017 study (Cultural values and cross-cultural video consumption on YouTube) delves into the consumption patterns of popular YouTube videos across countries, taking into account differences in cultural values, language, GDP, and internet penetration. Additionally, the 2016 study by Welbourne, D. J., and Grant, W. J. study the elements that influence the popularity of Science communication videos on YouTube, and find out that while professional content is more abundant, user-generated content tends to be more popular with audiences. Also one user from [reddit](https://www.reddit.com/r/youtube/comments/15a1vi0/differences_in_the_content_experience_in/?rdt=42149) raised a similar question about his channels, which feature similar content but exhibit a significant disparity in subscriber numbers between the English and Ukrainian versions. These studies and observations inspire our project to further explore the intricate factors influencing YouTube channel success, emphasizing the geographical and content factors.
 
 
 ## Initial questions
-  
-- 1.What are the factors that influence the success of YouTubers.
-- 2.Fit models to predict the success of YouTubers.
+
+- 1.Define what "success" means in the context of a YouTuber (Subscribers, Views per video or Earnings)?
+- 2.What are the factors that influence the success of YouTubers?
+- 3.Fit models to predict the success of YouTubers.
   
 ## Data Cleaning and Preprocessing
 
