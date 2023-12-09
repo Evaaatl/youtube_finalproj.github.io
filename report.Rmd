@@ -7,7 +7,10 @@ output:
     code_folding: "hide"
 ---
 
-```{r}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
+
 library(dplyr)
 library(tidyr)
 library(tidyverse)
@@ -15,6 +18,9 @@ library(leaflet)
 library(ggplot2)
 library(plotly)
 library(ggwordcloud)
+library(performance)
+library(ggpubr)
+library(knitr)
 
 cleaned_df<-
   read_csv("Data/cleaned_youtube_df.csv")|>
@@ -24,7 +30,7 @@ cleaned_df<-
 
 ## Motivation
 
-In contemporary times, social media has assumed a multifaceted role. Individuals utilize platforms like YouTube not only for educational purposes but also for listening to music and staying informed with current news. This project specifically delves into the content produced by global YouTubers across various countries, since this disparity provides advertisers and channel owners with broader insights to enhance earnings and garner more followers. The primary dataset comprises information from the top 995-ranked YouTubers in the global YouTube community. We employ data visualization techniques to offer a comprehensive understanding of content differences from a geographical perspective. Additionally, we develop a predictive model for forecasting xxx. 
+In contemporary times, social media has assumed a multifaceted role. Individuals utilize platforms like YouTube not only for educational purposes but also for listening to music and staying informed with current news. This project specifically delves into the content produced by global YouTubers across various countries, since this disparity provides advertisers and channel owners with broader insights to enhance earnings and garner more followers. The primary dataset comprises information from the top 995-ranked YouTubers in the global YouTube community. We employ data visualization techniques to offer a comprehensive understanding of content differences from a geographical perspective. Additionally, we develop a predictive model for forecasting the success of YouTubers. 
 
 ## Related work
 
@@ -33,11 +39,12 @@ Park M et al.'s 2017 study (Cultural values and cross-cultural video consumption
 
 ## Initial questions
   
-  Our objective is to examine potential differences in the rankings of top YouTubers and the content they produce across various countries having cultural and linguistic variations.
+- 1.What are the factors that influence the success of YouTubers.
+- 2.Fit models to predict the success of YouTubers.
   
 ## Data Cleaning and Preprocessing
 
-We imported the data with read_csv and apply the function clean_names from janitor package to convert all the variable names to lower case and puts underscores in the gaps. Since YouTube was created in 2005, we removed accounts (N=6) created before 2005, which might be data entry error. We select the following variables for further analysis. **We use drop_na to remove the missing values. Finally we have 588 observations.**
+We imported the data with read_csv and apply the function clean_names from janitor package to convert all the variable names to lower case and puts underscores in the gaps. Since YouTube was created in 2005, we removed accounts (N=6) created before 2005, which might be data entry error. We select the following variables for further analysis.
 
 - `rank`: Position of the YouTube channel based on the number of subscribers
 - `subscribers`: Number of subscribers to the channel
@@ -59,8 +66,6 @@ We imported the data with read_csv and apply the function clean_names from janit
 - `Population`: Total population of the country
 - `Latitude`: Latitude coordinate of the country's location
 - `Longitude`: Longitude coordinate of the country's location
-
-**How do you deal with the category coded with nan??, youtuber names are modified not in the data cleaning process, but in the visualization with grep, also the country and category are modified as factor in another script.., besides we drop a lot of observations just because they lack of subscribers_for_last_30_days, which this variable is even not used in the following analysis after all??, in the clean_data, there is a filter created_year >= 2005, but how come with the data for the model you dont include this process?** 
 
 ```{r}
 # Make sure 'country' and 'category' are factors if they are not already
@@ -138,7 +143,7 @@ p <- ggplot(numeric_data_long, aes(x = value)) +
 ggplotly(p)
 ```
 
-We create interactive plots by applying `ploty` to visualize the density distribution of `xxx`. Upon observing right skewness, we apply a logarithmic transformation to these numeric values. **However, after transformation, they are not all normal distributed, instead we use Box-Cox-Transformation, or other methods..**
+We create interactive plots by applying `ploty` to visualize the density distribution of numerical variables. Upon observing right skewness, we apply a logarithmic transformation to these numeric values. 
 
 ```{r fig.width = 9,fig.asp = 1.2,out.width = "100%"}
 p <- ggplot(numeric_data_long, aes(x = log(value+1))) +
@@ -186,7 +191,7 @@ fig <- fig %>% layout(
 fig
 ```
 
-The heat map depicts the Pearson correlation between continuous variables, which reveals a relatively high correlation between the variables `Subscribers` and `Video Views` (r = 0.85). The correlation of these two variables with the others is at a moderately weak level (r around 0.46), with no correlation to the `Uploads` variable (r = 0.08 and 0.15). Notably, the variables `Lowest Earnings` by year and month and `Highest Earnings` by year and month exhibit an absolute correlation of nearly 100%.
+The heat map depicts the Pearson correlation between continuous variables, which reveals a relatively high correlation between the variables `Subscribers` and `Video Views` ($r$ = 0.85). The correlation of these two variables with the others is at a moderately weak level ($r$ around 0.46), with no correlation to the `Uploads` variable ($r$ = 0.08 and 0.15). Notably, the variables `Lowest Earnings` by year and month and `Highest Earnings` by year and month exhibit an absolute correlation of nearly 100%.
 
 #### 2. Category variable exploration
 
@@ -260,9 +265,7 @@ fig %>%
 
 ```
 
-**should it not be weighted by view times or somehow? because it is similar to the previous plot, and why not remove nan?**
 In this interactive pie chart, we demonstrate the frequency of proportion in Channel type. The most frequently viewed channel, as observed from the word cloud chart, include `Entertainment`, `Music`, `People & Blogs`, `Gaming` and `Comedy`.
-
 
 - Bubble Chart: Subscribers vs. Video Views by Category
 
@@ -332,115 +335,126 @@ For the Top 15 YouTube Channels by Highest Yearly Earnings, first and foremost, 
 
 ## Model
 
-**Why do models 1, 2, and 3 focus on these questions when the correlation between the response and predictors hasn't even been explored in the data visualization part? I recommend considering groups of countries based on continent or other characteristics., you may describe why use randomforest and how the performance differs from the linear regression**
+#### 1. Fit the multiple linear regression model of **_subscribers_**
+Model statement:
+$subscribers =\beta_0+ \beta_1country +\beta_2category +\beta_3videoperupload + beta_4uploads + beta_5(videoviews)$
 
-#### 1. fit the first model
 ```{r}
 youtube_df <- youtube_df %>% drop_na()
 # Fit the Multiple Linear Regression model++uploads +video_views, data = youtube_df)
 mlr_model <- lm(subscribers ~ country + category + video_per_upload +uploads +video_views , data = youtube_df)
-# Check the summary of the model
-summary(mlr_model)
+  
+youtube_df %>% 
+  modelr::add_predictions(mlr_model) %>% 
+  ggplot(aes(x = earning_differences, y = pred)) +
+  geom_point() +
+  labs(
+        title = "Multivariate Linear Model",
+        x = "earning_differences",
+        y = "subscribers") +
+  theme_pubclean()
 
-
-# Plotting the observed vs predicted values
-plot(youtube_df$subscribers, fitted(mlr_model), xlab = "Observed", ylab = "Predicted")
-abline(0, 1)
-
-# Check for Independence
-# Durbin-Watson test
-library(lmtest)
-dwtest(mlr_model)
-
-# Check for Normality
-# Q-Q plot of residuals
-qqnorm(resid(mlr_model))
-qqline(resid(mlr_model))
-
-# Histogram of residuals
-hist(resid(mlr_model), breaks = 30, main = "Histogram of Residuals")
-
-# Check for Homoscedasticity
-# Plot of residuals vs fitted values
-plot(fitted(mlr_model), resid(mlr_model), xlab = "Fitted", ylab = "Residuals")
-abline(h = 0, col = "red")
-
-# Additionally, if you have a large dataset, you might want to consider using a sample for plotting
-# to make the plots less cluttered and more interpretable.
+check_model(mlr_model, check = c("linearity", "outliers", "qq", "normality"))
 
 # Summary of the model
 mlr_model%>% 
 broom::tidy()%>% 
-knitr::kable(digits=3)
+knitr::kable(digits=3) 
 
+mlr_model %>% 
+broom::glance() %>%
+knitr::kable(digits=3)
 ```
 
-#### 2. fit the second model and check
+#### 2. Fit the multiple linear regression model of **_earning_differences_**
+
+Model statement:
+$earningdifferences =\beta_0+ \beta_1country +\beta_2category +\beta_3videoperupload + beta_4uploads + beta_5(videoviews)$
+
 ```{r}
 mlr_model_1 <- lm(earning_differences ~ country + category + video_per_upload +uploads +video_views , data = youtube_df)
-# Plotting the observed vs predicted values
-plot(youtube_df$subscribers, fitted(mlr_model_1), xlab = "Observed", ylab = "Predicted")
-abline(0, 1)
+  
+  youtube_df %>% 
+  modelr::add_predictions(mlr_model_1) %>% 
+  ggplot(aes(x = earning_differences, y = pred)) +
+  geom_point() +
+  labs(
+        title = "Multivariate Linear Model",
+        x = "earning_differences",
+        y = "predictions") +
+  theme_pubclean()
 
-dwtest(mlr_model_1)
-
-# Check for Normality
-# Q-Q plot of residuals
-qqnorm(resid(mlr_model_1))
-qqline(resid(mlr_model_1))
-
-# Histogram of residuals
-hist(resid(mlr_model_1), breaks = 30, main = "Histogram of Residuals")
-
-# Check for Homoscedasticity
-# Plot of residuals vs fitted values
-plot(fitted(mlr_model_1), resid(mlr_model_1), xlab = "Fitted", ylab = "Residuals")
-abline(h = 0, col = "red")
-
-# Additionally, if you have a large dataset, you might want to consider using a sample for plotting
-# to make the plots less cluttered and more interpretable.
+check_model(mlr_model_1, check = c("linearity", "outliers", "qq", "normality"))
 
 # Summary of the model
 mlr_model_1%>% 
 broom::tidy() %>%
 knitr::kable(digits=3)
+
+mlr_model_1 %>% 
+broom::glance() %>%
+knitr::kable(digits=3)
 ```
 
+#### 3. Fit the multiple linear regression model of **_highest_yearly_earnings_**
 
-#### 3. fit the third model and check 
+Model statement:
+$highestyearlyearnings =\beta_0+ \beta_1country +\beta_2category +\beta_3videoperupload + beta_4uploads + beta_5(videoviews)$
 
 ```{r}
 mlr_model_2 <- lm(highest_yearly_earnings ~ country + category + video_per_upload+uploads +video_views , data = youtube_df)
-# Plotting the observed vs predicted values
-plot(youtube_df$subscribers, fitted(mlr_model_2), xlab = "Observed", ylab = "Predicted")
-abline(0, 1)
 
-dwtest(mlr_model_2)
+  youtube_df %>% 
+  modelr::add_predictions(mlr_model_2) %>% 
+  ggplot(aes(x = earning_differences, y = pred)) +
+  geom_point() +
+  labs(
+        title = "Multivariate Linear Model",
+        x = "highest_yearly_earnings",
+        y = "predictions") +
+  theme_pubclean()
 
-# Check for Normality
-# Q-Q plot of residuals
-qqnorm(resid(mlr_model_2))
-qqline(resid(mlr_model_2))
-
-# Histogram of residuals
-hist(resid(mlr_model_2), breaks = 30, main = "Histogram of Residuals")
-
-# Check for Homoscedasticity
-# Plot of residuals vs fitted values
-plot(fitted(mlr_model_2), resid(mlr_model_2), xlab = "Fitted", ylab = "Residuals")
-abline(h = 0, col = "red")
-
-# Additionally, if you have a large dataset, you might want to consider using a sample for plotting
-# to make the plots less cluttered and more interpretable.
+check_model(mlr_model_2, check = c("linearity", "outliers", "qq", "normality"))
 
 # Summary of the model
 mlr_model_2%>% 
 broom::tidy() %>%
 knitr::kable(digits=3)
+
+mlr_model_2 %>% 
+broom::glance() %>%
+knitr::kable(digits=3)
+```
+#### 4. Build Random Forest **_subscribers_**
+
+```{r}
+library(randomForest)
+library(caTools)
+set.seed(42) # for reproducibility
+split <- sample.split(youtube_df$subscribers, SplitRatio = 0.8)
+train_data <- subset(youtube_df, split == TRUE)
+test_data <- subset(youtube_df, split == FALSE)
+
+# Train a Random Forest model
+rf_modelS <- randomForest(subscribers ~ ., data=youtube_df, importance=TRUE)
+
+# Make predictions on the test set
+predictions <- predict(rf_modelS, test_data)
+
+# Calculate R^2 score
+r2_score <- cor(test_data$subscribers, predictions)^2
+
+# Output the model and R^2 score
+print(rf_modelS)
 ```
 
-#### Interpretation for model 1
+We use the same predictors `country`, `category`, `video_per_upload`, `uploads`, `video_views` and build three models with response `subscribers`, `earning_differences`, `highest_yearly_earnings`. The respective $r^2$ are $0.754, 0.438, 0.438$, which means that, with the specified covariates, the model's performance in predicting subscribers is superior to the others. To compare the performance with multiple linear regression model, we also trained a Random Forest model to predict the number of subscribers. The data was split into training data and test data with a proportion of 0.8. The $r^2$ score of 0.977 significantly outperforms the result from the linear regression model, where $r^2$ was 0.754. This suggests that the Random Forest model explains almost all the variability in the subscriber count. Based on these results, we conclude that the number of video views is also one of the most important factors for predicting the number of subscribers.
 
+## Discussion
+We also check the linear regression assumptions (e.g., homoscedasticity, normality of residuals) and observe potential outliers that can impact the model's accuracy. To enhance model accuracy, we may consider removing these outliers and subsequently explore missing value imputation. In summary, the Random Forest model proves highly effective for this dataset; however, further validation, potentially with different datasets or cross-validation, is advisable to ensure the model's generalizability and assess the potential impact of overfitting.
+
+#############################################################################
+#### Interpretation for model 1
 
 1. **Model Formula**:
    - The model predicts 'subscribers' based on 'country', 'category', 'video_per_upload', 'uploads', and 'video_views'.
@@ -464,15 +478,11 @@ knitr::kable(digits=3)
 #### Interpretation:
 The model explains a significant amount of the variance in the number of subscribers (as indicated by the R-squared values). 'video_views' is particularly a strong predictor. However, most of the individual country and category predictors do not significantly contribute to the model. This might suggest that while overall video views are important, where those views come from (which country) and the content category may not be as important, with the exception of South Korea.
 
-#### Recommendations:
-- Investigate potential outliers or influential observations that may affect the model.
-- Consider data transformations or robust regression techniques if the assumptions of linear regression (e.g., homoscedasticity, normality of residuals) are not met.
-- Look into interaction effects or polynomial terms if the relationship between the predictors and subscribers is not linear.
-- Simplify the model by removing non-significant predictors, which may improve the model's interpretability and performance.
+
 
 #### interpretation for model2
 1. **Model Formula**:
-   - The model is predicting 'earning_differences' based on the independent variables 'country', 'category', 'video_per_upload', and 'video_views'.
+   - The model is predicting 'earning_differences' based on the independent variables 'D'.
 
 2. **Residuals**:
    - The residuals' section provides a five-number summary of the residuals from the model. The wide range of values from the minimum to the maximum indicates the presence of large residuals, suggesting that there may be outliers or that the model may not be adequately capturing the pattern in the data.
@@ -524,13 +534,3 @@ The image you've uploaded shows the output from a Multiple Linear Regression (ML
 
 #### Interpretation:
 The model has a moderate explanatory power for 'highest_yearly_earnings', with 'video_views' being a particularly strong predictor. While most country and category variables are not significant on their own, the overall model is significant, suggesting that there is a combination of these variables that helps predict the highest yearly earnings. The significant predictors for 'countryLatvia' and 'countrySouth Korea' suggest that being in these countries is associated with a significant difference in 'highest_yearly_earnings' compared to the baseline country (not shown in the output, likely the reference category). 
-
-#### Recommendations:
-- Consider exploring potential outliers or influential points further, as indicated by the large range in residuals.
-- The significance of 'video_views' suggests this variable is an important predictor and may benefit from a deeper examination of its relationship with the dependent variable, such as checking for non-linearity.
-- Given the significance of the model and the low number of significant individual predictors, it might be beneficial to investigate potential interactions between variables or to explore non-linear models.
-- Ensure that the assumptions of the MLR are met. If not, consider transformations or alternative modeling approaches.
-
-## Discussion
-```
-
