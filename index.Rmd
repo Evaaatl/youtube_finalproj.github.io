@@ -1,11 +1,12 @@
 ---
-title: "YouTube final project"
+title: "How to evaluate the success of youtubers？"
 output: 
   html_document:
     toc: true
     toc_float: true
 ---
 
+<<<<<<< HEAD
 # YouTube Statistics Final Project
 ![](Webpage/youtube-logo.jpg.webp)
 
@@ -18,4 +19,21 @@ output:
 
 ## Project Report
 [Report](report.html)
+=======
+<style type="text/css">
 
+h1.title {
+  text-align: center;
+}
+
+</style>
+
+&nbsp;
+
+<center>
+<img src="youtubers.jpg" style="width:70%" class="center">
+</center>
+\
+>>>>>>> e49dd43c94c585790a22f71c3c2734641c02e0c8
+
+### Screencast
