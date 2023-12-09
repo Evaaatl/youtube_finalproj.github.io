@@ -7,14 +7,15 @@ output:
 ---
 
 # YouTube Statistics Final Project
+![](Webpage/youtube-logo.jpg.webp)
 
-# Motivation
+## Motivation
 
-# Data
+## Data
 [YouTube](https://www.youtube.com/)
 
-# Analysis
+## Analysis
 
-# Project Report
+## Project Report
 [Report](report.html)
 
