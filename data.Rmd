@@ -3,12 +3,12 @@ title: "Data"
 output: html_document
 ---
 Data Source: [Global Youtube Statistics 2023](https://www.kaggle.com/datasets/nelgiriyewithana/global-youtube-statistics-2023)\
-- `rank`: Position of the YouTube channel based on the number of subscribers\
+- `id`: Position of the YouTube channel based on the number of subscribers\
 - `subscribers`: Number of subscribers to the channel\
 - `video views`: Total views across all videos on the channel\
 - `category`: Category or niche of the channel\
 - `uploads`: Total number of videos uploaded on the channel\
-- `Country`: Country where the YouTube channel originates\
+- `country`: Country where the YouTube channel originates\
 - `channel_type`: Type of the YouTube channel (e.g., individual, brand)\
 - `video_views_rank`: Ranking of the channel based on total video views\
 - `country_rank`: Ranking of the channel based on the number of subscribers within its country\
@@ -20,6 +20,6 @@ Data Source: [Global Youtube Statistics 2023](https://www.kaggle.com/datasets/ne
 - `highest_yearly_earnings`: Highest estimated yearly earnings from the channel\
 - `subscribers_for_last_30_days`: Number of new subscribers gained in the last 30 days\
 - `created_year`: Year when the YouTube channel was created\
-- `Population`: Total population of the country\
-- `Latitude`: Latitude coordinate of the country's location\
-- `Longitude`: Longitude coordinate of the country's location\
+- `population`: Total population of the country\
+- `latitude`: Latitude coordinate of the country's location\
+- `longitude`: Longitude coordinate of the country's location\
