@@ -1,6 +1,26 @@
 ---
-title: "Model"
+title: "model"
 output: html_document
+date: "2023-12-10"
 ---
 
-models
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+We have employed three multivariate linear regression models and one random forest model in our analysis.
+
+For the first linear regression model, we predicted the variable 'subscribers' using 'country', 'category', 'video_per_upload', 'uploads', and 'video_views' as predictor variables. The model is represented by the equation:
+
+\[ \text{Subscribers} = \beta_0 + \beta_1 \times \text{Country} + \beta_2 \times \text{Category} + \beta_3 \times \text{Video Per Upload} + \beta_4 \times \text{Uploads} + \beta_5 \times \text{Video Views} \]
+
+In the second linear regression model, 'earning differences' was the dependent variable, with the same set of predictor variables as the first model. The equation for this model is:
+
+\[ \text{Earning Differences} = \beta_0 + \beta_1 \times \text{Country} + \beta_2 \times \text{Category} + \beta_3 \times \text{Video Per Upload} + \beta_4 \times \text{Uploads} + \beta_5 \times \text{Video Views} \]
+
+The third linear regression model aimed to predict 'highest yearly earnings', again utilizing the same predictors. The model's equation is as follows:
+
+\[ \text{Highest Yearly Earnings} = \beta_0 + \beta_1 \times \text{Country} + \beta_2 \times \text{Category} + \beta_3 \times \text{Video Per Upload} + \beta_4 \times \text{Uploads} + \beta_5 \times \text{Video Views} \]
+
+Lastly, we implemented a random forest model with 'subscribers' as the response variable and 'country', 'category', 'video_per_upload', 'uploads', and 'video_views' as the predictors. This model is a non-linear approach that does not rely on the beta coefficients used in linear regression and is suitable for capturing more complex patterns in the data.
