@@ -1,0 +1,36 @@
+---
+title: "Project Report"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: "hide"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = TRUE)
+
+library(tidyverse)
+library(dplyr)
+library(plotly)
+```
+
+# Visualizing the Pulse of Global Entertainment: A Data-Driven Exploration of YouTube Statistics
+
+
+### Motivation
+In contemporary times, social media has assumed a multifaceted role. Individuals utilize platforms like YouTube not only for educational purposes but also for listening to music and staying informed with current news. This project specifically delves into the content produced by global YouTubers across various countries, since this disparity provides advertisers and channel owners with broader insights to enhance earnings and garner more followers. The primary dataset comprises information from the top 995-ranked YouTubers in the global YouTube community. We employ data visualization techniques to offer a comprehensive understanding of content differences from a geographical perspective. Additionally, we develop a predictive model for forecasting xxx. 
+
+
+### Inspiration
+Park M et al.'s 2017 study (Cultural values and cross-cultural video consumption on YouTube) explores the consumption patterns of popular videos in countries with variations in cultural values, language, GDP, and Internet penetration. Also, one user from Reddit has a similar question about their channels, which have the same content but there is a significant gap in subscribers between the English and Ukrainian versions.
+https://www.reddit.com/r/youtube/comments/15a1vi0/differences_in_the_content_experience_in/?rdt=42149
+
+
+### Research Questions
+Our aim is to examine potential differences in the rankings of top YouTubers and the content they produce across various countries having cultural and linguistic variations.
+
+
+
+
+

@@ -1,0 +1,134 @@
+---
+title: "Data cleaning"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(leaflet)
+library(ggplot2)
+
+# Import dataset
+df <-
+  read_csv("Data/Global YouTube Statistics.csv") |>
+  janitor::clean_names()
+
+# Check variable names 
+variable_names <- names(df)
+print(variable_names)
+
+cleaned_df <- df |>
+  select(-youtuber,-title,-video_views_rank, -country_rank,-channel_type_rank, -created_month, -created_date, -gross_tertiary_education_enrollment_percent, -unemployment_rate, -urban_population) |> 
+  rename(id = rank) |>
+  na.omit()
+  
+
+head(cleaned_df, 10)
+
+# Save as a new dataset
+write_csv(cleaned_df, path = "./Data/cleaned_youtube_df.csv")
+
+read_csv("Data/cleaned_youtube_df.csv")
+
+```
+
+```{r}
+table(cleaned_df$category)
+table(cleaned_df$channel_type)
+```
+
+```{r}
+table(cleaned_df$country)
+```
+```{r}
+table(cleaned_df$created_year)
+cleaned_df <- cleaned_df |>
+  filter(created_year >= 2005)
+```
+Since YouTube was created at 2005, we removed accounts created before 2005 since those might just be data entry error.
+
+map of channel counts in each country
+```{r}
+channel_counts_by_location <- cleaned_df|>
+  drop_na(c(latitude, longitude)) |>
+  group_by(country, longitude, latitude) |>
+  summarise(channel_count = n())
+
+world_map <- leaflet() |>
+  addTiles() |>
+  addMarkers(
+    data = channel_counts_by_location,
+    ~longitude, ~latitude,
+    label = ~paste(country, ": ", channel_count, " channels"),
+    popup = TRUE
+  )
+
+world_map
+```
+
+channel created year summary
+```{r}
+library(plotly)
+c("#C7CEBD", "#F2D9B6", "#A8C0B5", "#D1B9CB", "#B3CDD1",
+     "#F4E1C1", "#BBC1D0", "#E8C3C3", "#D2DFD9", "#E0C5A8","#8dab7f","#6b8e23")
+year_created_plot <- plot_ly(cleaned_df, x = ~created_year, type = "histogram", 
+                marker = list(color = "#B3CDD1", line = list(color = "white", width = 1)),
+                nbinsx = 30)
+
+# Update layout
+year_created_plot <- year_created_plot |>
+  layout(
+    title = "Distribution of Channel Creation Years",
+    xaxis = list(title = "Year of Creation"),
+    yaxis = list(title = "Number of Channels"),
+    showlegend = TRUE,
+    template = "plotly_white"  # Optional: Set a template for the plot
+  )
+
+
+year_created_plot
+```
+
+
+```{r}
+summary_data <- cleaned_df |>
+  mutate(earning_diff = highest_yearly_earnings - lowest_yearly_earnings)|>
+  filter(category != "nan")|>
+  group_by(category) |>
+  summarize(mean_earning_diff = mean(earning_diff),
+            median_earning_diff = median(earning_diff),)
+
+# Create a bar plot using Plotly
+plot <- plot_ly(data = summary_data, x = ~category, type = 'bar',
+                y = ~mean_earning_diff, name = 'Mean Earning Difference',marker = list(color = "#F4E1C1")) %>%
+  add_trace(y = ~median_earning_diff, name = 'Median Earning Difference', marker = list(color = "#C7CEBD"))
+
+# Add layout details
+plot <- plot|>
+  layout(title = 'Earning Difference Summary by Category',
+               xaxis = list(title = 'Category'),
+               yaxis = list(title = 'Earning Difference'))
+
+# Show the plot
+plotly::layout(plot, layout)
+```
+
+```{r}
+perUploadData <- cleaned_df |>
+  mutate(viewsPerUpload = video_views / uploads) |>
+  filter(viewsPerUpload < 600000000)
+scatter_plot_perUpLoad <- plot_ly(data = perUploadData, x = ~viewsPerUpload, y = ~highest_yearly_earnings, mode = 'markers')
+
+
+scatter_plot_perUpLoad <- scatter_plot_perUpLoad |>
+  layout(title = 'Relationship between Views per Upload and Highest Yearly Earning',
+               xaxis = list(title = 'Views per Upload'),
+               yaxis = list(title = 'Highest Yearly Earnings'))
+
+
+scatter_plot_perUpLoad
+```
+
+

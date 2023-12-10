@@ -1,6 +1,560 @@
 ---
-title: "report"
-output: html_document
+title: "Project Report"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: "hide"
 ---
 
-Here is the report!
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
+
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(leaflet)
+library(ggplot2)
+library(plotly)
+library(ggwordcloud)
+library(performance)
+library(ggpubr)
+library(knitr)
+
+cleaned_df<-
+  read_csv("Data/cleaned_youtube_df.csv")|>
+  janitor::clean_names() |>
+  filter(created_year >= 2005)
+```
+
+## Motivation
+
+In contemporary times, social media has assumed a multifaceted role. Individuals utilize platforms like YouTube not only for educational purposes but also for listening to music and staying informed with current news. This project specifically delves into the content produced by global YouTubers across various countries, since this disparity provides advertisers and channel owners with broader insights to enhance earnings and garner more followers. The primary dataset comprises information from the top 995-ranked YouTubers in the global YouTube community. We employ data visualization techniques to offer a comprehensive understanding of content differences from a geographical perspective. Additionally, we develop a predictive model for forecasting the success of YouTubers. 
+
+## Related work
+
+Park M et al.'s 2017 study (Cultural values and cross-cultural video consumption on YouTube) explores the consumption patterns of popular videos in countries with variations in cultural values, language, GDP, and Internet penetration. Also one user from [reddit](https://www.reddit.com/r/youtube/comments/15a1vi0/differences_in_the_content_experience_in/?rdt=42149) has a similar question about his channels, which have same contents but there is a big gap of subscribers in English and Ukraine. 
+
+
+## Initial questions
+  
+- 1.What are the factors that influence the success of YouTubers.
+- 2.Fit models to predict the success of YouTubers.
+  
+## Data Cleaning and Preprocessing
+
+We imported the data with read_csv and apply the function clean_names from janitor package to convert all the variable names to lower case and puts underscores in the gaps. Since YouTube was created in 2005, we removed accounts (N=6) created before 2005, which might be data entry error. We select the following variables for further analysis.
+
+- `rank`: Position of the YouTube channel based on the number of subscribers
+- `subscribers`: Number of subscribers to the channel
+- `video views`: Total views across all videos on the channel
+- `category`: Category or niche of the channel
+- `uploads`: Total number of videos uploaded on the channel
+- `Country`: Country where the YouTube channel originates
+- `channel_type`: Type of the YouTube channel (e.g., individual, brand)
+- `video_views_rank`: Ranking of the channel based on total video views
+- `country_rank`: Ranking of the channel based on the number of subscribers within its country
+- `channel_type_rank`: Ranking of the channel based on its type (individual or brand)
+- `video_views_for_the_last_30_days`: Total video views in the last 30 days
+- `lowest_monthly_earnings`: Lowest estimated monthly earnings from the channel
+- `highest_monthly_earnings`: Highest estimated monthly earnings from the channel
+- `lowest_yearly_earnings`: Lowest estimated yearly earnings from the channel
+- `highest_yearly_earnings`: Highest estimated yearly earnings from the channel
+- `subscribers_for_last_30_days`: Number of new subscribers gained in the last 30 days
+- `created_year`: Year when the YouTube channel was created
+- `Population`: Total population of the country
+- `Latitude`: Latitude coordinate of the country's location
+- `Longitude`: Longitude coordinate of the country's location
+
+```{r}
+# Make sure 'country' and 'category' are factors if they are not already
+cleaned_df$country <- as.factor(cleaned_df$country)
+cleaned_df$category <- as.factor(cleaned_df$category)
+
+# Add new variables 'video_per_upload' and 'earning_differences'
+cleaned_df$video_per_upload <- with(cleaned_df, video_views / uploads)
+cleaned_df$earning_differences <- with(cleaned_df, highest_yearly_earnings - lowest_yearly_earnings)
+```
+
+
+## EDA
+
+#### 1. Category variable exploration
+- 1. How does the top youtubers spreaded over countries?
+```{r}
+channel_counts_by_location <- cleaned_df|>
+  drop_na(c(latitude, longitude)) |>
+  group_by(country, longitude, latitude) |>
+  summarise(channel_count = n())
+
+world_map <- leaflet() |>
+  addTiles() |>
+  addMarkers(
+    data = channel_counts_by_location,
+    ~longitude, ~latitude,
+    label = ~paste(country, ": ", channel_count, " channels"),
+    popup = TRUE
+  )
+
+world_map
+```
+
+We find that the top five ranked YouTubers are from the United States (N = 311), followed by India (N = 168), Brazil (N = 61), the United Kingdom (N = 43), and Mexico (N = 33).
+
+- 2. How are the distribution of numerical variables.
+
+```{r fig.width = 9,fig.asp = 1.2,out.width = "100%"}
+youtube_df <- cleaned_df
+
+all_columns <- colnames(youtube_df)
+columns_to_plot <- all_columns[!all_columns %in% c("id", "category","country","abbreviation","channel_type","population","latitude","longitude","created_year")]
+
+
+numeric_data_long <- 
+  youtube_df[, columns_to_plot] %>% 
+  gather(key = "variable", value = "value")
+
+
+# Create a single plot with facets for each numeric variable
+p <- ggplot(numeric_data_long, aes(x = value)) +
+  geom_histogram(aes(y = ..density..),bins = 15, fill = "#8dab7f", alpha = 0.8) +
+  geom_density(color="#6b8e23")+
+  facet_wrap(~ variable, scales = "free", ncol = 3) +
+  scale_x_continuous(labels = scales::comma) +
+  theme_minimal(base_size = 10) +  
+  theme(
+    strip.text.x = element_text(size = 10, face = "bold"), 
+    axis.text.x = element_text(angle = 20, hjust = 1, vjust = 1,size=7,face = "bold"), # Angle x-axis labels for readability
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.margin = margin(1, 1, 1, 1, "cm"), # Adjust the plot margins
+    strip.background = element_blank(),
+    panel.spacing = unit(3, "lines")
+  ) +
+  labs(
+    title = "Distribution of Numeric Variables",
+    x = "Value",
+    y = "Frequency",
+    caption = "Source: YouTube Data"
+  )
+# Convert to an interactive plot
+ggplotly(p)
+```
+
+We create interactive plots by applying `ploty` to visualize the density distribution of numerical variables. Upon observing right skewness, we apply a logarithmic transformation to these numeric values. 
+
+```{r fig.width = 9,fig.asp = 1.2,out.width = "100%"}
+p <- ggplot(numeric_data_long, aes(x = log(value+1))) +
+  geom_histogram(aes(y = ..density..),bins = 15, fill = "#8dab7f", alpha = 0.8) +
+  geom_density(color="#6b8e23")+
+  facet_wrap(~ variable, scales = "free", ncol = 3) +
+  scale_x_continuous(labels = scales::comma) +
+  theme_minimal(base_size = 10) +  
+  theme(
+    strip.text.x = element_text(size = 10, face = "bold"), 
+    axis.text.x = element_text(angle = 20, hjust = 1, vjust = 1,size=7,face = "bold"), # Angle x-axis labels for readability
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.margin = margin(1, 1, 1, 1, "cm"), # Adjust the plot margins
+    strip.background = element_blank(),
+    panel.spacing = unit(3, "lines")
+  ) +
+  labs(
+    title = "Distribution of Numeric Variables",
+    x = "Value",
+    y = "Frequency",
+    caption = "Source: YouTube Data"
+  )
+# Convert to an interactive plot
+ggplotly(p)
+```
+
+
+- 3. How are the numeric variables correlated?
+
+```{r fig.width = 9,fig.asp = 0.8}
+# Calculate the correlation matrix
+cor_matrix <- cor(youtube_df[, columns_to_plot], use = "complete.obs")
+
+fig <- plot_ly(x = colnames(cor_matrix), y = rownames(cor_matrix), z = cor_matrix, 
+               type = "heatmap",colorscale ="Greens"  , zmin = -1, zmax = 1)
+
+fig <- fig %>% layout(
+  yaxis = list(autorange = "reversed"),
+  width=800,
+  height=600,
+  title = "Correlation Matrix")
+
+fig
+```
+
+The heat map depicts the Pearson correlation between continuous variables, which reveals a relatively high correlation between the variables `Subscribers` and `Video Views` ($r$ = 0.85). The correlation of these two variables with the others is at a moderately weak level ($r$ around 0.46), with no correlation to the `Uploads` variable ($r$ = 0.08 and 0.15). Notably, the variables `Lowest Earnings` by year and month and `Highest Earnings` by year and month exhibit an absolute correlation of nearly 100%.
+
+#### 2. Category variable exploration
+
+- Channel created year summary
+
+```{r}
+year_created_plot <- plot_ly(cleaned_df, x = ~created_year, type = "histogram", 
+                marker = list(color = "#B3CDD1", line = list(color = "white", width = 1)),
+                nbinsx = 30)
+
+# Update layout
+year_created_plot <- year_created_plot |>
+  layout(
+    title = "Distribution of Channel Creation Years",
+    xaxis = list(title = "Year of Creation"),
+    yaxis = list(title = "Number of Channels"),
+    showlegend = FALSE,
+    template = "plotly_white"  # Optional: Set a template for the plot
+  )
+
+
+year_created_plot
+```
+
+The summary plot we generated showcases the relationship between the year of channel creation on the x-axis and the corresponding number of channels on the y-axis. Notably, the data reveals a pronounced peak in the year 2014, with 66 channels coming into existence during that period. This peak suggests a surge in YouTube channel creation, indicating potential shifts in content creation trends, platform popularity, or other influential factors during that specific year. Furthermore, our analysis indicates a sustained period of notable channel creation from 2011 to 2016, highlighting a consistent and relatively high annual rate of channel initiation within this timeframe.
+- Word Cloud
+```{r}
+category_data <- youtube_df %>%
+  filter(!is.na(category) & category != "nan") %>%
+  count(category) %>%
+  mutate(n=n*30) %>% 
+  ungroup()
+
+
+category_data$scaled_size <- log(category_data$n + 1) # adding 1 to avoid log(0)
+
+wordcloud_plot <- ggplot(category_data, aes(label = category, size = scaled_size)) +
+  geom_text_wordcloud(
+    aes(color = n),
+    shape = 'circle',
+    rm_outside = TRUE
+  ) +
+  scale_size_area(max_size = 10) + 
+  scale_color_gradient(low = "#ffcc99", high = "#8dab7f") +
+  theme_void(base_family = "sans") +
+  theme(legend.position = "none", 
+        plot.margin = margin(1, 1, 1, 1, "cm")) # Adjust margins around the plot
+
+# Display the plot
+wordcloud_plot
+
+```
+
+We exclude the NaN values in the category, and modify the frequency `n` of each category, 
+to a new variable `scale`, which equals to the log(`n`*30+1). We use this scaled parameter to build the word cloud. The most frequently used categories, as observed from the word cloud chart, include `Entertainment`, `Music`, `People & Blogs`, and `Gaming`.
+
+- Pie Chart
+
+```{r}
+channel_type_counts <- table(youtube_df$channel_type)
+
+channel_type_counts <- youtube_df %>%
+  group_by(channel_type) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+color <- c("#ffcc99","#ffe4b5", "#ffd180","#ffa07a","#d1d17a", "#8dab7f", "#D2DFD9", "#A8C0B5", "#D1B9CB", "#B3CDD1", "#BBC1D0", "#E8C3C3","#C7CEBD", "#D2DFD9","#6b8e23")
+
+# Create a pie chart using plotly with the custom colors
+fig <- plot_ly(channel_type_counts, labels = ~channel_type, values = ~count, type = 'pie',
+               textinfo = 'label+percent',
+               insidetextorientation = 'radial',
+               marker = list(colors = color))
+fig %>% 
+  layout(title = 'Pie Chart of Channel Types',
+         showlegend = FALSE,
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+```
+
+In this interactive pie chart, we demonstrate the frequency of proportion in Channel type. The most frequently viewed channel, as observed from the word cloud chart, include `Entertainment`, `Music`, `People & Blogs`, `Gaming` and `Comedy`.
+
+- Bubble Chart: Subscribers vs. Video Views by Category
+
+```{r fig.width = 9}
+
+size_factor <- 10^(-8.7) # Adjust this factor as needed to scale sizes up or down
+
+youtube_df %>%
+  filter(!is.na(category) & category != "nan") %>%
+  plot_ly(
+    x = ~subscribers, 
+    y = ~video_views, 
+    size = ~video_views_for_the_last_30_days * size_factor, 
+    color = ~category,
+    text = ~category,
+    hoverinfo = 'text+x+y',
+    type = 'scatter',
+    mode = 'markers',
+    marker = list(
+      sizemode = 'area',
+      sizeref = 2 * max(youtube_df$video_views_for_the_last_30_days * size_factor)/100
+    )
+  ) %>%
+  layout(
+    title = 'Subscribers vs. Video Views by Category',
+    xaxis = list(type = 'log', title = 'Subscribers'),
+    yaxis = list(type = 'log', title = 'Video Views (in billions)'),
+    hovermode = 'closest',
+    showlegend = TRUE
+  )
+```
+
+
+```{r}
+color <- c("#ffe4b5", "#ffa07a","#d1d17a" , "#D2DFD9", "#A8C0B5", "#D1B9CB", "#B3CDD1", "#BBC1D0", "#E8C3C3")
+
+earning_plot_data <-
+  read_csv("Data/Global YouTube Statistics.csv",locale = locale(encoding = "Windows-1252"))  %>%
+  janitor::clean_names() %>% 
+  drop_na() %>% 
+  select(youtuber, channel_type, highest_yearly_earnings) %>% 
+  mutate(youtuber = stringi::stri_replace_all_regex(youtuber, "[^\x01-\x7F]", "")) %>% 
+  arrange(desc(highest_yearly_earnings)) %>%
+  top_n(15, highest_yearly_earnings)
+
+
+
+plot_ly(earning_plot_data, x = ~highest_yearly_earnings, y = ~youtuber, 
+                type = 'bar', orientation = 'h',
+                color = ~channel_type, colors = color,
+                text = ~paste('$', formatC(highest_yearly_earnings, format = "d", big.mark = ",")),
+                textposition = 'inside',
+                insidetextanchor = 'end', 
+                textfont = list(color = 'white'), # text color
+                hoverinfo = 'text',
+                hovertemplate = paste('<b>Youtuber:</b> %{y}<br>',
+                                      '<b>Earnings:</b> $%{x}<extra></extra>')) %>%
+  layout(title = 'Top 15 YouTube Channels by Highest Yearly Earnings',
+         xaxis = list(title = 'Yearly Earnings ($)'),
+         yaxis = list(title = ''),
+         showlegend = TRUE,
+         margin = list(l = 100, r = 25, t = 50, b = 50),
+         font = list(family = "Arial, sans-serif", size = 12, color = "#333333"))
+
+```
+For the Top 15 YouTube Channels by Highest Yearly Earnings, first and foremost, KIMPO has the highest earnings at 163,400,400 US dollars in 2023, which is triple of the lowest earnings(59,800,000 dollars) of dednahype. Secondly, Entertainment is still the most predominant category among these channels. In the 15 YouTube Channels, animal and comedy have respectably only one position.
+```{r}
+perUploadData <- cleaned_df |>
+  mutate(viewsPerUpload = video_views / uploads) |>
+  filter(viewsPerUpload < 600000000)
+scatter_plot_perUpLoad <- plot_ly(data = perUploadData, x = ~viewsPerUpload, y = ~highest_yearly_earnings, mode = 'markers')
+
+
+scatter_plot_perUpLoad <- scatter_plot_perUpLoad |>
+  layout(title = 'Relationship between Views per Upload and Highest Yearly Earning',
+               xaxis = list(title = 'Views per Upload'),
+               yaxis = list(title = 'Highest Yearly Earnings'))
+
+
+scatter_plot_perUpLoad
+```
+The scatterplot illustrates a discernible but weak downward slope between the highest earning and the number of YouTube views per upload. This implies that, in general, channels with a higher number of views per upload tend to have slightly lower earnings. While the relationship is present, its strength is limited, indicating that other factors beyond views per upload are likely influencing the earnings of YouTube channels.
+
+## Model
+
+#### 1. Fit the multiple linear regression model of **_subscribers_**
+Model statement:
+$subscribers =\beta_0+ \beta_1country +\beta_2category +\beta_3videoperupload + beta_4uploads + beta_5(videoviews)$
+
+```{r}
+youtube_df <- youtube_df %>% drop_na()
+# Fit the Multiple Linear Regression model++uploads +video_views, data = youtube_df)
+mlr_model <- lm(subscribers ~ country + category + video_per_upload +uploads +video_views , data = youtube_df)
+  
+youtube_df %>% 
+  modelr::add_predictions(mlr_model) %>% 
+  ggplot(aes(x = earning_differences, y = pred)) +
+  geom_point() +
+  labs(
+        title = "Multivariate Linear Model",
+        x = "earning_differences",
+        y = "subscribers") +
+  theme_pubclean()
+
+check_model(mlr_model, check = c("linearity", "outliers", "qq", "normality"))
+
+# Summary of the model
+mlr_model%>% 
+broom::tidy()%>% 
+knitr::kable(digits=3) 
+
+mlr_model %>% 
+broom::glance() %>%
+knitr::kable(digits=3)
+```
+
+#### 2. Fit the multiple linear regression model of **_earning_differences_**
+
+Model statement:
+$earningdifferences =\beta_0+ \beta_1country +\beta_2category +\beta_3videoperupload + beta_4uploads + beta_5(videoviews)$
+
+```{r}
+mlr_model_1 <- lm(earning_differences ~ country + category + video_per_upload +uploads +video_views , data = youtube_df)
+  
+  youtube_df %>% 
+  modelr::add_predictions(mlr_model_1) %>% 
+  ggplot(aes(x = earning_differences, y = pred)) +
+  geom_point() +
+  labs(
+        title = "Multivariate Linear Model",
+        x = "earning_differences",
+        y = "predictions") +
+  theme_pubclean()
+
+check_model(mlr_model_1, check = c("linearity", "outliers", "qq", "normality"))
+
+# Summary of the model
+mlr_model_1%>% 
+broom::tidy() %>%
+knitr::kable(digits=3)
+
+mlr_model_1 %>% 
+broom::glance() %>%
+knitr::kable(digits=3)
+```
+
+#### 3. Fit the multiple linear regression model of **_highest_yearly_earnings_**
+
+Model statement:
+$highestyearlyearnings =\beta_0+ \beta_1country +\beta_2category +\beta_3videoperupload + beta_4uploads + beta_5(videoviews)$
+
+```{r}
+mlr_model_2 <- lm(highest_yearly_earnings ~ country + category + video_per_upload+uploads +video_views , data = youtube_df)
+
+  youtube_df %>% 
+  modelr::add_predictions(mlr_model_2) %>% 
+  ggplot(aes(x = earning_differences, y = pred)) +
+  geom_point() +
+  labs(
+        title = "Multivariate Linear Model",
+        x = "highest_yearly_earnings",
+        y = "predictions") +
+  theme_pubclean()
+
+check_model(mlr_model_2, check = c("linearity", "outliers", "qq", "normality"))
+
+# Summary of the model
+mlr_model_2%>% 
+broom::tidy() %>%
+knitr::kable(digits=3)
+
+mlr_model_2 %>% 
+broom::glance() %>%
+knitr::kable(digits=3)
+```
+#### 4. Build Random Forest **_subscribers_**
+
+```{r}
+library(randomForest)
+library(caTools)
+set.seed(42) # for reproducibility
+split <- sample.split(youtube_df$subscribers, SplitRatio = 0.8)
+train_data <- subset(youtube_df, split == TRUE)
+test_data <- subset(youtube_df, split == FALSE)
+
+# Train a Random Forest model
+rf_modelS <- randomForest(subscribers ~ ., data=youtube_df, importance=TRUE)
+
+# Make predictions on the test set
+predictions <- predict(rf_modelS, test_data)
+
+# Calculate R^2 score
+r2_score <- cor(test_data$subscribers, predictions)^2
+
+# Output the model and R^2 score
+print(rf_modelS)
+```
+
+We use the same predictors `country`, `category`, `video_per_upload`, `uploads`, `video_views` and build three models with response `subscribers`, `earning_differences`, `highest_yearly_earnings`. The respective $r^2$ are $0.754, 0.438, 0.438$, which means that, with the specified covariates, the model's performance in predicting subscribers is superior to the others. To compare the performance with multiple linear regression model, we also trained a Random Forest model to predict the number of subscribers. The data was split into training data and test data with a proportion of 0.8. The $r^2$ score of 0.977 significantly outperforms the result from the linear regression model, where $r^2$ was 0.754. This suggests that the Random Forest model explains almost all the variability in the subscriber count. Based on these results, we conclude that the number of video views is also one of the most important factors for predicting the number of subscribers.
+
+## Discussion
+We also check the linear regression assumptions (e.g., homoscedasticity, normality of residuals) and observe potential outliers that can impact the model's accuracy. To enhance model accuracy, we may consider removing these outliers and subsequently explore missing value imputation. In summary, the Random Forest model proves highly effective for this dataset; however, further validation, potentially with different datasets or cross-validation, is advisable to ensure the model's generalizability and assess the potential impact of overfitting.
+
+#############################################################################
+#### Interpretation for model 1
+
+1. **Model Formula**:
+   - The model predicts 'subscribers' based on 'country', 'category', 'video_per_upload', 'uploads', and 'video_views'.
+
+2. **Residuals**:
+   - The residuals' section provides a five-number summary (minimum, 1st quartile, median, 3rd quartile, maximum) of the model residuals. Large values for the minimum and maximum suggest the presence of outliers.
+
+3. **Coefficients**:
+   - The estimates for each predictor variable (country, category, video_per_upload, uploads, video_views) are provided along with their standard errors, t-values, and p-values.
+   - Most of the country and category levels are not statistically significant predictors of subscribers (p > 0.05), except for 'countrySouth Korea' which is significant (p = 0.0126, indicated by `*`).
+   - The variable 'video_per_upload' is not a significant predictor (p = 0.4483).
+   - The variable 'uploads' is significant (p < 0.001, indicated by `***`).
+   - The variable 'video_views' is highly significant (p < 2e-16, indicated by `***`), indicating a strong association with the number of subscribers.
+
+4. **Model Summary**:
+   - **Residual standard error**: An estimate of the standard deviation of the residuals, which gives a measure of the typical size of the residuals.
+   - **Multiple R-squared**: The proportion of variance in the dependent variable that is predictable from the independent variables (0.7526, or 75.26%).
+   - **Adjusted R-squared**: Adjusted for the number of predictors in the model, providing a more accurate measure of model fit (0.724, or 72.4%).
+   - **F-statistic**: A measure of how much the model improves the fit compared to a model with no predictors. The associated p-value (p < 2e-16) suggests the model as a whole is statistically significant.
+
+#### Interpretation:
+The model explains a significant amount of the variance in the number of subscribers (as indicated by the R-squared values). 'video_views' is particularly a strong predictor. However, most of the individual country and category predictors do not significantly contribute to the model. This might suggest that while overall video views are important, where those views come from (which country) and the content category may not be as important, with the exception of South Korea.
+
+
+
+#### interpretation for model2
+1. **Model Formula**:
+   - The model is predicting 'earning_differences' based on the independent variables 'D'.
+
+2. **Residuals**:
+   - The residuals' section provides a five-number summary of the residuals from the model. The wide range of values from the minimum to the maximum indicates the presence of large residuals, suggesting that there may be outliers or that the model may not be adequately capturing the pattern in the data.
+
+3. **Coefficients**:
+   - The coefficients represent the estimated change in 'earning_differences' for a one-unit change in the predictor, holding other variables constant.
+   - Most of the country and category coefficients are not statistically significant (p > 0.05), which suggests they do not have a unique effect on the 'earning_differences' after accounting for other factors in the model.
+   - 'video_per_upload' has a coefficient that is not statistically significant (p = 0.3893).
+   - 'video_views' is highly significant (p < 2e-16, indicated by `***`), indicating a strong association with 'earning_differences'.
+
+4. **Model Summary**:
+   - **Residual standard error**: An estimate of the standard deviation of the residuals.
+   - **Multiple R-squared**: The proportion of variance in the dependent variable that is predictable from the independent variables (0.4386, or 43.86%).
+   - **Adjusted R-squared**: Adjusted for the number of predictors in the model, which provides a more accurate measure of model fit (0.3736, or 37.36%).
+   - **F-statistic**: A measure of the overall significance of the model. The associated p-value (p < 2e-16) suggests the model as a whole is statistically significant.
+
+#### Interpretation:
+The model explains a moderate amount of the variance in 'earning_differences'. The variable 'video_views' stands out as a strong predictor. The country and category variables generally do not significantly predict 'earning_differences', with a few exceptions. Notably, the 'countryLatvia' coefficient is significant (p = 0.007876), suggesting it has a unique effect on 'earning_differences'.
+
+#### Recommendations:
+- Given the large residuals and the significance of some country coefficients, further investigation is warranted. You might want to look into possible outliers or influential points that could be affecting the model.
+- Consider exploring different transformations of the dependent and independent variables to achieve a better fit.
+- Simplify the model by potentially removing non-significant predictors, although the significance of the overall model suggests that at least some of the predictors are useful. The low significance of many individual predictors suggests that there might be multicollinearity or other issues affecting the estimates.
+- The presence of significant predictors like 'video_views' may warrant a closer look at potential non-linear relationships or interactions between variables that could improve model fit.
+
+
+#### interpretation for model 3
+The image you've uploaded shows the output from a Multiple Linear Regression (MLR) model in R, with 'highest_yearly_earnings' as the dependent variable. The model includes 'country', 'category', 'video_per_upload', and 'video_views' as independent variables. Here's an interpretation of the output:
+
+1. **Model Formula**:
+   - The model predicts 'highest_yearly_earnings' based on the independent variables mentioned.
+
+2. **Residuals**:
+   - The residuals' section provides a five-number summary of the model's residuals. The large range suggests the presence of outliers or extreme values in the data.
+
+3. **Coefficients**:
+   - The estimates for each predictor variable are given along with their standard errors, t-values, and p-values.
+   - Most coefficients are not statistically significant, but there are a few exceptions:
+     - 'countryLatvia' has a positive coefficient that is significant at the 0.01 level (p = 0.002892).
+     - 'countrySouth Korea' has a negative coefficient that is significant at the 0.001 level (p = 0.000702).
+   - 'video_per_upload' is not a significant predictor (p = 0.29118).
+   - 'video_views' has a positive and highly significant coefficient (p < 2e-16), indicating a strong and statistically significant relationship with 'highest_yearly_earnings'.
+
+4. **Model Summary**:
+   - **Residual standard error**: An estimate of the standard deviation of the residuals.
+   - **Multiple R-squared**: A measure of the proportion of variance in the dependent variable explained by the model (0.4387, or 43.87%).
+   - **Adjusted R-squared**: Adjusted for the number of predictors; it provides a more accurate measure of the goodness of fit (0.3737, or 37.37%).
+   - **F-statistic**: Reflects the overall significance of the model. A very low p-value (< 2.2e-16) indicates that the model is statistically significant.
+
+#### Interpretation:
+The model has a moderate explanatory power for 'highest_yearly_earnings', with 'video_views' being a particularly strong predictor. While most country and category variables are not significant on their own, the overall model is significant, suggesting that there is a combination of these variables that helps predict the highest yearly earnings. The significant predictors for 'countryLatvia' and 'countrySouth Korea' suggest that being in these countries is associated with a significant difference in 'highest_yearly_earnings' compared to the baseline country (not shown in the output, likely the reference category). 

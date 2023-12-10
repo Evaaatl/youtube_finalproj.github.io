@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Data cleaning</title>
+
+<script src="site_libs/header-attrs-2.24/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/journal.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<link href="site_libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="site_libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="site_libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="site_libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="site_libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="site_libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="site_libs/leaflet-binding-2.2.1/leaflet.js"></script>
+<script src="site_libs/plotly-binding-4.10.3/plotly.js"></script>
+<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
+<link href="site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
+<script src="site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+<link href="site_libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="site_libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="report.html">Report</a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Data cleaning</h1>
+
+</div>
+
+
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(tidyr)
+library(tidyverse)</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ forcats   1.0.0     ✔ readr     2.1.4
+## ✔ ggplot2   3.4.3     ✔ stringr   1.5.0
+## ✔ lubridate 1.9.2     ✔ tibble    3.2.1
+## ✔ purrr     1.0.2</code></pre>
+<pre><code>## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(leaflet)
+library(ggplot2)
+
+# Import dataset
+df &lt;-
+  read_csv(&quot;Data/Global YouTube Statistics.csv&quot;) |&gt;
+  janitor::clean_names()</code></pre>
+<pre><code>## Rows: 995 Columns: 28
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr  (7): Youtuber, category, Title, Country, Abbreviation, channel_type, cr...
+## dbl (21): rank, subscribers, video views, uploads, video_views_rank, country...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code># Check variable names 
+variable_names &lt;- names(df)
+print(variable_names)</code></pre>
+<pre><code>##  [1] &quot;rank&quot;                                       
+##  [2] &quot;youtuber&quot;                                   
+##  [3] &quot;subscribers&quot;                                
+##  [4] &quot;video_views&quot;                                
+##  [5] &quot;category&quot;                                   
+##  [6] &quot;title&quot;                                      
+##  [7] &quot;uploads&quot;                                    
+##  [8] &quot;country&quot;                                    
+##  [9] &quot;abbreviation&quot;                               
+## [10] &quot;channel_type&quot;                               
+## [11] &quot;video_views_rank&quot;                           
+## [12] &quot;country_rank&quot;                               
+## [13] &quot;channel_type_rank&quot;                          
+## [14] &quot;video_views_for_the_last_30_days&quot;           
+## [15] &quot;lowest_monthly_earnings&quot;                    
+## [16] &quot;highest_monthly_earnings&quot;                   
+## [17] &quot;lowest_yearly_earnings&quot;                     
+## [18] &quot;highest_yearly_earnings&quot;                    
+## [19] &quot;subscribers_for_last_30_days&quot;               
+## [20] &quot;created_year&quot;                               
+## [21] &quot;created_month&quot;                              
+## [22] &quot;created_date&quot;                               
+## [23] &quot;gross_tertiary_education_enrollment_percent&quot;
+## [24] &quot;population&quot;                                 
+## [25] &quot;unemployment_rate&quot;                          
+## [26] &quot;urban_population&quot;                           
+## [27] &quot;latitude&quot;                                   
+## [28] &quot;longitude&quot;</code></pre>
+<pre class="r"><code>cleaned_df &lt;- df |&gt;
+  select(-youtuber,-title,-video_views_rank, -country_rank,-channel_type_rank, -created_month, -created_date, -gross_tertiary_education_enrollment_percent, -unemployment_rate, -urban_population) |&gt; 
+  rename(id = rank) |&gt;
+  na.omit()
+  
+
+head(cleaned_df, 10)</code></pre>
+<pre><code>## # A tibble: 10 × 18
+##       id subscribers  video_views category       uploads country    abbreviation
+##    &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;       
+##  1     1   245000000 228000000000 Music            20082 India      IN          
+##  2     3   166000000  28368841870 Entertainment      741 United St… US          
+##  3     4   162000000 164000000000 Education          966 United St… US          
+##  4     5   159000000 148000000000 Shows           116536 India      IN          
+##  5     9   106000000  90479060027 People &amp; Blogs     493 Russia     RU          
+##  6    10    98900000  77180169894 Entertainment      574 United St… US          
+##  7    11    96700000  57856289381 Music             8548 India      IN          
+##  8    12    96000000  77428473662 Sports           70127 United St… US          
+##  9    14    89800000  32144597566 People &amp; Blogs     543 South Kor… KR          
+## 10    16    83000000 101000000000 Shows            71270 India      IN          
+## # ℹ 11 more variables: channel_type &lt;chr&gt;,
+## #   video_views_for_the_last_30_days &lt;dbl&gt;, lowest_monthly_earnings &lt;dbl&gt;,
+## #   highest_monthly_earnings &lt;dbl&gt;, lowest_yearly_earnings &lt;dbl&gt;,
+## #   highest_yearly_earnings &lt;dbl&gt;, subscribers_for_last_30_days &lt;dbl&gt;,
+## #   created_year &lt;dbl&gt;, population &lt;dbl&gt;, latitude &lt;dbl&gt;, longitude &lt;dbl&gt;</code></pre>
+<pre class="r"><code># Save as a new dataset
+write_csv(cleaned_df, path = &quot;./Data/cleaned_youtube_df.csv&quot;)</code></pre>
+<pre><code>## Warning: The `path` argument of `write_csv()` is deprecated as of readr 1.4.0.
+## ℹ Please use the `file` argument instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.</code></pre>
+<pre class="r"><code>read_csv(&quot;Data/cleaned_youtube_df.csv&quot;)</code></pre>
+<pre><code>## Rows: 589 Columns: 18
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr  (4): category, country, abbreviation, channel_type
+## dbl (14): id, subscribers, video_views, uploads, video_views_for_the_last_30...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre><code>## # A tibble: 589 × 18
+##       id subscribers  video_views category       uploads country    abbreviation
+##    &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt; &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;       
+##  1     1   245000000 228000000000 Music            20082 India      IN          
+##  2     3   166000000  28368841870 Entertainment      741 United St… US          
+##  3     4   162000000 164000000000 Education          966 United St… US          
+##  4     5   159000000 148000000000 Shows           116536 India      IN          
+##  5     9   106000000  90479060027 People &amp; Blogs     493 Russia     RU          
+##  6    10    98900000  77180169894 Entertainment      574 United St… US          
+##  7    11    96700000  57856289381 Music             8548 India      IN          
+##  8    12    96000000  77428473662 Sports           70127 United St… US          
+##  9    14    89800000  32144597566 People &amp; Blogs     543 South Kor… KR          
+## 10    16    83000000 101000000000 Shows            71270 India      IN          
+## # ℹ 579 more rows
+## # ℹ 11 more variables: channel_type &lt;chr&gt;,
+## #   video_views_for_the_last_30_days &lt;dbl&gt;, lowest_monthly_earnings &lt;dbl&gt;,
+## #   highest_monthly_earnings &lt;dbl&gt;, lowest_yearly_earnings &lt;dbl&gt;,
+## #   highest_yearly_earnings &lt;dbl&gt;, subscribers_for_last_30_days &lt;dbl&gt;,
+## #   created_year &lt;dbl&gt;, population &lt;dbl&gt;, latitude &lt;dbl&gt;, longitude &lt;dbl&gt;</code></pre>
+<pre class="r"><code>table(cleaned_df$category)</code></pre>
+<pre><code>## 
+##      Autos &amp; Vehicles                Comedy             Education 
+##                     2                    40                    33 
+##         Entertainment      Film &amp; Animation                Gaming 
+##                   145                    28                    49 
+##         Howto &amp; Style                Movies                 Music 
+##                    13                     2                   110 
+##                   nan       News &amp; Politics Nonprofits &amp; Activism 
+##                    34                    21                     2 
+##        People &amp; Blogs        Pets &amp; Animals  Science &amp; Technology 
+##                    72                     3                    12 
+##                 Shows                Sports              Trailers 
+##                    12                     9                     2</code></pre>
+<pre class="r"><code>table(cleaned_df$channel_type)</code></pre>
+<pre><code>## 
+##       Animals         Autos        Comedy     Education Entertainment 
+##             3             2            30            39           194 
+##          Film         Games         Howto         Music           nan 
+##            29            50            14           125             1 
+##          News     Nonprofit        People        Sports          Tech 
+##            26             2            51            10            13</code></pre>
+<pre class="r"><code>table(cleaned_df$country)</code></pre>
+<pre><code>## 
+##            Argentina            Australia             Barbados 
+##                   11                    2                    1 
+##               Brazil               Canada                Chile 
+##                   33                    6                    3 
+##                China             Colombia                 Cuba 
+##                    1                    9                    1 
+##              Ecuador                Egypt          El Salvador 
+##                    2                    2                    1 
+##               France              Germany                India 
+##                    4                    4                  144 
+##            Indonesia                Italy                Japan 
+##                   20                    2                    4 
+##               Jordan               Kuwait               Latvia 
+##                    3                    1                    1 
+##             Malaysia               Mexico          Netherlands 
+##                    1                   17                    2 
+##             Pakistan          Philippines               Russia 
+##                    6                    8                   13 
+##                Samoa         Saudi Arabia            Singapore 
+##                    1                    6                    2 
+##          South Korea                Spain               Sweden 
+##                    9                   11                    2 
+##          Switzerland             Thailand               Turkey 
+##                    1                   13                    3 
+##              Ukraine United Arab Emirates       United Kingdom 
+##                    5                    7                   27 
+##        United States            Venezuela              Vietnam 
+##                  197                    1                    2</code></pre>
+<pre class="r"><code>table(cleaned_df$created_year)</code></pre>
+<pre><code>## 
+## 1970 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 
+##    1   14   45   28   29   30   19   48   43   48   66   48   48   39   26   18 
+## 2020 2021 2022 
+##   20   15    4</code></pre>
+<pre class="r"><code>cleaned_df &lt;- cleaned_df |&gt;
+  filter(created_year &gt;= 2005)</code></pre>
+<p>Since YouTube was created at 2005, we removed accounts created before
+2005 since those might just be data entry error.</p>
+<p>map of channel counts in each country</p>
+<pre class="r"><code>channel_counts_by_location &lt;- cleaned_df|&gt;
+  drop_na(c(latitude, longitude)) |&gt;
+  group_by(country, longitude, latitude) |&gt;
+  summarise(channel_count = n())</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;country&#39;, &#39;longitude&#39;. You can override
+## using the `.groups` argument.</code></pre>
+<pre class="r"><code>world_map &lt;- leaflet() |&gt;
+  addTiles() |&gt;
+  addMarkers(
+    data = channel_counts_by_location,
+    ~longitude, ~latitude,
+    label = ~paste(country, &quot;: &quot;, channel_count, &quot; channels&quot;),
+    popup = TRUE
+  )
+
+world_map</code></pre>
+<div class="leaflet html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-123e365afc133a311178" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-123e365afc133a311178">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org/copyright/\">OpenStreetMap<\/a>,  <a href=\"https://opendatacommons.org/licenses/odbl/\">ODbL<\/a>"}]},{"method":"addMarkers","args":[[-38.416097,-25.274398,13.193887,-14.235004,56.130366,-35.675147,35.86166,4.570868,21.521757,-1.831239,26.820553,13.794185,46.227638,51.165691,20.593684,-0.7892749999999999,41.87194,36.204824,30.585164,29.31166,56.879635,4.210484,23.634501,52.132633,30.375321,12.879721,61.52401,-13.759029,23.885942,1.352083,35.907757,40.463667,60.128161,46.818188,15.870032,38.963745,48.379433,23.424076,55.378051,37.09024,6.42375,14.058324],[-63.616672,133.775136,-59.543198,-51.92528,-106.346771,-71.542969,104.195397,-74.29733299999999,-77.781167,-78.18340600000001,30.802498,-88.89653,2.213749,10.451526,78.96288,113.921327,12.56738,138.252924,36.238414,47.481766,24.603189,101.975766,-102.552784,5.291266,69.345116,121.774017,105.318756,-172.104629,45.079162,103.819836,127.766922,-3.74922,18.643501,8.227512000000001,100.992541,35.243322,31.16558,53.847818,-3.435973,-95.712891,-66.58973,108.277199],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},true,null,null,null,["Argentina :  11  channels","Australia :  2  channels","Barbados :  1  channels","Brazil :  33  channels","Canada :  6  channels","Chile :  3  channels","China :  1  channels","Colombia :  9  channels","Cuba :  1  channels","Ecuador :  2  channels","Egypt :  2  channels","El Salvador :  1  channels","France :  4  channels","Germany :  4  channels","India :  144  channels","Indonesia :  20  channels","Italy :  2  channels","Japan :  4  channels","Jordan :  3  channels","Kuwait :  1  channels","Latvia :  1  channels","Malaysia :  1  channels","Mexico :  17  channels","Netherlands :  2  channels","Pakistan :  6  channels","Philippines :  8  channels","Russia :  13  channels","Samoa :  1  channels","Saudi Arabia :  6  channels","Singapore :  2  channels","South Korea :  9  channels","Spain :  11  channels","Sweden :  2  channels","Switzerland :  1  channels","Thailand :  13  channels","Turkey :  3  channels","Ukraine :  5  channels","United Arab Emirates :  7  channels","United Kingdom :  27  channels","United States :  196  channels","Venezuela :  1  channels","Vietnam :  2  channels"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[-38.416097,61.52401],"lng":[-172.104629,138.252924]}},"evals":[],"jsHooks":[]}</script>
+<p>channel created year summary</p>
+<pre class="r"><code>library(plotly)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;plotly&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:ggplot2&#39;:
+## 
+##     last_plot</code></pre>
+<pre><code>## The following object is masked from &#39;package:stats&#39;:
+## 
+##     filter</code></pre>
+<pre><code>## The following object is masked from &#39;package:graphics&#39;:
+## 
+##     layout</code></pre>
+<pre class="r"><code>c(&quot;#C7CEBD&quot;, &quot;#F2D9B6&quot;, &quot;#A8C0B5&quot;, &quot;#D1B9CB&quot;, &quot;#B3CDD1&quot;,
+     &quot;#F4E1C1&quot;, &quot;#BBC1D0&quot;, &quot;#E8C3C3&quot;, &quot;#D2DFD9&quot;, &quot;#E0C5A8&quot;,&quot;#8dab7f&quot;,&quot;#6b8e23&quot;)</code></pre>
+<pre><code>##  [1] &quot;#C7CEBD&quot; &quot;#F2D9B6&quot; &quot;#A8C0B5&quot; &quot;#D1B9CB&quot; &quot;#B3CDD1&quot; &quot;#F4E1C1&quot; &quot;#BBC1D0&quot;
+##  [8] &quot;#E8C3C3&quot; &quot;#D2DFD9&quot; &quot;#E0C5A8&quot; &quot;#8dab7f&quot; &quot;#6b8e23&quot;</code></pre>
+<pre class="r"><code>year_created_plot &lt;- plot_ly(cleaned_df, x = ~created_year, type = &quot;histogram&quot;, 
+                marker = list(color = &quot;#B3CDD1&quot;, line = list(color = &quot;white&quot;, width = 1)),
+                nbinsx = 30)
+
+# Update layout
+year_created_plot &lt;- year_created_plot |&gt;
+  layout(
+    title = &quot;Distribution of Channel Creation Years&quot;,
+    xaxis = list(title = &quot;Year of Creation&quot;),
+    yaxis = list(title = &quot;Number of Channels&quot;),
+    showlegend = TRUE,
+    template = &quot;plotly_white&quot;  # Optional: Set a template for the plot
+  )
+
+
+year_created_plot</code></pre>
+<div class="plotly html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-7333b939396472a132ea" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-7333b939396472a132ea">{"x":{"visdat":{"2c62284ae904":["function () ","plotlyVisDat"]},"cur_data":"2c62284ae904","attrs":{"2c62284ae904":{"x":{},"marker":{"color":"#B3CDD1","line":{"color":"white","width":1}},"nbinsx":30,"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"histogram"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Distribution of Channel Creation Years","xaxis":{"domain":[0,1],"automargin":true,"title":"Year of Creation"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Number of Channels"},"showlegend":true,"template":"plotly_white","hovermode":"closest"},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[2006,2012,2006,2006,2016,2018,2014,2007,2016,2007,2012,2007,2008,2005,2011,2013,2010,2008,2009,2006,2007,2011,2014,2009,2009,2007,2015,2006,2006,2014,2006,2007,2013,2013,2013,2006,2007,2009,2006,2011,2016,2006,2013,2008,2008,2008,2005,2011,2016,2012,2014,2005,2005,2016,2011,2017,2014,2015,2006,2015,2012,2014,2009,2018,2015,2016,2014,2011,2018,2017,2013,2017,2012,2015,2006,2009,2013,2013,2006,2012,2012,2015,2016,2016,2011,2017,2013,2006,2013,2008,2006,2014,2013,2008,2016,2016,2012,2012,2010,2011,2013,2006,2006,2006,2012,2012,2018,2014,2011,2013,2018,2006,2015,2009,2016,2016,2007,2016,2018,2008,2008,2007,2009,2015,2012,2014,2012,2014,2011,2011,2005,2009,2008,2008,2015,2012,2012,2017,2015,2009,2011,2016,2012,2016,2015,2020,2020,2019,2020,2005,2013,2009,2013,2009,2011,2015,2016,2010,2015,2015,2014,2016,2015,2006,2009,2009,2011,2018,2014,2021,2019,2019,2014,2014,2019,2020,2012,2015,2011,2015,2007,2020,2014,2013,2014,2020,2006,2016,2008,2014,2006,2016,2013,2019,2006,2014,2011,2012,2018,2015,2016,2020,2012,2010,2021,2015,2018,2009,2019,2013,2015,2009,2018,2021,2014,2014,2014,2008,2006,2011,2020,2013,2018,2018,2016,2017,2017,2011,2016,2014,2021,2017,2009,2016,2015,2013,2018,2013,2013,2014,2020,2013,2020,2015,2007,2017,2006,2017,2014,2013,2007,2013,2013,2019,2009,2014,2017,2020,2021,2014,2013,2007,2013,2017,2011,2006,2011,2010,2017,2008,2013,2020,2016,2014,2017,2017,2010,2006,2021,2011,2018,2018,2017,2012,2007,2011,2015,2009,2014,2014,2005,2007,2019,2014,2013,2007,2008,2016,2014,2011,2009,2016,2012,2011,2014,2006,2009,2014,2014,2015,2013,2019,2008,2009,2021,2021,2017,2018,2016,2006,2009,2013,2011,2017,2014,2007,2017,2012,2014,2005,2014,2008,2015,2012,2014,2008,2013,2011,2005,2016,2016,2019,2013,2009,2012,2018,2013,2011,2011,2021,2006,2014,2011,2009,2006,2010,2010,2015,2011,2013,2012,2011,2014,2010,2005,2020,2019,2015,2006,2020,2008,2017,2014,2010,2016,2010,2016,2007,2017,2011,2017,2019,2014,2016,2008,2010,2017,2010,2016,2017,2017,2017,2015,2018,2016,2011,2008,2016,2006,2021,2011,2017,2015,2012,2014,2011,2005,2008,2017,2013,2014,2013,2016,2009,2020,2009,2013,2014,2014,2005,2008,2016,2014,2008,2013,2014,2017,2007,2012,2007,2012,2011,2011,2012,2015,2021,2010,2015,2006,2012,2013,2006,2014,2014,2012,2012,2014,2014,2019,2021,2006,2018,2016,2011,2018,2017,2017,2008,2014,2020,2018,2014,2016,2015,2016,2014,2018,2008,2012,2015,2007,2016,2011,2006,2014,2013,2012,2014,2015,2015,2012,2012,2011,2006,2018,2010,2015,2006,2017,2019,2007,2014,2009,2015,2013,2021,2009,2011,2014,2017,2011,2007,2016,2005,2015,2006,2016,2015,2013,2019,2010,2018,2007,2022,2007,2014,2006,2011,2008,2015,2011,2007,2007,2013,2015,2021,2019,2013,2018,2011,2011,2015,2022,2016,2010,2015,2014,2017,2016,2006,2011,2016,2015,2020,2021,2017,2013,2010,2014,2005,2006,2009,2014,2013,2015,2020,2020,2007,2019,2020,2015,2017,2015,2014,2010,2012,2014,2022,2006,2008,2017,2008,2015,2011,2022,2019,2012,2012,2012,2012,2016,2016,2012,2017,2018,2006,2012,2017],"marker":{"color":"#B3CDD1","line":{"color":"white","width":1}},"nbinsx":30,"type":"histogram","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>summary_data &lt;- cleaned_df |&gt;
+  mutate(earning_diff = highest_yearly_earnings - lowest_yearly_earnings)|&gt;
+  filter(category != &quot;nan&quot;)|&gt;
+  group_by(category) |&gt;
+  summarize(mean_earning_diff = mean(earning_diff),
+            median_earning_diff = median(earning_diff),)
+
+# Create a bar plot using Plotly
+plot &lt;- plot_ly(data = summary_data, x = ~category, type = &#39;bar&#39;,
+                y = ~mean_earning_diff, name = &#39;Mean Earning Difference&#39;,marker = list(color = &quot;#F4E1C1&quot;)) %&gt;%
+  add_trace(y = ~median_earning_diff, name = &#39;Median Earning Difference&#39;, marker = list(color = &quot;#C7CEBD&quot;))
+
+# Add layout details
+plot &lt;- plot|&gt;
+  layout(title = &#39;Earning Difference Summary by Category&#39;,
+               xaxis = list(title = &#39;Category&#39;),
+               yaxis = list(title = &#39;Earning Difference&#39;))
+
+# Show the plot
+plotly::layout(plot, layout)</code></pre>
+<div class="plotly html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-1b7ab285cc9b3beee648" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-1b7ab285cc9b3beee648">{"x":{"visdat":{"2c6275f511af":["function () ","plotlyVisDat"]},"cur_data":"2c6275f511af","attrs":{"2c6275f511af":{"x":{},"y":{},"marker":{"color":"#F4E1C1"},"name":"Mean Earning Difference","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"},"2c6275f511af.1":{"x":{},"y":{},"marker":{"color":"#C7CEBD"},"name":"Median Earning Difference","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar","inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Earning Difference Summary by Category","xaxis":{"domain":[0,1],"automargin":true,"title":"Category","type":"category","categoryorder":"array","categoryarray":["Autos & Vehicles","Comedy","Education","Entertainment","Film & Animation","Gaming","Howto & Style","Movies","Music","News & Politics","Nonprofits & Activism","People & Blogs","Pets & Animals","Science & Technology","Shows","Sports","Trailers"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"Earning Difference"},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["Autos & Vehicles","Comedy","Education","Entertainment","Film & Animation","Gaming","Howto & Style","Movies","Music","News & Politics","Nonprofits & Activism","People & Blogs","Pets & Animals","Science & Technology","Shows","Sports","Trailers"],"y":[12310250,12097570,10050700,10424734.021931034,10245919,5051434.8279591836,3083661.5384615385,5108950,9320518.5869090911,9096000,4407250,8646310.640694445,11955600,2779657.75,24763341.666666668,10599255.555555556,4078600],"marker":{"color":"#F4E1C1","line":{"color":"rgba(31,119,180,1)"}},"name":"Mean Earning Difference","type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Autos & Vehicles","Comedy","Education","Entertainment","Film & Animation","Gaming","Howto & Style","Movies","Music","News & Politics","Nonprofits & Activism","People & Blogs","Pets & Animals","Science & Technology","Shows","Sports","Trailers"],"y":[12310250,4966950,5061700,5530400,4641950,3000800,2248000,5108950,6141000,8248600,4407250,5060000,1966800,2202800,9236150,6000400,4078600],"marker":{"color":"#C7CEBD","line":{"color":"rgba(255,127,14,1)"}},"name":"Median Earning Difference","type":"bar","error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<pre class="r"><code>perUploadData &lt;- cleaned_df |&gt;
+  mutate(viewsPerUpload = video_views / uploads) |&gt;
+  filter(viewsPerUpload &lt; 600000000)
+scatter_plot_perUpLoad &lt;- plot_ly(data = perUploadData, x = ~viewsPerUpload, y = ~highest_yearly_earnings, mode = &#39;markers&#39;)
+
+
+scatter_plot_perUpLoad &lt;- scatter_plot_perUpLoad |&gt;
+  layout(title = &#39;Relationship between Views per Upload and Highest Yearly Earning&#39;,
+               xaxis = list(title = &#39;Views per Upload&#39;),
+               yaxis = list(title = &#39;Highest Yearly Earnings&#39;))
+
+
+scatter_plot_perUpLoad</code></pre>
+<pre><code>## No trace type specified:
+##   Based on info supplied, a &#39;scatter&#39; trace seems appropriate.
+##   Read more about this trace type -&gt; https://plotly.com/r/reference/#scatter</code></pre>
+<div class="plotly html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-589736626d1b19cf7dc6" style="width:672px;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-589736626d1b19cf7dc6">{"x":{"visdat":{"2c62598559ff":["function () ","plotlyVisDat"]},"cur_data":"2c62598559ff","attrs":{"2c62598559ff":{"x":{},"y":{},"mode":"markers","alpha_stroke":1,"sizes":[10,100],"spans":[1,20]}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Relationship between Views per Upload and Highest Yearly Earning","xaxis":{"domain":[0,1],"automargin":true,"title":"Views per Upload"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Highest Yearly Earnings"},"hovermode":"closest","showlegend":false},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[11353450.851508813,38284536.936572202,169772256.72877848,1269993.8216516785,183527505.12576064,134460226.29616725,6768400.7230931213,1104117.8670412253,59198153.896869242,1417146.064262663,9130641.8049101271,122924175.59839357,21417028.375467464,566074.22732268355,13557846.409424083,72287283.1421801,3369562.9780051755,544754.07569410617,41752054.390745498,1516541.1181448624,7051635.245306897,37928232.348344371,2083543.9135320983,89182.463338912872,7428424.6563626993,173550467.02564102,33706429.424311928,9523130.2106824927,79288973.201044381,52887647.727902949,138354894.8425926,163298249.0340136,11661588.280991735,7130463.1038011694,209635862.47692308,9268115.4533413611,1966614.7221203388,7922781.3028455283,19011770.889502764,4589855.1993562235,3833340.6310320944,5024782.3029525029,408307.77997121733,198898062.671875,259386.97401619476,84566740.168711662,24667609.591339648,345312.05399969057,2452084.7158529893,20130560.745484401,267592212.32142857,3904419.3261640798,19254680.233676977,16281809.671068924,14965428.671679199,17709748.069892474,79003566.285714284,60350669.298387095,8591781.2755863536,497812.46325434005,8266261.027275715,36526.270547894077,21922725.976578411,4733350.0526613817,1183915.4588816473,45012704.174257427,45650781.266019419,24506321.476446837,232710.17237435127,74554848.713636369,43485.77374314655,32511911.178763442,195738943.6868687,1707437.4395724258,41465373.206422016,2069478.3798572561,58937.709278878705,11262578.864179105,3697255.2311475412,22543758.743579291,41503075.053484604,18772512.256259203,163158252.54609931,1735117.0818739054,47295899.266666666,413250769.04545456,6979407.1357694594,69221102.845744684,3973347.9796845764,307771.36897956638,52561335.041474655,59969992.80177515,2190839.4590643276,12419928.448162111,11738197.75147929,7005127.8005843684,13789289.472437138,138343011.86982247,139545862.35074627,3430034.3286962146,597003.35349282727,208210.26953949695,6147694.8159311088,2527919.4347959496,126697262.23493975,25258753.284482758,8793223.5359576084,6385977.0774589023,148825375.96923077,1906386.6042780748,2044203.8156590683,182533395.23913044,21377149.595155708,46942710.955223881,92785.119955356146,7053937.5023400933,33834514.877819546,8507976.5018438846,1704809.0744283106,29522606.8807947,9733799.3939193655,3182112.1639299397,32307334.439639639,1851135.0367917586,29335033.730693068,222885.28985913651,2526002.3240279164,25488986.294022616,19617881.966275658,11342355.970907016,16100343.442367602,5299641.787663755,4126629.4878631849,6120327.5218427321,19480824.401574802,11860895.268953068,2006728.1701213347,18207663.954356845,1108587.3752124864,1503268.1555577728,2373208.3249585866,31221418.109826591,17798965.88107549,41261242.583225809,2689645.9627401838,6445629.6084002471,174188.52263885058,23756755.070761014,243880501.5,89172049.797909409,184631001.1025641,1730584.777987083,3908886.8451282051,43546892.444723621,5472396.2311111111,203589.98316024174,158888.48404893529,100864524.82312925,10576389.124087591,1953195.7254487856,197420235.83653846,135747385.95428571,30399894.158333335,18823594.217325229,3964471.0227954411,40312151.791044779,33526993.993603412,9160413.055555556,13714464.437655861,2388407.7948150355,18714002.196610171,15475061.296337403,2065104.6250935395,8055205.803960396,14116436.565557729,4294630.9043298969,39929514.480812639,26384511.55916775,9449755.6460176986,12258081.648550725,6331444.6043165466,1418744.5774880096,6144751.8214383377,2634,91579425.656976745,570876.11280892906,573928.77885264345,20393357.962719299,3478410.6971700611,10841484.704647159,3780515.950563204,1913250.5218607904,3185919.2029940118,14062418.316652287,10556731.526778577,10269357.141116751,341956.53421691491,18633403.23030303,79066351.98888889,14724188.965517242,11669473.56828953,719915.43914717203,20178140.585551329,4173506.2838612366,254818534.20588234,13955531.819605568,11147413.874874875,63215332.019108281,16688234.747572815,2924445.2001912654,14800390.840531562,6256146.0126849897,19058910.350490198,17391873.957198445,552511.42796693568,68831459.542682931,562463.23396800214,3262370.7634262405,26773411.19178082,115493739.88235295,494684807.17647058,54949664.53508772,8553813.1159618013,136472538.06410256,13418773.752891693,3197658.3756218906,15019038.236173393,637598.37745364651,355275.52021007222,1946783.5169892474,2692648.5130072841,25313425.304761905,19656870.694779117,1889675.7578125,611306.38565953367,5018206.7912423629,1122644.6583756346,12323565.435233161,29019712.861066237,9740091.7109111361,330406006.26666665,92255084.096385539,452574.37428150111,37193069.523648649,8719550.5679611657,7267716.0715705762,570828.04270600795,14977218.09205021,1960874.4586345381,13507487.488,6417204.7826086953,3988640.6479076478,32186505.513274338,10811061.354005167,25879455.135348227,1642511.33423108,6187895.0317965019,7641667.7481431467,6214796.9492449667,1114422.5587324714,2537768.3267845451,6582176.0724932253,33455346.052884616,7578213.75,2680146.1528994082,746477.75955200684,6722610.6807044409,36944774.654205605,6179753.445100354,474851.07199999999,18563050.964705881,182879.12022322067,515392.60682326619,788740.45373134327,916183.70838865417,82067572.799999997,8005731.2535991138,5430638.9462295081,11979443.540727902,202709425.5443038,1763813.498069498,16852032.387820512,44118162.668202765,18102242.84528302,10779248.480263159,1347801.2685535992,15335340.253829321,3212454.9508509622,1393107.894736842,2188202.329571106,9244968.8796791453,16526523.09127789,5966232.9720176728,3654415.2557771448,54653659.070422538,1175228.8814199397,31853239.107142858,6563487.8915187381,21014554.821782179,1611737.347368421,14770980.118461538,3148475.9284961349,13389127.423507463,3911614.5264765783,3845774.9248511903,16391222.556478405,11912188.273493975,11342587.690042077,14323763.190414507,330334789.96153843,11668713.142162818,15454557.037109375,4935409.5466847094,39679.026259332764,5279543.1520979023,13106067.009878419,9759688.9399141632,23263606.0703125,1341174.9396001701,39747.9483424719,51089836.389261745,4027110.9687145771,110120.57537484803,5702361.7000000002,2380020.520510674,2301794.8123803446,11365930.887785502,8932399.0281124506,65515.011151964922,10687634.31724138,711773.60980810237,3885463.2890380314,1181988.0094871796,4083987.0915703895,720420.90881210391,14333296.414342629,2477396.9175050301,4195490.6207914948,9593628.4826086964,7324681.3388888892,66231.200746474729,469597.91030743212,1330906.6243315509,6944849.4804545455,14090819.694915254,5797943.0736342045,6934385.1141552515,331555.57741373632,486688.08627745189,168376.14424496912,536257.19526553107,82667782.9375,4945862.3732686983,1674876.1921132456,1549318.8948186529,3150457.9775888715,2476183.8364189705,59468.765960661331,643555.42974066292,78226359.380952388,14508423.539215686,10242478.077496273,173810017.58536586,10728239.889055472,3909025.783930779,17434881.07267442,1331905.0982470445,1801956.2940254651,11372321.046482412,51533200.598484851,2131577.8372827806,164075.58339378113,7606336.6549815498,1256231.5486064553,74861669.240506336,41023304.060000002,3389055.6676829266,1226605.3452750354,1096359.9066034851,1916521.5933630511,15023560.244147157,29028508.5,21662134.217270195,8095131.8697355529,8337142.1245901641,868189.60370441829,10795309.090909092,30379258.329815302,937224.09350333945,2369099.5434369054,8442997.6260869559,233794664.19047618,241766.30915544229,4569568.4850574713,188313.37216607484,4421266.5670103095,42489442.216981135,1264177.1431962026,644353.86043787724,767050.56256337452,88514.410990929216,72234.233566692841,562504.17270341213,2951015.2815814852,7071598.7383798137,1786366.9584784356,10289925.394136807,50063.799980908741,5115175.5991902836,238728266.94230768,1872817.1467297762,11039046.927697442,5537019.1616022103,233660.2808988764,1325375.9726818006,8972594.2549222801,3660577.4614820248,5679332.546866334,43959.527303475188,7585488.7522371365,2819456.5056818184,24031027.312649164,121669.94632470389,34607750.732283466,591126.42980997625,198603.28671628973,1426633.1973652695,92641062.634408608,8019949.6176470593,7105404.3753375337,2719849.0848375452,92490.443187035169,9673332.3610315192,4450059.9679358713,526280.61000425718,160357.16258814797,1177723.3114630468,5333056.0142857144,2896749.3625401929,1438425.2973310053,9272224.1434494201,4562027.8043117747,9867453.1178571433,3383520.1848249026,242377.55866540165,7968898.3157024793,1313303.0691022964,136776.55111797803,35103.776032652393,1648775.4615384615,720713.50939727807,8968308.2911111116,2261386.1789989118,1423592.2686567164,182597.68070334612,8292547.151041667,116232209.21666667,6095880.5467836261,3015815.04,15136259.399538105,11741505.902522936,86321.506571096237,14305696.046979865,6322296.3216374265,2115100.5311843026,160098030.04651162,3004590.7168831169,7179976.3456221195,3493096.4307692307,29332330.955782313,460094.05216820294,1403122.6184210526,3897513.7421576129,1032644.2961412449,4040275.7400177461,346106.3944941957,7538459.2427710844,16769354.700396825,5869608.7642276427,12860757.398843931,2052491.4453213078,1270982.4190573771,9652185.942307692,30132.032947031192,4416580.3295681067,2217626.2681799917,2827486.686781609,2024244.878974359,9227336.9846153855,1362002.4958294716,10460893.228282828,5766472.8695652178,3285316.3040293041,4730401.8422330096,18917629.929648243,4686600.8869644487,603543.38032030908,283164883.68421054,6813189.7850122852,5891604.1760513186,2182004.6620189627,12017658.762051282,5864975.5873249816,4113144.66017316,9691046.0314465407,1602729.5615823818,80325.6953125,32300.773579683533,31418675.827586208,44856380.364583336,621618.33598901099,1319388.5252684776,10662314.506578946,3314574.0342815462,1685138.436809018,1070941.1127819549,2517835.0091463416,3666274.1966838194,18373394.236059479,5981364.583333333,3176484.0589123867,12650762.636803875,1230086.6800654358,1361523.7520325202,1113759.7416829746,66140953.454545453,9459110.0069204159,3734250.7836767035,2373075.0250696377,3087306.2205128204,10114560.004597701,1993950.0803324101,553151727.58333337,3202026.0727923629,367744.31034482759,4152272.7457212713,17135636.566666666,13706717.863636363,4827489.6274056965,448275.51146010187,1596534.9516539441,2280161.7672090111,161562387.74358973,44419.387321031987,112749690.47445256,4450267.0358565738,20626279.05882353,13954454.552129222,3853591.4486301369,1482468.3567774936,1718468.4450261779,10426652.078651685,83426045.537815124,92777418.316901416,5829892.8879310349,6805378.0912698414,4004357.9515151517,2863217.4432334243,5103036.1273792097,2773048.0752788102,12930556.189440994,32657.959777948337,19865929.578249335,6112330.0523837553,112485.90543238007,981866.23843117489,65971497.043478258,19462838.860986546,19087972.419597991,9042322.6376146786,2773572.24609375,558310.72598437872,6339661.9232673263,3175893.8930041152,3566522.0186567162,70640467.262626261,7524674.7908333335,1116273.2966666666,903215.45799347467,9592909.82051282,34351188.935483873],"y":[108400000,64700000,94800000,87500000,2300000,27900000,38600000,34300000,23900000,79600000,8100000,8500000,28700000,81900000,22700000,20200000,12200000,57000000,6800000,5500000,20300000,29400000,11100000,22100000,12400000,12500000,5400000,24600000,9700000,39200000,25400000,7700000,12800000,3200000,7000000,14700000,11200000,15100000,1600000,11200000,6300000,2300000,64200000,6400000,8500000,17000000,14600000,55200000,7700000,32200000,8800000,8700000,6600000,4700000,11900000,3800000,2800000,26900000,12700000,6300000,78500000,2200000,76300,39100000,20000000,9900000,11700000,15400000,6800000,2400000,12800000,12100000,8400000,0,14500000,25600000,14000000,15900000,6100000,11500000,16100000,4900000,6200000,26300000,8600000,19400000,10100000,5600000,13100000,0,1200000,6500000,7500000,6100000,972600,70200000,15800000,17900000,22400000,2700000,80000000,38300000,5200000,5400000,7400000,1300000,15000000,11800000,172,0,9200000,9100000,4900000,1500000,22200000,7600000,5900000,5600000,4800000,1300000,0,14500000,5300000,10900000,13800000,32900000,8900000,8300000,4300000,14800000,8400000,3800000,2000000,4900000,20600000,6900000,4000000,13300000,5700000,7800000,4800000,50200000,58800000,23400000,34600000,3300000,11000000,7900000,5000000,15300000,9400000,2800000,39100000,9500000,6700000,13100000,5900000,13600000,15900000,6500000,6700000,4300000,4300000,8200000,4600000,1600000,7300000,15800000,19300000,20400000,3200000,36500000,7300000,2800000,8500000,4700000,5900000,36200000,2200000,2100000,2600000,17600000,6000000,0,6900000,2500000,635800,14600000,6200000,36300000,1700000,4500000,0,8100000,6600000,7500000,47100000,19200000,3900000,3500000,56300000,2300000,3100000,8400000,35,6300000,6700000,5400000,8800000,34100000,8900000,11200000,33000000,9500000,2200000,6100000,76700000,9300000,9300000,5400000,2,7700000,7700000,5000000,35000000,3300000,11300000,26900000,6800000,1300000,5700000,3800000,6400000,1400000,2500000,0,18400000,1400000,42000000,26500000,4,9300000,7600000,9400000,1900000,703000,43600000,2000000,4100000,5400000,12700000,746700,5400000,59800000,21700000,3100000,10600000,713400,13300000,5100000,1900000,0,10300000,294600,2600000,13200000,5300000,110600000,0,1500000,114300,13100000,2800000,1800000,1400000,1000000,5900000,5100000,3700000,4900000,1400000,3800000,4700000,3300000,5200000,4900000,2100000,8100000,2100000,0,1800000,2300000,9500000,2600000,6100000,6700000,23900000,2300000,8700000,2600000,18800000,12400000,415200,2500000,1300000,4100000,21500000,4900000,20700000,994,163400000,16600000,2300000,17800000,5700000,30700000,1300000,1100000,4800000,18900000,5300000,21100000,11300000,2200000,15900000,2500000,4000000,1800000,2200000,4500000,366100,3500000,1700000,13200000,7200000,2100000,2100000,5000000,2200000,723800,2800000,7400000,4300000,29600000,9600000,1100000,5400000,6300000,6400000,4200000,8700000,2000000,7300000,861300,1600000,1300000,12300000,10800000,5600000,1800,1500000,19200000,37,23000000,12800000,5400000,3100000,6500000,7900000,2900000,1200000,8900000,3400000,1200000,6800000,45100,4100000,16100000,4200000,2700000,4300000,4400000,8100000,6500000,6700000,1600000,1300000,3800000,2700000,8000000,4000000,1800000,4100000,22800000,17400000,3100000,4700000,2800000,10100000,5100000,9000000,2400000,827100,2100000,2200000,4600000,24600000,8700000,34200000,4100000,12000000,5500000,1600000,2000000,1400000,4900000,11600000,15000000,5400000,13600000,6300000,5800000,2100000,2700000,665200,2400000,1900000,119,1800,57800000,10900,3600000,1700000,3800000,16700000,8900000,2000000,787600,4400000,7300000,5300000,2400000,6700000,1100000,3200000,7200000,2300000,2200000,20100000,65700,666800,170700,3400000,10200000,7200000,19900,5,2600000,2100000,6800000,17700000,2900000,1200000,17000000,8500000,6500000,600100,1300000,7200000,9700000,65500000,6400000,3300000,5100000,4200000,1600000,4700000,5500000,2100000,4800000,4000000,2600000,1300000,4800000,3800000,10400000,4200000,1800000,18200000,1100000,1100000,2300000,580200,1500000,733300,516700,2100000,78,1700000,3600000,8600000,23800000,5300000,64100,4400000,11000000,972700,5500000,19100000,0.14000000000000001,2100000,2200000,4300000,7800000,9100000,838500,3400000,258600,15300000,420900,12700000,3100000,2500000,5700000,888900,12,2700000,1700000,2100000,1300000,2900000,3000000,18,1400000,0,1500000,51900000,28,17700000,1500000,575700,1400000,4400000,3900000,3600000,3400000,2600000,11000000,10300000,2500000,3700000,2200000,22700,8200000,2100000,15700000,2800000,285700,5400000,5300000,0,2800000,5600000,11300000,16800000,8600000,10300000,419,43400000,13100000,1200000,4000000,4600000,1500000,8500000,2400000,26500000,3100000,3200,185800,1200000],"mode":"markers","type":"scatter","marker":{"color":"rgba(31,119,180,1)","line":{"color":"rgba(31,119,180,1)"}},"error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"line":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
