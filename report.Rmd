@@ -39,9 +39,9 @@ Park M et al.'s 2017 study (Cultural values and cross-cultural video consumption
 
 ## Initial questions
 
-- 1.Define what "success" means in the context of a YouTuber (Subscribers, Views per video or Earnings)?
+- 1.Define what "success" means in the context of a YouTuber.
 - 2.What are the factors that influence the success of YouTubers?
-- 3.Develop a predictive models to forecast YouTubers' success.
+- 3.Develop a predictive model to forecast YouTubers' success.
   
 ## Data Cleaning and Preprocessing
 
@@ -381,6 +381,7 @@ ggplot(data = world.plus1, mapping = aes(x = long, y = lat, group = group)) +
       legend.position = "bottom"
     )
 ```
+
 YouTube content preferences vary widely by country, reflecting cultural diversity in digital consumption. Music, People & Blogs are the most popular genres across world. The presence of an "Unknown" category could indicate data gaps or emerging genres yet to be classified. The map underscores the importance of cultural context in content creation and consumption on YouTube.
 
 
@@ -459,11 +460,13 @@ print(scatter_plot_perUpLoad)
 
 The scatterplot illustrates a discernible but weak downward slope between the highest earning and the number of YouTube views per upload. This implies that, in general, channels with a higher number of views per upload tend to have slightly lower earnings. While the relationship is present, its strength is limited, indicating that other factors beyond views per upload are likely influencing the earnings of YouTube channels.
 
-## Model
+## Model Fitting
+
+We explored three variables to measure a YouTuber's success: Subscribers, Earnings Differences, and Highest Yearly Earnings. Across these three models, we consistently applied the same predictors: `country`, `category`, `video_per_upload`, `uploads`, `video_views` are applied.
 
 #### 1. Fit the multiple linear regression model of **_subscribers_**
 Model statement:
-$subscribers =\beta_0+ \beta_1country +\beta_2category +\beta_3videoperupload + \beta_4uploads + \beta_5(videoviews)$
+$subscribers =\beta_0+ \beta_1country +\beta_2category +\beta_3videoperupload + \beta_4uploads + \beta_5videoviews$
 
 ```{r}
 youtube_df <- youtube_df %>% drop_na()
@@ -492,10 +495,22 @@ broom::glance() %>%
 knitr::kable(digits=3)
 ```
 
+#### Interpretation for model 1
+
+1. **Residuals**:
+   Large values for the minimum and maximum suggest the presence of outliers.
+
+2. **Coefficients**:
+   Most of the country and category levels are not statistically significant predictors of subscribers (p > 0.05), except for 'countrySouth Korea' which is significant (p = 0.0126). 'video_per_upload' is not a significant predictor, while 'uploads' is significant. The variable 'video_views' is highly significant (p < 2e-16), indicating a strong association with the number of subscribers.
+
+3. **Model Summary**:
+   The high Multiple R-squared value of 75.26% indicates that a significant proportion of the variability in subscriber counts can be explained by the independent variables included in the model, demonstrating its strong predictive power. The Adjusted R-squared value of 72.4% reaffirms this, suggesting that the model is appropriately balanced with the right number of predictors. The F-statistic confirms the model's overall statistical significance.
+   
+
 #### 2. Fit the multiple linear regression model of **_earning_differences_**
 
 Model statement:
-$earningdifferences =\beta_0+ \beta_1country +\beta_2category +\beta_3videoperupload + beta_4uploads + beta_5(videoviews)$
+$earningdifferences =\beta_0+ \beta_1country +\beta_2category +\beta_3videoperupload + \beta_4uploads + \beta_5videoviews$
 
 ```{r}
 mlr_model_1 <- lm(earning_differences ~ country + category + video_per_upload +uploads +video_views , data = youtube_df)
@@ -522,10 +537,22 @@ broom::glance() %>%
 knitr::kable(digits=3)
 ```
 
+#### interpretation for model2
+
+1. **Residuals**:
+   Large residuals imply potential outliers or limitations in the model's ability to capture data patterns effectively.
+
+2. **Coefficients**:
+   Most of the country and category coefficients are not statistically significant (p > 0.05) except for 'countrySouth Korea'. 'video_per_upload' also lacks statistical significance (p = 0.3893). 'video_views' is highly significant (p < 2e-16), indicating a strong association with 'earning_differences'.
+
+3. **Model Summary**:
+   The Multiple R-squared value, at 43.86%, denotes the proportion of variance in 'earning_differences' explained by the independent variables. The Adjusted R-squared, at 37.36%, accounts for predictor count and provides a more precise measure of model fit. The F-statistic's low associated p-value underscores the overall statistical significance of the model.
+
+
 #### 3. Fit the multiple linear regression model of **_highest_yearly_earnings_**
 
 Model statement:
-$highestyearlyearnings =\beta_0+ \beta_1country +\beta_2category +\beta_3videoperupload + beta_4uploads + beta_5(videoviews)$
+$highestyearlyearnings =\beta_0+ \beta_1country +\beta_2category +\beta_3videoperupload + \beta_4uploads + \beta_5videoviews$
 
 ```{r}
 mlr_model_2 <- lm(highest_yearly_earnings ~ country + category + video_per_upload+uploads +video_views , data = youtube_df)
@@ -551,7 +578,25 @@ mlr_model_2 %>%
 broom::glance() %>%
 knitr::kable(digits=3)
 ```
-#### 4. Build Random Forest **_subscribers_**
+
+#### interpretation for model 3
+
+
+1. **Residuals**:
+   The large range suggests the presence of outliers or extreme values in the data.
+
+2. **Coefficients**:
+   Most of the country and category coefficients are not statistically significant (p > 0.05) except for 'countrySouth Korea','countryLatvia'. 'video_per_upload' is not a significant predictor (p = 0.29118).'video_views' has a positive and highly significant coefficient (p < 2e-16), indicating a strong and statistically significant relationship with 'highest_yearly_earnings'.
+   
+3. **Model Summary**:
+   The Multiple R-squared value, at 43.87%, denotes the proportion of variance in 'highest_yearly_earnings' explained by the independent variables. The Adjusted R-squared, at 37.37%, accounts for predictor count and provides a more precise measure of model fit. The F-statistic's low associated p-value underscores the overall statistical significance of the model.
+   
+#### Discussion for three linear models
+
+In summary, Models 2 and 3, which predict 'earning_differences' and 'highest_yearly_earnings' respectively, share similar results may because they both involve financial aspects of a YouTuber's success. 'video_views' consistently emerges as a strong predictor of success across all three models. While country and category variables do not consistently impact success, a few countries (South Korea and Latvia) exhibit unique effects. These models collectively provide valuable insights into the factors influencing YouTuber success. The respective $r^2$ of three models are $0.754, 0.438, 0.438$. A high $r^2$ indicates a better model fit. This suggests that the number of subscribers may be a more appropriate metric to quantify the success of YouTube creators.
+
+#### 4. Fit the Random Forest Regression model of **_subscribers_**
+To Proceed our project, we further develop a random forest model to predict the number of subscribers, expecting for a higher $r^2$. The data was split into training data and test data with a proportion of 0.8. 
 
 ```{r}
 library(randomForest)
@@ -572,91 +617,23 @@ r2_score <- cor(test_data$subscribers, predictions)^2
 
 # Output the model and R^2 score
 print(rf_modelS)
+print(r2_score)
 ```
 
-We use the same predictors `country`, `category`, `video_per_upload`, `uploads`, `video_views` and build three models with response `subscribers`, `earning_differences`, `highest_yearly_earnings`. The respective $r^2$ are $0.754, 0.438, 0.438$, which means that, with the specified covariates, the model's performance in predicting subscribers is superior to the others. To compare the performance with multiple linear regression model, we also trained a Random Forest model to predict the number of subscribers. The data was split into training data and test data with a proportion of 0.8. The $r^2$ score of 0.977 significantly outperforms the result from the linear regression model, where $r^2$ was 0.754. This suggests that the Random Forest model explains almost all the variability in the subscriber count. Based on these results, we conclude that the number of video views is also one of the most important factors for predicting the number of subscribers.
+#### interpretation for random forest
+
+The Random Forest Regression model with 500 trees and 6 variables considered at each split explains about 85.25% of the variance in the number of subscribers, indicating a strong predictive performance with relatively low mean squared residuals. Additionally, the 
+$r^2$ for testing is approximately 0.981, signifying a high level of accuracy in predicting subscribers. This suggests that the Random Forest model explains almost all the variability in the subscriber count. 
 
 ## Discussion
 We also check the linear regression assumptions (e.g., homoscedasticity, normality of residuals) and observe potential outliers that can impact the model's accuracy. To enhance model accuracy, we may consider removing these outliers and subsequently explore missing value imputation. In summary, the Random Forest model proves highly effective for this dataset; however, further validation, potentially with different datasets or cross-validation, is advisable to ensure the model's generalizability and assess the potential impact of overfitting.
 
 
-#### Interpretation for model 1
-
-1. **Model Formula**:
-   - The model predicts 'subscribers' based on 'country', 'category', 'video_per_upload', 'uploads', and 'video_views'.
-
-2. **Residuals**:
-   - The residuals' section provides a five-number summary (minimum, 1st quartile, median, 3rd quartile, maximum) of the model residuals. Large values for the minimum and maximum suggest the presence of outliers.
-
-3. **Coefficients**:
-   - The estimates for each predictor variable (country, category, video_per_upload, uploads, video_views) are provided along with their standard errors, t-values, and p-values.
-   - Most of the country and category levels are not statistically significant predictors of subscribers (p > 0.05), except for 'countrySouth Korea' which is significant (p = 0.0126, indicated by `*`).
-   - The variable 'video_per_upload' is not a significant predictor (p = 0.4483).
-   - The variable 'uploads' is significant (p < 0.001, indicated by `***`).
-   - The variable 'video_views' is highly significant (p < 2e-16, indicated by `***`), indicating a strong association with the number of subscribers.
-
-4. **Model Summary**:
-   - **Residual standard error**: An estimate of the standard deviation of the residuals, which gives a measure of the typical size of the residuals.
-   - **Multiple R-squared**: The proportion of variance in the dependent variable that is predictable from the independent variables (0.7526, or 75.26%).
-   - **Adjusted R-squared**: Adjusted for the number of predictors in the model, providing a more accurate measure of model fit (0.724, or 72.4%).
-   - **F-statistic**: A measure of how much the model improves the fit compared to a model with no predictors. The associated p-value (p < 2e-16) suggests the model as a whole is statistically significant.
-
-#### Interpretation:
-The model explains a significant amount of the variance in the number of subscribers (as indicated by the R-squared values). 'video_views' is particularly a strong predictor. However, most of the individual country and category predictors do not significantly contribute to the model. This might suggest that while overall video views are important, where those views come from (which country) and the content category may not be as important, with the exception of South Korea.
 
 
 
-#### interpretation for model2
-1. **Model Formula**:
-   - The model is predicting 'earning_differences' based on the independent variables 'D'.
-
-2. **Residuals**:
-   - The residuals' section provides a five-number summary of the residuals from the model. The wide range of values from the minimum to the maximum indicates the presence of large residuals, suggesting that there may be outliers or that the model may not be adequately capturing the pattern in the data.
-
-3. **Coefficients**:
-   - The coefficients represent the estimated change in 'earning_differences' for a one-unit change in the predictor, holding other variables constant.
-   - Most of the country and category coefficients are not statistically significant (p > 0.05), which suggests they do not have a unique effect on the 'earning_differences' after accounting for other factors in the model.
-   - 'video_per_upload' has a coefficient that is not statistically significant (p = 0.3893).
-   - 'video_views' is highly significant (p < 2e-16, indicated by `***`), indicating a strong association with 'earning_differences'.
-
-4. **Model Summary**:
-   - **Residual standard error**: An estimate of the standard deviation of the residuals.
-   - **Multiple R-squared**: The proportion of variance in the dependent variable that is predictable from the independent variables (0.4386, or 43.86%).
-   - **Adjusted R-squared**: Adjusted for the number of predictors in the model, which provides a more accurate measure of model fit (0.3736, or 37.36%).
-   - **F-statistic**: A measure of the overall significance of the model. The associated p-value (p < 2e-16) suggests the model as a whole is statistically significant.
-
-#### Interpretation:
-The model explains a moderate amount of the variance in 'earning_differences'. The variable 'video_views' stands out as a strong predictor. The country and category variables generally do not significantly predict 'earning_differences', with a few exceptions. Notably, the 'countryLatvia' coefficient is significant (p = 0.007876), suggesting it has a unique effect on 'earning_differences'.
-
-#### Recommendations:
-- Given the large residuals and the significance of some country coefficients, further investigation is warranted. You might want to look into possible outliers or influential points that could be affecting the model.
-- Consider exploring different transformations of the dependent and independent variables to achieve a better fit.
-- Simplify the model by potentially removing non-significant predictors, although the significance of the overall model suggests that at least some of the predictors are useful. The low significance of many individual predictors suggests that there might be multicollinearity or other issues affecting the estimates.
-- The presence of significant predictors like 'video_views' may warrant a closer look at potential non-linear relationships or interactions between variables that could improve model fit.
 
 
-#### interpretation for model 3
-The image you've uploaded shows the output from a Multiple Linear Regression (MLR) model in R, with 'highest_yearly_earnings' as the dependent variable. The model includes 'country', 'category', 'video_per_upload', and 'video_views' as independent variables. Here's an interpretation of the output:
 
-1. **Model Formula**:
-   - The model predicts 'highest_yearly_earnings' based on the independent variables mentioned.
 
-2. **Residuals**:
-   - The residuals' section provides a five-number summary of the model's residuals. The large range suggests the presence of outliers or extreme values in the data.
 
-3. **Coefficients**:
-   - The estimates for each predictor variable are given along with their standard errors, t-values, and p-values.
-   - Most coefficients are not statistically significant, but there are a few exceptions:
-     - 'countryLatvia' has a positive coefficient that is significant at the 0.01 level (p = 0.002892).
-     - 'countrySouth Korea' has a negative coefficient that is significant at the 0.001 level (p = 0.000702).
-   - 'video_per_upload' is not a significant predictor (p = 0.29118).
-   - 'video_views' has a positive and highly significant coefficient (p < 2e-16), indicating a strong and statistically significant relationship with 'highest_yearly_earnings'.
-
-4. **Model Summary**:
-   - **Residual standard error**: An estimate of the standard deviation of the residuals.
-   - **Multiple R-squared**: A measure of the proportion of variance in the dependent variable explained by the model (0.4387, or 43.87%).
-   - **Adjusted R-squared**: Adjusted for the number of predictors; it provides a more accurate measure of the goodness of fit (0.3737, or 37.37%).
-   - **F-statistic**: Reflects the overall significance of the model. A very low p-value (< 2.2e-16) indicates that the model is statistically significant.
-
-#### Interpretation:
-The model has a moderate explanatory power for 'highest_yearly_earnings', with 'video_views' being a particularly strong predictor. While most country and category variables are not significant on their own, the overall model is significant, suggesting that there is a combination of these variables that helps predict the highest yearly earnings. The significant predictors for 'countryLatvia' and 'countrySouth Korea' suggest that being in these countries is associated with a significant difference in 'highest_yearly_earnings' compared to the baseline country (not shown in the output, likely the reference category). 
