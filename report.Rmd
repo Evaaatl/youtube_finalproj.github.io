@@ -204,10 +204,10 @@ The most frequently used categories, as observed from the word cloud chart, incl
 
 #### Pie Chart
 
-```{r}
-channel_type_counts <- table(youtube_df$channel_type)
+```{r fig.width = 7,fig.asp = 0.9}
 
 channel_type_counts <- youtube_df %>%
+  filter(!is.na(channel_type) & channel_type != "nan") %>%
   group_by(channel_type) %>%
   summarise(count = n()) %>%
   ungroup()
@@ -291,23 +291,9 @@ plot_ly(earning_plot_data, x = ~highest_yearly_earnings, y = ~youtuber,
          font = list(family = "Arial, sans-serif", size = 12, color = "#333333"))
 
 ```
+
 For the Top 15 YouTube Channels by Highest Yearly Earnings, first and foremost, KIMPO has the highest earnings at 163,400,400 US dollars in 2023, which is triple of the lowest earnings(59,800,000 dollars) of dednahype. Secondly, Entertainment is still the most predominant category among these channels. In the 15 YouTube Channels, animal and comedy have respectably only one position.
-```{r}
-perUploadData <- cleaned_df |>
-  mutate(viewsPerUpload = video_views / uploads) |>
-  filter(viewsPerUpload < 600000000)
-scatter_plot_perUpLoad <- plot_ly(data = perUploadData, x = ~viewsPerUpload, y = ~highest_yearly_earnings, mode = 'markers')
 
-
-scatter_plot_perUpLoad <- scatter_plot_perUpLoad |>
-  layout(title = 'Relationship between Views per Upload and Highest Yearly Earning',
-               xaxis = list(title = 'Views per Upload'),
-               yaxis = list(title = 'Highest Yearly Earnings'))
-
-
-scatter_plot_perUpLoad
-```
-The scatterplot illustrates a discernible but weak downward slope between the highest earning and the number of YouTube views per upload. This implies that, in general, channels with a higher number of views per upload tend to have slightly lower earnings. While the relationship is present, its strength is limited, indicating that other factors beyond views per upload are likely influencing the earnings of YouTube channels.
 
 #### How does the top youtubers spread over countries?
 ```{r}
