@@ -1,9 +1,24 @@
 ---
-title: "About"
+title: "About our team"
+output: html_document
 ---
 
-### About this site
+## Li Tian 
+lt2949\
+[Learn more about Li](https://evaaatl.github.io)
 
-Sometimes you need to say a bit about the site -- how it was made, where it's hosted, where the source code can be found. 
+## Qianyuan Huang  
+qh2283\
+[Learn more about Qianyuan](https://qianyuanhuang.github.io)
 
-If this is for a project or analysis, I recommend giving some details about the R package versions that you used to create the content.
+## Tongxi Yu  
+ty2520\
+[Learn more about Tongxi](https://ty2520.github.io/ty2520.gihub.io/)
+
+## You Wu  
+yw4251\
+[Learn more about You](uu1230.github.io)
+
+## Ziqi Wang  
+zw2977\
+[Learn more about Ziqi](https://ziqiwang74747849494uyrufj90.github.io/Ziqi.github.io//)

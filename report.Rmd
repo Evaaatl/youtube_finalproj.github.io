@@ -19,6 +19,8 @@ library(ggwordcloud)
 library(performance)
 library(ggpubr)
 library(knitr)
+library(maps)
+library(forcats)
 
 cleaned_df<-
   read_csv("Data/cleaned_youtube_df.csv")|>
@@ -162,16 +164,24 @@ ggplotly(p)
 #### Channel created year summary
 
 ```{r}
-cleaned_df |>
-  ggplot(aes(x = created_year)) + 
-  geom_histogram(color = "white", bins = 30, fill = "#B3CDD1") +
-  theme_minimal() +  
-  labs(
+year_created_plot <- plot_ly(cleaned_df, x = ~created_year, type = "histogram", 
+                marker = list(color = "#B3CDD1", line = list(color = "white", width = 1)),
+                nbinsx = 30)
+
+# Update layout
+year_created_plot <- year_created_plot |>
+  layout(
     title = "Distribution of Channel Creation Years",
-    x = "Year of Creation",
-    y = "Number of Channels"
-  ) 
+    xaxis = list(title = "Year of Creation"),
+    yaxis = list(title = "Number of Channels"),
+    showlegend = FALSE,
+    template = "plotly_white"  # Optional: Set a template for the plot
+  )
+
+
+year_created_plot
 ```
+
 
 There is an initial growth in the number of channels created from 2005 onwards, which is expected as YouTube was founded in February 2005 and gradually gained popularity.
 
@@ -181,6 +191,8 @@ Post-2015, there's a noticeable decline in new channel creation. This could be d
 
 
 #### Word Cloud
+
+
 ```{r}
 category_data <- youtube_df %>%
   filter(!is.na(category) & category != "nan") %>%
@@ -242,61 +254,31 @@ In this interactive pie chart, we demonstrate the frequency of proportion in Cha
 
 ### 2. Multivariate Analysis
 
-
-#### How does the top youtubers spread over countries?
+#### Mean and median earning differences by YouTube content category
 ```{r}
-channel_counts_by_location <- cleaned_df|>
-  drop_na(c(latitude, longitude)) |>
-  group_by(country, longitude, latitude) |>
-  summarise(channel_count = n())
+summary_data <- cleaned_df |>
+  mutate(earning_diff = highest_yearly_earnings - lowest_yearly_earnings)|>
+  filter(category != "nan")|>
+  group_by(category) |>
+  summarize(mean_earning_diff = mean(earning_diff),
+            median_earning_diff = median(earning_diff),)
 
-world_map <- leaflet() |>
-  addTiles() |>
-  addMarkers(
-    data = channel_counts_by_location,
-    ~longitude, ~latitude,
-    label = ~paste(country, ": ", channel_count, " channels"),
-    popup = TRUE
-  )
+# Create a bar plot using Plotly
+plot <- plot_ly(data = summary_data, x = ~category, type = 'bar',
+                y = ~mean_earning_diff, name = 'Mean Earning Difference',marker = list(color = "#F4E1C1")) %>%
+  add_trace(y = ~median_earning_diff, name = 'Median Earning Difference', marker = list(color = "#C7CEBD"))
 
-world_map
+# Add layout details
+plot <- plot|>
+  layout(title = 'Earning Difference Summary by Category',
+               xaxis = list(title = 'Category'),
+               yaxis = list(title = 'Earning Difference'),
+         legend = list(orientation = 'h', x = 0.5, y = -0.3, xanchor = 'center', yanchor = 'top'))
+
+# Show the plot
+plotly::layout(plot, layout)
 ```
-
-We find that the top five ranked YouTubers are from the United States (N = 311), followed by India (N = 168), Brazil (N = 61), the United Kingdom (N = 43), and Mexico (N = 33).
-
-
-#### Bubble Chart: Subscribers vs. Video Views by Category
-
-```{r fig.width = 9}
-
-size_factor <- 10^(-8.7) # Adjust this factor as needed to scale sizes up or down
-
-youtube_df %>%
-  filter(!is.na(category) & category != "nan") %>%
-  plot_ly(
-    x = ~subscribers, 
-    y = ~video_views, 
-    size = ~video_views_for_the_last_30_days * size_factor, 
-    color = ~category,
-    text = ~category,
-    hoverinfo = 'text+x+y',
-    type = 'scatter',
-    mode = 'markers',
-    marker = list(
-      sizemode = 'area',
-      sizeref = 2 * max(youtube_df$video_views_for_the_last_30_days * size_factor)/100
-    )
-  ) %>%
-  layout(
-    title = 'Subscribers vs. Video Views by Category',
-    xaxis = list(type = 'log', title = 'Subscribers'),
-    yaxis = list(type = 'log', title = 'Video Views (in billions)'),
-    hovermode = 'closest',
-    showlegend = TRUE
-  )
-```
-
-The bubble chart implies the relationship between the number of subscribers (on the x-axis) and video views (on the y-axis) for YouTube channels: more subscribers tend to have a higher number of total video views. The size of the bubbles represent the video views in the last 30 days, and color huw represents the category. Certain categories like Music, Entertainment, and Gaming appear more frequently among the channels with higher views and subscribers, reflecting their popularity on Youtube.
+For most categories, the mean earning difference is higher than the median, suggesting that a few channels with substantially higher earnings may be skewing the mean upwards. 
 
 #### Top 15 YouTube Channels by Highest Yearly Earnings
 ```{r}
@@ -333,6 +315,75 @@ plot_ly(earning_plot_data, x = ~highest_yearly_earnings, y = ~youtuber,
 ```
 For the Top 15 YouTube Channels by Highest Yearly Earnings, first and foremost, KIMPO has the highest earnings at 163,400,400 US dollars in 2023, which is triple of the lowest earnings(59,800,000 dollars) of dednahype. Secondly, Entertainment is still the most predominant category among these channels. In the 15 YouTube Channels, animal and comedy have respectably only one position.
 
+#### How does the top youtubers spread over countries?
+```{r}
+channel_counts_by_location <- cleaned_df|>
+  drop_na(c(latitude, longitude)) |>
+  group_by(country, longitude, latitude) |>
+  summarise(channel_count = n())
+
+world_map <- leaflet() |>
+  addTiles() |>
+  addMarkers(
+    data = channel_counts_by_location,
+    ~longitude, ~latitude,
+    label = ~paste(country, ": ", channel_count, " channels"),
+    popup = TRUE
+  )
+
+world_map
+```
+
+We find that the top five ranked YouTubers are from the United States (N = 311), followed by India (N = 168), Brazil (N = 61), the United Kingdom (N = 43), and Mexico (N = 33).
+
+#### Most Popular YouTube Content Categories by Country
+```{r}
+cleaned_youtube_df <- cleaned_df %>%
+                      filter(created_year >= 2005, !is.na(category), category != "nan")
+
+
+world <- map_data("world")
+
+world <- world %>%
+          mutate(region = ifelse(region == "USA", "United States", region),
+                 region = ifelse(region == "UK", "United Kingdom", region))
+
+
+popular_category <- cleaned_youtube_df %>%
+                    group_by(country) %>%
+                    summarise(most_popular_category = names(sort(table(category), decreasing = TRUE)[1])) %>%
+                    ungroup()
+
+world.plus1 <- world %>% 
+               left_join(popular_category, by = c("region" = "country")) %>%
+               filter(region != "Antarctica")
+
+world.plus1$most_popular_category[is.na(world.plus1$most_popular_category)] <- "Unknown"
+
+categories <- unique(world.plus1$most_popular_category)
+
+color <- c("#ffd180","#ffa07a","#d1d17a", "#8dab7f", "#D2DFD9", "#A8C0B5", "#D1B9CB", "#B3CDD1", "#BBC1D0", "#E8C3C3","#C7CEBD", "#D2DFD9","#6b8e23")
+
+
+category_colors <- setNames(color, categories)
+
+ggplot(data = world.plus1, mapping = aes(x = long, y = lat, group = group)) + 
+    coord_fixed(1.3) +
+    geom_polygon(aes(fill = most_popular_category)) +
+    ggtitle("Most Popular YouTube Content Categories by Country") +
+    scale_fill_manual(values = category_colors) +
+    theme_minimal() +
+    theme(
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      plot.title = element_text(hjust = 0.5),
+      legend.title = element_blank(),
+      legend.position = "bottom"
+    )
+```
+YouTube content preferences vary widely by country, reflecting cultural diversity in digital consumption. Music, People & Blogs are the most popular genres across world. The presence of an "Unknown" category could indicate data gaps or emerging genres yet to be classified. The map underscores the importance of cultural context in content creation and consumption on YouTube.
+
+
 #### How are the numeric variables correlated?
 
 ```{r fig.width = 9,fig.asp = 0.8}
@@ -353,12 +404,66 @@ fig
 
 The correlation coefficient values range from -1 to 1, where 1 indicates a perfect positive correlation, -1 indicates a perfect negative correlation, and 0 indicates no correlation. The heatmap indicates strong positive correlations between `subscribers` and `video views`, as well as among various earnings metrics, suggesting that higher subscriber counts are associated with more views and consistent earnings patterns. Other variables like `video_per_upload` show moderate correlations with recent engagement metrics, while `earning_differences` exhibit a lower correlation with viewership-related variables, hinting at additional factors influencing earnings beyond just subscriber and view counts.
 
+#### Bubble Chart: Subscribers vs. Video Views by Category
+
+```{r fig.width = 9}
+
+size_factor <- 10^(-8.7) # Adjust this factor as needed to scale sizes up or down
+
+youtube_df %>%
+  filter(!is.na(category) & category != "nan") %>%
+  plot_ly(
+    x = ~subscribers, 
+    y = ~video_views, 
+    size = ~video_views_for_the_last_30_days * size_factor, 
+    color = ~category,
+    text = ~category,
+    hoverinfo = 'text+x+y',
+    type = 'scatter',
+    mode = 'markers',
+    marker = list(
+      sizemode = 'area',
+      sizeref = 2 * max(youtube_df$video_views_for_the_last_30_days * size_factor)/100
+    )
+  ) %>%
+  layout(
+    title = 'Subscribers vs. Video Views by Category',
+    xaxis = list(type = 'log', title = 'Subscribers'),
+    yaxis = list(type = 'log', title = 'Video Views (in billions)'),
+    hovermode = 'closest',
+    showlegend = TRUE
+  )
+```
+
+The bubble chart implies the relationship between the number of subscribers (on the x-axis) and video views (on the y-axis) for YouTube channels: more subscribers tend to have a higher number of total video views. The size of the bubbles represent the video views in the last 30 days, and color hue represents the category. Certain categories like Music, Entertainment, and Gaming appear more frequently among the channels with higher views and subscribers, reflecting their popularity on Youtube.
+
+
+#### Relationship between Views per Upload and Highest Yearly Earning
+
+```{r}
+perUploadData <- cleaned_df |>
+  mutate(viewsPerUpload = video_views / uploads) |>
+  filter(viewsPerUpload < 600000000)
+
+scatter_plot_perUpLoad <- ggplot(data = perUploadData, aes(x = viewsPerUpload, y = highest_yearly_earnings)) +
+  geom_point(alpha=0.7,color="#8dab7f") +
+  geom_smooth(method = "lm", color = "#ffa07a") + 
+  labs(title = 'Scatter Plot of Highest Yearly Earnings vs. Views per Upload for Content Creators',
+       x = 'Views per Upload',
+       y = 'Highest Yearly Earnings')+
+  theme_minimal()
+
+# Print the plot
+print(scatter_plot_perUpLoad)
+```
+
+The scatterplot illustrates a discernible but weak downward slope between the highest earning and the number of YouTube views per upload. This implies that, in general, channels with a higher number of views per upload tend to have slightly lower earnings. While the relationship is present, its strength is limited, indicating that other factors beyond views per upload are likely influencing the earnings of YouTube channels.
 
 ## Model
 
 #### 1. Fit the multiple linear regression model of **_subscribers_**
 Model statement:
-$subscribers =\beta_0+ \beta_1country +\beta_2category +\beta_3videoperupload + beta_4uploads + beta_5(videoviews)$
+$subscribers =\beta_0+ \beta_1country +\beta_2category +\beta_3videoperupload + \beta_4uploads + \beta_5(videoviews)$
 
 ```{r}
 youtube_df <- youtube_df %>% drop_na()
@@ -474,7 +579,7 @@ We use the same predictors `country`, `category`, `video_per_upload`, `uploads`,
 ## Discussion
 We also check the linear regression assumptions (e.g., homoscedasticity, normality of residuals) and observe potential outliers that can impact the model's accuracy. To enhance model accuracy, we may consider removing these outliers and subsequently explore missing value imputation. In summary, the Random Forest model proves highly effective for this dataset; however, further validation, potentially with different datasets or cross-validation, is advisable to ensure the model's generalizability and assess the potential impact of overfitting.
 
-#############################################################################
+
 #### Interpretation for model 1
 
 1. **Model Formula**:
