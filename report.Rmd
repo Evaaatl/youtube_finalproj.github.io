@@ -85,29 +85,9 @@ In order to preserve data integrity and avoid a significant reduction in dataset
 
 ## EDA
 
-#### 1. Category variable exploration
-- 1. How does the top youtubers spreaded over countries?
-```{r}
-channel_counts_by_location <- cleaned_df|>
-  drop_na(c(latitude, longitude)) |>
-  group_by(country, longitude, latitude) |>
-  summarise(channel_count = n())
+#### 1. Univariate Analysis
 
-world_map <- leaflet() |>
-  addTiles() |>
-  addMarkers(
-    data = channel_counts_by_location,
-    ~longitude, ~latitude,
-    label = ~paste(country, ": ", channel_count, " channels"),
-    popup = TRUE
-  )
-
-world_map
-```
-
-We find that the top five ranked YouTubers are from the United States (N = 311), followed by India (N = 168), Brazil (N = 61), the United Kingdom (N = 43), and Mexico (N = 33).
-
-- 2. How are the distribution of numerical variables.
+- How are the distribution of numerical variables?
 
 ```{r fig.width = 9,fig.asp = 1.2,out.width = "100%"}
 youtube_df <- cleaned_df
@@ -176,29 +156,6 @@ p <- ggplot(numeric_data_long, aes(x = log(value+1))) +
 # Convert to an interactive plot
 ggplotly(p)
 ```
-
-
-- 3. How are the numeric variables correlated?
-
-```{r fig.width = 9,fig.asp = 0.8}
-# Calculate the correlation matrix
-cor_matrix <- cor(youtube_df[, columns_to_plot], use = "complete.obs")
-
-fig <- plot_ly(x = colnames(cor_matrix), y = rownames(cor_matrix), z = cor_matrix, 
-               type = "heatmap",colorscale ="Greens"  , zmin = -1, zmax = 1)
-
-fig <- fig %>% layout(
-  yaxis = list(autorange = "reversed"),
-  width=800,
-  height=600,
-  title = "Correlation Matrix")
-
-fig
-```
-
-The heat map depicts the Pearson correlation between continuous variables, which reveals a relatively high correlation between the variables `Subscribers` and `Video Views` ($r$ = 0.85). The correlation of these two variables with the others is at a moderately weak level ($r$ around 0.46), with no correlation to the `Uploads` variable ($r$ = 0.08 and 0.15). Notably, the variables `Lowest Earnings` by year and month and `Highest Earnings` by year and month exhibit an absolute correlation of nearly 100%.
-
-#### 2. Category variable exploration
 
 - Channel created year summary
 
@@ -271,6 +228,51 @@ fig %>%
 ```
 
 In this interactive pie chart, we demonstrate the frequency of proportion in Channel type. The most frequently viewed channel, as observed from the word cloud chart, include `Entertainment`, `Music`, `People & Blogs`, `Gaming` and `Comedy`.
+
+
+#### 2. Multivariate Analysis
+- How does the top youtubers spread over countries?
+```{r}
+channel_counts_by_location <- cleaned_df|>
+  drop_na(c(latitude, longitude)) |>
+  group_by(country, longitude, latitude) |>
+  summarise(channel_count = n())
+
+world_map <- leaflet() |>
+  addTiles() |>
+  addMarkers(
+    data = channel_counts_by_location,
+    ~longitude, ~latitude,
+    label = ~paste(country, ": ", channel_count, " channels"),
+    popup = TRUE
+  )
+
+world_map
+```
+
+We find that the top five ranked YouTubers are from the United States (N = 311), followed by India (N = 168), Brazil (N = 61), the United Kingdom (N = 43), and Mexico (N = 33).
+
+- 3. How are the numeric variables correlated?
+
+```{r fig.width = 9,fig.asp = 0.8}
+# Calculate the correlation matrix
+cor_matrix <- cor(youtube_df[, columns_to_plot], use = "complete.obs")
+
+fig <- plot_ly(x = colnames(cor_matrix), y = rownames(cor_matrix), z = cor_matrix, 
+               type = "heatmap",colorscale ="Greens"  , zmin = -1, zmax = 1)
+
+fig <- fig %>% layout(
+  yaxis = list(autorange = "reversed"),
+  width=800,
+  height=600,
+  title = "Correlation Matrix")
+
+fig
+```
+
+The heat map depicts the Pearson correlation between continuous variables, which reveals a relatively high correlation between the variables `Subscribers` and `Video Views` ($r$ = 0.85). The correlation of these two variables with the others is at a moderately weak level ($r$ around 0.46), with no correlation to the `Uploads` variable ($r$ = 0.08 and 0.15). Notably, the variables `Lowest Earnings` by year and month and `Highest Earnings` by year and month exhibit an absolute correlation of nearly 100%.
+
+
 
 - Bubble Chart: Subscribers vs. Video Views by Category
 
