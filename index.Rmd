@@ -3,7 +3,7 @@ title: "How to become a successful youtuber？"
 output: 
   html_document:
     toc: true
-    toc_float: true
+    toc_float: false
 ---
 
 <style type="text/css">
@@ -21,4 +21,6 @@ h1.title {
 </center>
 \
 
-### For a practical guide, watch our [Screencast](https://www.youtube.com/watch?v=I7zzyQskhuY) !
+<h3 align="center">
+  For a practical guide, watch our <a href="https://www.youtube.com/watch?v=I7zzyQskhuY">Screencast</a> !
+</h3>
