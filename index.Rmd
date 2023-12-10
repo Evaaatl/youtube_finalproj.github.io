@@ -21,4 +21,4 @@ h1.title {
 </center>
 \
 
-### [Screencast](https://www.youtube.com/watch?v=I7zzyQskhuY)
+### For a practical guide, watch our [Screencast](https://www.youtube.com/watch?v=I7zzyQskhuY) !
