@@ -39,9 +39,9 @@ Park M et al.'s 2017 study (Cultural values and cross-cultural video consumption
 
 ## Initial questions
 
-- 1.Define what "success" means in the context of a YouTuber.
+- 1.Which variable should be used to quantify "Success" in the context of YouTube?
 - 2.What are the factors that influence the success of YouTubers?
-- 3.Develop a predictive model to forecast YouTubers' success.
+- 3.Develop a predictive model for YouTubers' success.
   
 ## Data Cleaning and Preprocessing
 
@@ -628,7 +628,6 @@ rf_modelS <- randomForest(subscribers ~ ., data=youtube_df, importance=TRUE)
 # Make predictions on the test set
 predictions <- predict(rf_modelS, test_data)
 
-# Calculate R^2 score
 r2_score <- cor(test_data$subscribers, predictions)^2
 
 # Output the model and R^2 score
@@ -639,14 +638,19 @@ print(r2_score)
 #### interpretation for random forest
 
 The Random Forest Regression model with 500 trees and 6 variables considered at each split explains about 85.25% of the variance in the number of subscribers, indicating a strong predictive performance with relatively low mean squared residuals. Additionally, the 
-$r^2$ for testing is approximately 0.981, signifying a high level of accuracy in predicting subscribers. This suggests that the Random Forest model explains almost all the variability in the subscriber count. 
+$r^2$ for testing is approximately 0.981, signifying a high level of accuracy in predicting subscribers. These results strongly indicate that the Random Forest model comprehensively accounts for the variability in subscriber counts.
 
-## Discussion
-We also check the linear regression assumptions (e.g., homoscedasticity, normality of residuals) and observe potential outliers that can impact the model's accuracy. To enhance model accuracy, we may consider removing these outliers and subsequently explore missing value imputation. In summary, the Random Forest model proves highly effective for this dataset; however, further validation, potentially with different datasets or cross-validation, is advisable to ensure the model's generalizability and assess the potential impact of overfitting.
-
+## Further Discussion
 
 
+1. **Factors that influence the success of YouTubers**:
+   The success of a YouTuber, as indicated by subscribers and earnings, is majorly influenced by the number of video views. Categories like Music and Entertainment tend to be more popular.
 
+2. **Model Efficacy**:
+   In our project, we concluded that the number of subscribers is a more appropriate variable to quantify the success of a Youtuber. The Random Forest model proved to be more effective in predicting the success of YouTube channels compared to linear regression models, with $r^2$ equals 0.85.
+   
+3. **Limitation**:
+   We assessed linear regression assumptions like homoscedasticity and the normality of residuals, identifying potential outliers that might affect model accuracy. Future studies could consider excluding these outliers and experimenting with missing value imputation techniques. While the Random Forest model shows high effectiveness with the current dataset, additional validation, possibly using different datasets or cross-validation methods, is recommended. This would help confirm the model's generalizability and evaluate any overfitting issues.
 
 
 
