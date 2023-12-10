@@ -1,0 +1,228 @@
+---
+title: "Fit models"
+output: html_document
+date: "2023-12-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### data cleaning
+```{r}
+youtube_df=read.csv("youtube_df.csv")
+youtube_df$country <- as.factor(youtube_df$country)
+youtube_df$category <- as.factor(youtube_df$category)
+youtube_df$video_per_upload <- with(youtube_df, video_views / uploads)
+youtube_df$earning_differences <- with(youtube_df, highest_yearly_earnings - lowest_yearly_earnings)
+youtube_df <- na.omit(youtube_df)
+write.csv(youtube_df, "youtube_df.csv", row.names = FALSE)
+```
+```{r}
+summary(youtube_df)
+```
+
+
+### fit the first model
+
+
+```{r}
+
+mlr_model <- lm(subscribers ~ country + category + video_per_upload +uploads +video_views , data = youtube_df)
+summary(mlr_model)
+plot(youtube_df$subscribers, fitted(mlr_model), xlab = "Observed", ylab = "Predicted")
+abline(0, 1)
+library(lmtest)
+dwtest(mlr_model)
+# Check for Normality
+# Q-Q plot of residuals
+qqnorm(resid(mlr_model))
+qqline(resid(mlr_model))
+
+# Histogram of residuals
+hist(resid(mlr_model), breaks = 30, main = "Histogram of Residuals")
+
+# Check for Homoscedasticity
+# Plot of residuals vs fitted values
+plot(fitted(mlr_model), resid(mlr_model), xlab = "Fitted", ylab = "Residuals")
+abline(h = 0, col = "red")
+summary(mlr_model)
+```
+### fit the second model and check
+```{r}
+mlr_model_1 <- lm(earning_differences ~ country + category + video_per_upload +uploads +video_views , data = youtube_df)
+# Plotting the observed vs predicted values
+plot(youtube_df$subscribers, fitted(mlr_model_1), xlab = "Observed", ylab = "Predicted")
+abline(0, 1)
+dwtest(mlr_model_1)
+# Check for Normality
+# Q-Q plot of residuals
+qqnorm(resid(mlr_model_1))
+qqline(resid(mlr_model_1))
+# Histogram of residuals
+hist(resid(mlr_model_1), breaks = 30, main = "Histogram of Residuals")
+
+# Check for Homoscedasticity
+# Plot of residuals vs fitted values
+plot(fitted(mlr_model_1), resid(mlr_model_1), xlab = "Fitted", ylab = "Residuals")
+abline(h = 0, col = "red")
+summary(mlr_model_1)
+```
+
+### fit the third model and check 
+```{r}
+mlr_model_2 <- lm(highest_yearly_earnings ~ country + category + video_per_upload+uploads +video_views , data = youtube_df)
+# Plotting the observed vs predicted values
+plot(youtube_df$subscribers, fitted(mlr_model_2), xlab = "Observed", ylab = "Predicted")
+abline(0, 1)
+dwtest(mlr_model_2)
+
+# Check for Normality
+# Q-Q plot of residuals
+qqnorm(resid(mlr_model_2))
+qqline(resid(mlr_model_2))
+
+# Histogram of residuals
+hist(resid(mlr_model_2), breaks = 30, main = "Histogram of Residuals")
+
+# Check for Homoscedasticity
+# Plot of residuals vs fitted values
+plot(fitted(mlr_model_2), resid(mlr_model_2), xlab = "Fitted", ylab = "Residuals")
+abline(h = 0, col = "red")
+summary(mlr_model_2)
+```
+### summary for three model and write the result of the model 
+```{r}
+result1<-summary(mlr_model)
+result2<-summary(mlr_model_1)
+result3<-summary(mlr_model_2)
+result1
+result2
+result3
+sink("result1.txt")
+print(result1)
+sink()
+```
+```{r}
+sink("result2.txt")
+print(result2)
+sink()
+```
+```{r}
+sink("result3.txt")
+print(result3)
+sink()
+```
+
+### post-hoc analysis of model 1
+
+```{r}
+library(emmeans)
+# Get the estimated marginal means for 'country'
+emm_country2 <- emmeans(mlr_model, specs = pairwise ~ country)
+print(summary(emm_country2))
+
+# Get the estimated marginal means for 'category'
+emm_category2 <- emmeans(mlr_model, specs = pairwise ~ category)
+print(summary(emm_category2))
+
+# Post-hoc pairwise comparisons for 'country'
+post_hoc_country2 <- pairs(emm_country2)
+print(post_hoc_country2)
+
+# Post-hoc pairwise comparisons for 'category'
+post_hoc_category2 <- pairs(emm_category2)
+print(post_hoc_category2)
+
+# Write the results to text files
+sink("post_hoc_country_1.txt")
+print(post_hoc_country2)
+sink()
+
+sink("post_hoc_category_1.txt")
+print(post_hoc_category2)
+sink()
+
+```
+The analysis results indicate that there are no statistically significant differences in the means of the categories compared, as evidenced by the high p-values (most are 1 or close to 1). This suggests that, with respect to the variable under consideration, the categories (like "Autos & Vehicles", "Comedy", "Education", etc.) do not differ significantly from each other. The consistency of high p-values across different category comparisons reinforces this conclusion. This finding is important for understanding that the variable being analyzed does not vary significantly across these different categories.
+
+### post-hoc analysis of model 2
+```{r}
+
+# Get the estimated marginal means for 'country'
+emm_country1 <- emmeans(mlr_model_1, specs = pairwise ~ country)
+print(summary(emm_country1))
+
+# Get the estimated marginal means for 'category'
+emm_category1 <- emmeans(mlr_model_1, specs = pairwise ~ category)
+print(summary(emm_category1))
+
+# Post-hoc pairwise comparisons for 'country'
+post_hoc_country1 <- pairs(emm_country1)
+print(post_hoc_country1)
+
+# Post-hoc pairwise comparisons for 'category'
+post_hoc_category1 <- pairs(emm_category1)
+print(post_hoc_category1)
+
+# Write the results to text files
+sink("post_hoc_country_2.txt")
+print(post_hoc_country1)
+sink()
+
+sink("post_hoc_category_2.txt")
+print(post_hoc_category1)
+sink()
+```
+
+### post-hoc for model 3
+
+```{r}
+# Get the estimated marginal means for 'country'
+emm_country <- emmeans(mlr_model_2, specs = pairwise ~ country)
+print(summary(emm_country))
+
+# Get the estimated marginal means for 'category'
+emm_category <- emmeans(mlr_model_2, specs = pairwise ~ category)
+print(summary(emm_category))
+
+# Post-hoc pairwise comparisons for 'country'
+post_hoc_country <- pairs(emm_country)
+print(post_hoc_country)
+
+# Post-hoc pairwise comparisons for 'category'
+post_hoc_category <- pairs(emm_category)
+print(post_hoc_category)
+
+# Write the results to text files
+sink("post_hoc_country_3.txt")
+print(post_hoc_country)
+sink()
+
+sink("post_hoc_category_3.txt")
+print(post_hoc_category)
+sink()
+```
+
+
+###fit the random forest 
+
+
+```{r}
+library(randomForest)
+library(caTools)
+set.seed(42)
+split <- sample.split(youtube_df$subscribers, SplitRatio = 0.8)
+train_data <- subset(youtube_df, split == TRUE)
+test_data <- subset(youtube_df, split == FALSE)
+rf_modelS <- randomForest(subscribers ~ ., data=youtube_df, importance=TRUE)
+# Make predictions on the test set
+predictions <- predict(rf_modelS, test_data)
+# Calculate R^2 score
+r2_score <- cor(test_data$subscribers, predictions)^2
+# Output the model and R^2 score
+print(rf_modelS)
+print(r2_score)
+```
+
+
